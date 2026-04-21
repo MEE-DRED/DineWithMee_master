@@ -1,0 +1,194 @@
+@import "tailwindcss";
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+/* Custom CSS variables for Dine with Mee */
+:root {
+  /* Custom colors */
+  --color-dwm-green-deep: #0D3B2B;
+  --color-dwm-green-mid: #145A3E;
+  --color-dwm-green-light: #1E7A56;
+  --color-dwm-green-pale: #E8F5EF;
+  --color-dwm-gold: #C9973A;
+  --color-dwm-gold-light: #E8B85C;
+  --color-dwm-gold-pale: #FBF3E3;
+  --color-dwm-white: #FFFFFF;
+  --color-dwm-off-white: #F9F6F0;
+  --color-dwm-text-dark: #1A1A1A;
+  --color-dwm-text-mid: #4A4A4A;
+  --color-dwm-text-light: #888888;
+
+  /* Custom fonts */
+  --font-serif: 'Playfair Display', serif;
+  --font-sans: 'DM Sans', sans-serif;
+}
+
+/* Custom base styles */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    @apply bg-white text-gray-900 leading-relaxed;
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-serif);
+    @apply leading-tight;
+  }
+}
+
+/* Custom component styles */
+@layer components {
+  .btn-primary {
+    @apply bg-amber-600 hover:bg-amber-500 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg;
+  }
+
+  .btn-secondary {
+    @apply bg-transparent border-2 border-amber-600 text-amber-600 hover:bg-amber-600 hover:text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300;
+  }
+
+  .btn-login {
+    @apply text-white hover:text-amber-400 font-medium py-2 px-4 transition-colors duration-300;
+  }
+
+  .btn-cart {
+    @apply bg-green-700 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-sm transition-all duration-300 relative;
+  }
+
+  .navbar {
+    @apply fixed top-0 left-0 right-0 z-50 bg-green-900/97 backdrop-blur-md border-b border-amber-600/20 px-[5%] flex items-center justify-between h-[72px] transition-all duration-300;
+  }
+
+  .nav-logo {
+    @apply flex items-center gap-2.5;
+  }
+
+  .nav-logo .logo-mark {
+    @apply w-9 h-9 bg-gradient-to-br from-amber-600 to-amber-400 rounded-full flex items-center justify-center font-serif text-lg text-green-900 font-bold;
+  }
+
+  .nav-logo .logo-text {
+    @apply font-serif text-xl text-white tracking-wide;
+  }
+
+  .nav-logo .logo-text span {
+    color: var(--color-dwm-gold-light, #E8B85C);
+  }
+
+  .nav-links {
+    @apply flex items-center gap-2;
+  }
+
+  .nav-links a {
+    @apply text-white hover:text-amber-400 px-3 py-2 rounded-sm transition-colors duration-300;
+  }
+
+  .nav-links a.active {
+    color: var(--color-dwm-gold-light, #E8B85C);
+    @apply bg-green-700/20;
+  }
+
+  .section {
+    @apply py-16 px-[5%];
+  }
+
+  .section-header {
+    @apply text-center mb-12;
+  }
+
+  .section-tag {
+    color: var(--color-dwm-gold, #C9973A);
+    @apply inline-block font-semibold text-sm uppercase tracking-wider mb-3;
+  }
+
+  .section-header h2 {
+    color: var(--color-dwm-green-deep, #0D3B2B);
+    @apply text-4xl md:text-5xl font-bold mb-4;
+  }
+
+  .section-header p {
+    @apply text-gray-600 text-lg max-w-3xl mx-auto;
+  }
+
+  .hero-slider {
+    @apply relative h-screen overflow-hidden;
+  }
+
+  .hero-slide {
+    @apply absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-1000;
+  }
+
+  .hero-overlay {
+    background: var(--color-dwm-green-deep, #0D3B2B);
+    @apply absolute inset-0 opacity-50;
+  }
+
+  .hero-content-wrap {
+    @apply relative h-full flex items-center justify-center text-center text-white px-6;
+  }
+
+  .hero-content-wrap h1 {
+    @apply text-5xl md:text-7xl font-bold mb-6;
+  }
+
+  .hero-content-wrap p {
+    @apply text-xl md:text-2xl mb-8 max-w-2xl mx-auto;
+  }
+
+  .hero-cta-row {
+    @apply flex flex-col sm:flex-row gap-4 justify-center items-center;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300;
+  }
+
+  .card-image {
+    @apply w-full h-48 object-cover rounded-t-lg;
+  }
+
+  .card-content {
+    @apply p-6;
+  }
+
+  .footer {
+    background: var(--color-dwm-green-deep, #0D3B2B);
+    @apply text-white py-12 px-[5%];
+  }
+
+  .footer-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8;
+  }
+
+  .footer-brand {
+    @apply lg:col-span-1;
+  }
+
+  .footer-col h5 {
+    color: var(--color-dwm-gold-light, #E8B85C);
+    @apply font-serif text-xl font-semibold mb-4;
+  }
+
+  .footer-col ul {
+    @apply space-y-2;
+  }
+
+  .footer-col a {
+    @apply text-white/80 hover:text-amber-400 transition-colors duration-300;
+  }
+}
+
+/* Custom utilities */
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .bg-gradient-dwm {
+    background: linear-gradient(135deg, var(--tw-gradient-stops));
+  }
+}
