@@ -86,7 +86,7 @@ const Signup = () => {
     const { values, errors, touched, isSubmitting } = useFormikContext();
 
     return (
-      <Form className="auth-form max-w-md mx-auto w-full" novalidate>
+      <Form className="auth-form max-w-md mx-auto w-full" noValidate>
         {/* Step 1: Personal Information */}
         {currentStep === 1 && (
           <div className="space-y-6">

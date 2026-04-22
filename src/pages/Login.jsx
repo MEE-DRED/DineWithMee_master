@@ -109,7 +109,7 @@ const Login = () => {
             onSubmit={handleSubmit}
           >
             {({ isSubmitting }) => (
-              <Form className="auth-form max-w-md mx-auto w-full" novalidate>
+              <Form className="auth-form max-w-md mx-auto w-full" noValidate>
                 <FormField
                   name="email"
                   type="email"

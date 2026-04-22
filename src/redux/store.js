@@ -8,6 +8,7 @@ import ingredientsReducer from './slices/ingredientsSlice';
 import usersReducer from './slices/usersSlice';
 import contentReducer from './slices/contentSlice';
 import healthReducer from './slices/healthSlice';
+import roleManagementReducer from './slices/roleManagementSlice';
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
     users: usersReducer,
     content: contentReducer,
     health: healthReducer,
+    roleManagement: roleManagementReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -11,20 +11,20 @@ import {
 export const useToast = () => {
   const dispatch = useDispatch();
 
-  const success = (message, options = {}) => {
-    dispatch(showSuccessToast({ message, ...options }));
+  const success = (message) => {
+    dispatch(showSuccessToast(message));
   };
 
-  const error = (message, options = {}) => {
-    dispatch(showErrorToast({ message, ...options }));
+  const error = (message) => {
+    dispatch(showErrorToast(message));
   };
 
-  const warning = (message, options = {}) => {
-    dispatch(showWarningToast({ message, ...options }));
+  const warning = (message) => {
+    dispatch(showWarningToast(message));
   };
 
-  const info = (message, options = {}) => {
-    dispatch(showInfoToast({ message, ...options }));
+  const info = (message) => {
+    dispatch(showInfoToast(message));
   };
 
   const remove = (id) => {

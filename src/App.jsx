@@ -26,6 +26,15 @@ import Maternal from './pages/Maternal';
 import Research from './pages/Research';
 import ChefPartner from './pages/ChefPartner';
 
+// Role-based dashboards with lazy loading
+import { lazy, Suspense } from 'react';
+import LoadingSpinner from './components/common/LoadingSpinner';
+
+const CustomerDashboard = lazy(() => import('./pages/Customer/Dashboard'));
+const NutritionistDashboard = lazy(() => import('./pages/Nutritionist/Dashboard'));
+const AdminDashboardNew = lazy(() => import('./pages/Admin/Dashboard'));
+const PharmacyDashboard = lazy(() => import('./pages/Pharmacy/Dashboard'));
+
 function App() {
   useEffect(() => {
     // Initialize Redux state from localStorage
@@ -62,6 +71,28 @@ function App() {
                   <Route path="/maternal" element={<Maternal />} />
                   <Route path="/research" element={<Research />} />
                   <Route path="/chef-partner" element={<ChefPartner />} />
+                  
+                  {/* Role-based dashboards with lazy loading */}
+                  <Route path="/customer/dashboard" element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <CustomerDashboard />
+                    </Suspense>
+                  } />
+                  <Route path="/nutritionist/dashboard" element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <NutritionistDashboard />
+                    </Suspense>
+                  } />
+                  <Route path="/admin/dashboard" element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <AdminDashboardNew />
+                    </Suspense>
+                  } />
+                  <Route path="/pharmacy/dashboard" element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <PharmacyDashboard />
+                    </Suspense>
+                  } />
                 </Routes>
               </main>
               <Footer />
