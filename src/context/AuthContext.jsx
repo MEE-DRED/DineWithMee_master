@@ -1,147 +1,148 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import React, { createContext, useContext, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { 
+  loginUser, 
+  registerUser, 
+  logoutUser, 
+  getCurrentUser,
+  selectAuth 
+} from '../redux';
 
 const AuthContext = createContext();
 
-const authReducer = (state, action) => {
-  switch (action.type) {
-    case 'LOGIN_START':
-      return {
-        ...state,
-        isLoading: true,
-        error: null,
-      };
-
-    case 'LOGIN_SUCCESS':
-      return {
-        ...state,
-        isLoading: false,
-        isAuthenticated: true,
-        user: action.payload,
-        error: null,
-      };
-
-    case 'LOGIN_FAILURE':
-      return {
-        ...state,
-        isLoading: false,
-        isAuthenticated: false,
-        user: null,
-        error: action.payload,
-      };
-
-    case 'LOGOUT':
-      return {
-        ...state,
-        isAuthenticated: false,
-        user: null,
-        error: null,
-      };
-
-    case 'REGISTER_START':
-      return {
-        ...state,
-        isLoading: true,
-        error: null,
-      };
-
-    case 'REGISTER_SUCCESS':
-      return {
-        ...state,
-        isLoading: false,
-        error: null,
-      };
-
-    case 'REGISTER_FAILURE':
-      return {
-        ...state,
-        isLoading: false,
-        error: action.payload,
-      };
-
-    default:
-      return state;
-  }
+export const ROLES = {
+  CUSTOMER: 'CUSTOMER',
+  NUTRITIONIST: 'NUTRITIONIST', 
+  ADMIN: 'ADMIN',
+  PHARMACY_PARTNER: 'PHARMACY_PARTNER'
 };
 
-const initialState = {
-  isAuthenticated: false,
-  user: null,
-  isLoading: false,
-  error: null,
+export const ACCOUNT_STATUS = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE', 
+  SUSPENDED: 'SUSPENDED',
+  PENDING_VERIFICATION: 'PENDING_VERIFICATION'
 };
 
 export const AuthProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, initialState);
+  const dispatch = useDispatch();
+  const auth = useSelector(selectAuth);
 
-  // Check for existing session on mount
+  // Initialize auth state on mount
   useEffect(() => {
-    const savedUser = localStorage.getItem('dwm-user');
-    if (savedUser) {
-      try {
-        const parsedUser = JSON.parse(savedUser);
-        dispatch({ type: 'LOGIN_SUCCESS', payload: parsedUser });
-      } catch (error) {
-        console.error('Error loading user from localStorage:', error);
-        localStorage.removeItem('dwm-user');
-      }
+    const token = localStorage.getItem('dwm-token');
+    if (token) {
+      dispatch(getCurrentUser());
     }
-  }, []);
+  }, [dispatch]);
 
-  const login = async (email) => {
-    dispatch({ type: 'LOGIN_START' });
-    
-    try {
-      // Mock authentication - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock user data
-      const userData = {
-        id: 'user_1',
-        email,
-        name: 'John Doe',
-        role: email.includes('admin') ? 'admin' : 'customer',
-        createdAt: new Date().toISOString(),
-      };
-
-      localStorage.setItem('dwm-user', JSON.stringify(userData));
-      dispatch({ type: 'LOGIN_SUCCESS', payload: userData });
+  const login = async (credentials) => {
+    const result = await dispatch(loginUser(credentials));
+    if (result.meta.requestStatus === 'fulfilled') {
       return { success: true };
-    } catch {
-      const errorMessage = 'Invalid email or password';
-      dispatch({ type: 'LOGIN_FAILURE', payload: errorMessage });
-      return { success: false, error: errorMessage };
+    } else {
+      return { 
+        success: false, 
+        error: result.error?.message || 'Login failed' 
+      };
     }
   };
 
   const register = async (userData) => {
-    dispatch({ type: 'REGISTER_START' });
-    
-    try {
-      // Mock registration - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // In a real implementation, you would send userData to your API
-      console.log('Registering user:', userData);
-      
-      dispatch({ type: 'REGISTER_SUCCESS' });
+    const result = await dispatch(registerUser(userData));
+    if (result.meta.requestStatus === 'fulfilled') {
       return { success: true };
-    } catch {
-      const errorMessage = 'Registration failed. Please try again.';
-      dispatch({ type: 'REGISTER_FAILURE', payload: errorMessage });
-      return { success: false, error: errorMessage };
+    } else {
+      return { 
+        success: false, 
+        error: result.error?.message || 'Registration failed' 
+      };
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('dwm-user');
-    dispatch({ type: 'LOGOUT' });
+  const logout = async () => {
+    await dispatch(logoutUser());
+  };
+
+  // Role-based permission checking
+  const hasRole = (role) => {
+    return auth.user?.role === role;
+  };
+
+  const hasAnyRole = (roles) => {
+    return roles.includes(auth.user?.role);
+  };
+
+  const isVerified = () => {
+    return auth.user?.is_verified === true;
+  };
+
+  const isActive = () => {
+    return auth.user?.account_status === ACCOUNT_STATUS.ACTIVE;
+  };
+
+  const canAccess = (requiredRole) => {
+    if (!auth.isAuthenticated) return false;
+    if (!auth.user) return false;
+    if (!isVerified()) return false;
+    if (!isActive()) return false;
+    
+    // Admin can access everything
+    if (auth.user.role === ROLES.ADMIN) return true;
+    
+    // Check specific role requirements
+    return auth.user.role === requiredRole;
+  };
+
+  const getDashboardRoute = () => {
+    if (!auth.user) return '/login';
+    
+    switch (auth.user.role) {
+      case ROLES.CUSTOMER:
+        return '/customer/dashboard';
+      case ROLES.NUTRITIONIST:
+        return '/nutritionist/dashboard';
+      case ROLES.ADMIN:
+        return '/admin/dashboard';
+      case ROLES.PHARMACY_PARTNER:
+        return '/pharmacy/dashboard';
+      default:
+        return '/dashboard';
+    }
+  };
+
+  const getProfileRoute = () => {
+    if (!auth.user) return '/login';
+    
+    switch (auth.user.role) {
+      case ROLES.CUSTOMER:
+        return '/customer/profile';
+      case ROLES.NUTRITIONIST:
+        return '/nutritionist/profile';
+      case ROLES.ADMIN:
+        return '/admin/profile';
+      case ROLES.PHARMACY_PARTNER:
+        return '/pharmacy/profile';
+      default:
+        return '/profile';
+    }
   };
 
   const value = {
-    ...state,
+    ...auth,
     login,
     register,
     logout,
+    hasRole,
+    hasAnyRole,
+    isVerified,
+    isActive,
+    canAccess,
+    getDashboardRoute,
+    getProfileRoute,
+    ROLES,
+    ACCOUNT_STATUS
   };
 
   return (
@@ -157,4 +158,19 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
+};
+
+// Higher-order component for route protection
+export const withRoleProtection = (requiredRole) => (Component) => {
+  return (props) => {
+    const { canAccess, getDashboardRoute } = useAuth();
+    
+    if (!canAccess(requiredRole)) {
+      // Redirect to appropriate dashboard or login
+      window.location.href = getDashboardRoute();
+      return null;
+    }
+    
+    return <Component {...props} />;
+  };
 };

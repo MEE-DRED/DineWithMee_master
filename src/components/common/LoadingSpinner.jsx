@@ -1,11 +1,21 @@
 import React from 'react';
+import { Skeleton } from '../ui';
 
 const LoadingSpinner = ({ 
+  variant = 'spinner',
   size = 'sm', 
   className = '', 
   color = 'text-amber-600',
   ...props 
 }) => {
+  if (variant === 'skeleton') {
+    return (
+      <div className={`p-4 ${className}`} {...props}>
+        <Skeleton variant="card" lines={3} />
+      </div>
+    );
+  }
+
   const sizeClasses = {
     xs: 'w-4 h-4',
     sm: 'w-5 h-5',

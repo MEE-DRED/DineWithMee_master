@@ -6,10 +6,14 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:analyze": "vite build && open dist/stats.html",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "lint:fix": "eslint . --fix",
+    "preview": "vite preview",
+    "size-check": "yarn build && npx bundlesize"
   },
   "dependencies": {
+    "@loadable/component": "^5.16.7",
     "@reduxjs/toolkit": "^2.11.2",
     "axios": "^1.15.1",
     "formik": "^2.4.9",
@@ -18,6 +22,7 @@
     "react-hot-toast": "^2.6.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.14.1",
+    "vite-plugin-imagemin": "^0.6.1",
     "yup": "^1.7.1"
   },
   "devDependencies": {
@@ -28,11 +33,13 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "autoprefixer": "^10.5.0",
+    "bundlesize": "^0.18.2",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
     "postcss": "^8.5.10",
+    "rollup-plugin-visualizer": "^7.0.1",
     "tailwindcss": "^4.2.3",
     "vite": "^8.0.9"
   }

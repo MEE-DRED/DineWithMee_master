@@ -53,28 +53,40 @@ export const selectLoading = (state) => state.ui.loading;
 export const selectIsLoading = (state, key) => state.ui.loading[key] || false;
 
 // Toast action creators
-export const showSuccessToast = (message) => addToast({ 
-  type: 'success', 
-  message,
-  duration: 3000 
+export const showSuccessToast = (message) => ({ 
+  type: 'ui/addToast', 
+  payload: {
+    type: 'success', 
+    message,
+    duration: 3000 
+  }
 });
 
-export const showErrorToast = (message) => addToast({ 
-  type: 'error', 
-  message,
-  duration: 5000 
+export const showErrorToast = (message) => ({ 
+  type: 'ui/addToast', 
+  payload: {
+    type: 'error', 
+    message,
+    duration: 5000 
+  }
 });
 
-export const showWarningToast = (message) => addToast({ 
-  type: 'warning', 
-  message,
-  duration: 4000 
+export const showWarningToast = (message) => ({ 
+  type: 'ui/addToast', 
+  payload: {
+    type: 'warning', 
+    message,
+    duration: 4000 
+  }
 });
 
-export const showInfoToast = (message) => addToast({ 
-  type: 'info', 
-  message,
-  duration: 3000 
+export const showInfoToast = (message) => ({ 
+  type: 'ui/addToast', 
+  payload: {
+    type: 'info', 
+    message,
+    duration: 3000 
+  }
 });
 
 export default uiSlice.reducer;
