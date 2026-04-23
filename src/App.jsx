@@ -34,6 +34,7 @@ const CustomerDashboard = lazy(() => import('./pages/Customer/Dashboard'));
 const NutritionistDashboard = lazy(() => import('./pages/Nutritionist/Dashboard'));
 const AdminDashboardNew = lazy(() => import('./pages/Admin/Dashboard'));
 const PharmacyDashboard = lazy(() => import('./pages/Pharmacy/Dashboard'));
+const ChatWithMee = lazy(() => import('./components/ai/ChatwithMee'));
 
 function App() {
   useEffect(() => {
@@ -91,6 +92,13 @@ function App() {
                   <Route path="/pharmacy/dashboard" element={
                     <Suspense fallback={<LoadingSpinner />}>
                       <PharmacyDashboard />
+                    </Suspense>
+                  } />
+
+                  {/* Chat with Nia (AI Nutritionist) */}
+                  <Route path="/chat" element={
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <ChatWithMee />
                     </Suspense>
                   } />
                 </Routes>
