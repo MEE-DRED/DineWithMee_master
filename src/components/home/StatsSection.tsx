@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, useInView } from 'framer-motion';
 
-interface Stat {
-  id: string;
-  value: number;
-  suffix: string;
-  label: string;
-  icon: React.ReactNode;
-}
+// Stat component props
+const Stat = {
+  id: '',
+  value: 0,
+  suffix: '',
+  label: '',
+  icon: null,
+};
 
-const stats: Stat[] = [
+const stats = [
   {
     id: 'meals',
     value: 500,
@@ -77,7 +78,7 @@ const stats: Stat[] = [
 ];
 
 // Animated Counter Component
-const AnimatedCounter: React.FC<{ target: number; suffix: string }> = ({ target, suffix }) => {
+const AnimatedCounter = ({ target, suffix }) => {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
@@ -112,17 +113,39 @@ const AnimatedCounter: React.FC<{ target: number; suffix: string }> = ({ target,
   );
 };
 
-const StatsSection: React.FC = () => {
+const StatsSection = () => {
   const particleColors = [
-    'bg-secondary-200',
-    'bg-secondary-300',
-    'bg-secondary-400',
-    'bg-primary-400',
-    'bg-primary-500',
+    'bg-emerald-200/40',
+    'bg-green-200/40',
+    'bg-lime-200/40',
+    'bg-teal-200/40',
+    'bg-yellow-200/40',
+    'bg-amber-200/40',
+    'bg-orange-200/40',
+    'bg-green-300/40',
   ];
 
+  // Generate fixed positions for particles
+
+  const particles = useMemo(() => {
+    return [
+      { id: 0, x: 5, duration: 4.5, delay: 0, left: 15, top: 20 },
+      { id: 1, x: -8, duration: 6.2, delay: 0.3, left: 85, top: 35 },
+      { id: 2, x: 3, duration: 5.8, delay: 0.6, left: 45, top: 70 },
+      { id: 3, x: -6, duration: 7.1, delay: 0.9, left: 25, top: 85 },
+      { id: 4, x: 7, duration: 4.3, delay: 1.2, left: 75, top: 15 },
+      { id: 5, x: -4, duration: 6.7, delay: 1.5, left: 55, top: 45 },
+      { id: 6, x: 2, duration: 5.2, delay: 1.8, left: 35, top: 60 },
+      { id: 7, x: -9, duration: 7.8, delay: 2.1, left: 65, top: 25 },
+      { id: 8, x: 4, duration: 4.9, delay: 2.4, left: 95, top: 55 },
+      { id: 9, x: -7, duration: 6.4, delay: 2.7, left: 5, top: 40 },
+      { id: 10, x: 6, duration: 5.6, delay: 3.0, left: 40, top: 90 },
+      { id: 11, x: -5, duration: 7.3, delay: 3.3, left: 80, top: 75 },
+    ];
+  }, []);
+
   return (
-    <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-primary-800 via-primary-700 to-primary-900 relative overflow-hidden">
+    <section className="py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-emerald-900 via-green-900 to-teal-900 relative overflow-hidden">
       {/* Animated Background Pattern */}
       <div className="absolute inset-0">
         {/* Large Gradient Orbs */}
@@ -134,9 +157,9 @@ const StatsSection: React.FC = () => {
           transition={{
             duration: 8,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
           }}
-          className="absolute -top-32 -left-32 w-96 h-96 bg-gradient-to-br from-secondary-300 to-secondary-500 rounded-full blur-3xl"
+          className="absolute -top-32 -left-32 w-96 h-96 bg-gradient-to-br from-emerald-300/20 to-lime-400/20 rounded-full blur-3xl"
         />
         <motion.div
           animate={{
@@ -146,10 +169,10 @@ const StatsSection: React.FC = () => {
           transition={{
             duration: 10,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
             delay: 1,
           }}
-          className="absolute -bottom-32 -right-32 w-96 h-96 bg-gradient-to-br from-secondary-400 to-secondary-600 rounded-full blur-3xl"
+          className="absolute -bottom-32 -right-32 w-96 h-96 bg-gradient-to-br from-green-300/20 to-emerald-400/20 rounded-full blur-3xl"
         />
         <motion.div
           animate={{
@@ -159,10 +182,10 @@ const StatsSection: React.FC = () => {
           transition={{
             duration: 12,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
             delay: 2,
           }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-br from-primary-400 to-primary-600 rounded-full blur-3xl"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-gradient-to-br from-teal-300/20 to-cyan-400/20 rounded-full blur-3xl"
         />
         <motion.div
           animate={{
@@ -172,31 +195,31 @@ const StatsSection: React.FC = () => {
           transition={{
             duration: 9,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: 'easeInOut',
             delay: 0.5,
           }}
-          className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-secondary-200 to-secondary-400 rounded-full blur-3xl"
+          className="absolute -top-20 -right-20 w-80 h-80 bg-gradient-to-br from-yellow-300/20 to-amber-400/20 rounded-full blur-3xl"
         />
 
         {/* Floating Particles */}
-        {[...Array(12)].map((_, i) => (
+        {particles.map(particle => (
           <motion.div
-            key={i}
+            key={particle.id}
             animate={{
               y: [0, -30, 0],
-              x: [0, Math.random() * 20 - 10, 0],
+              x: [0, particle.x, 0],
               opacity: [0.2, 0.5, 0.2],
             }}
             transition={{
-              duration: 4 + Math.random() * 4,
+              duration: particle.duration,
               repeat: Infinity,
-              ease: "easeInOut",
-              delay: i * 0.3,
+              ease: 'easeInOut',
+              delay: particle.delay,
             }}
-            className={`absolute w-2 h-2 ${particleColors[i % particleColors.length]} rounded-full`}
+            className={`absolute w-2 h-2 ${particleColors[particle.id % particleColors.length]} rounded-full`}
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
             }}
           />
         ))}
@@ -230,14 +253,14 @@ const StatsSection: React.FC = () => {
             transition={{ duration: 0.8 }}
             className="inline-block mb-4"
           >
-            <span className="px-4 py-2 bg-secondary-400/20 backdrop-blur-sm border border-secondary-400/30 rounded-full text-secondary-300 font-semibold text-sm tracking-wide">
+            <span className="px-6 py-3 bg-gradient-to-r from-emerald-400/20 to-lime-400/20 backdrop-blur-sm border border-emerald-400/30 rounded-full text-emerald-200 font-bold text-sm tracking-wide uppercase shadow-lg shadow-emerald-400/10">
               BY THE NUMBERS
             </span>
           </motion.div>
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-6xl font-bold text-white mb-4 bg-gradient-to-r from-white via-secondary-100 to-white bg-clip-text text-transparent">
+          <h2 className="font-serif text-3xl sm:text-4xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-white via-emerald-200 to-lime-200 bg-clip-text text-transparent">
             Transforming African Health
           </h2>
-          <p className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl text-emerald-100/80 max-w-2xl mx-auto leading-relaxed">
             Join thousands who are reclaiming their health through culturally relevant nutrition
           </p>
         </motion.div>
@@ -253,7 +276,7 @@ const StatsSection: React.FC = () => {
               transition={{
                 duration: 0.7,
                 delay: index * 0.15,
-                type: "spring",
+                type: 'spring',
                 stiffness: 100,
               }}
               className="relative group"
@@ -262,10 +285,10 @@ const StatsSection: React.FC = () => {
               <motion.div
                 whileHover={{ y: -8 }}
                 transition={{ duration: 0.3 }}
-                className="relative bg-gradient-to-br from-white/15 via-white/10 to-white/5 backdrop-blur-xl border border-white/20 rounded-dwm-lg p-6 sm:p-8 text-center overflow-hidden"
+                className="relative bg-gradient-to-br from-white/20 via-white/10 to-white/5 backdrop-blur-xl border border-white/30 rounded-2xl p-6 sm:p-8 text-center overflow-hidden shadow-xl"
               >
                 {/* Top Accent Line */}
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-secondary-400 to-transparent" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent" />
 
                 {/* Icon Container with Pulse Effect */}
                 <div className="relative inline-flex items-center justify-center w-20 h-20 mb-6">
@@ -278,29 +301,29 @@ const StatsSection: React.FC = () => {
                     transition={{
                       duration: 3,
                       repeat: Infinity,
-                      ease: "easeInOut",
+                      ease: 'easeInOut',
                     }}
-                    className="absolute inset-0 rounded-full bg-gradient-to-br from-secondary-400 to-secondary-500 blur-md"
+                    className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400 to-lime-400 blur-md"
                   />
                   {/* Icon Circle */}
-                  <div className="relative flex items-center justify-center w-full h-full rounded-full bg-gradient-to-br from-secondary-400 to-secondary-500 text-primary-900 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <div className="relative flex items-center justify-center w-full h-full rounded-full bg-gradient-to-br from-emerald-400 to-lime-400 text-emerald-900 shadow-lg group-hover:scale-110 transition-transform duration-300">
                     {stat.icon}
                   </div>
                 </div>
 
                 {/* Animated Number */}
-                <div className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-br from-white via-secondary-100 to-white bg-clip-text text-transparent mb-3">
+                <div className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-to-br from-white via-emerald-100 to-lime-100 bg-clip-text text-transparent mb-3">
                   <AnimatedCounter target={stat.value} suffix={stat.suffix} />
                 </div>
 
                 {/* Label */}
-                <div className="text-base sm:text-lg text-white/80 font-medium tracking-wide">
+                <div className="text-base sm:text-lg text-emerald-50/90 font-medium tracking-wide">
                   {stat.label}
                 </div>
 
                 {/* Decorative Corner Elements */}
-                <div className="absolute top-3 right-3 w-16 h-16 border-t border-r border-secondary-400/20 rounded-tr-2xl" />
-                <div className="absolute bottom-3 left-3 w-16 h-16 border-b border-l border-secondary-400/20 rounded-bl-2xl" />
+                <div className="absolute top-3 right-3 w-16 h-16 border-t border-r border-emerald-400/20 rounded-tr-2xl" />
+                <div className="absolute bottom-3 left-3 w-16 h-16 border-b border-l border-lime-400/20 rounded-bl-2xl" />
               </motion.div>
 
               {/* Hover Glow Effect */}
@@ -308,7 +331,7 @@ const StatsSection: React.FC = () => {
                 initial={{ opacity: 0 }}
                 whileHover={{ opacity: 0.4 }}
                 transition={{ duration: 0.3 }}
-                className="absolute inset-0 rounded-dwm-lg bg-gradient-to-br from-secondary-400 via-secondary-500 to-secondary-600 blur-2xl -z-10"
+                className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-400 via-lime-400 to-yellow-400 blur-2xl -z-10"
               />
             </motion.div>
           ))}
@@ -322,7 +345,7 @@ const StatsSection: React.FC = () => {
           transition={{ duration: 0.6, delay: 0.7 }}
           className="mt-16 text-center"
         >
-          <p className="text-white/90 text-lg sm:text-xl mb-8 font-medium">
+          <p className="text-emerald-50/95 text-lg sm:text-xl mb-8 font-medium">
             Ready to be part of this movement?
           </p>
           <div className="flex flex-wrap justify-center gap-4">
@@ -330,11 +353,11 @@ const StatsSection: React.FC = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
               href="/signup"
-              className="relative group bg-gradient-to-r from-secondary-400 to-secondary-500 hover:from-secondary-500 hover:to-secondary-600 text-primary-900 px-10 py-4 rounded-dwm-md font-bold text-lg transition-all duration-300 shadow-dwm-md hover:shadow-dwm-lg overflow-hidden"
+              className="relative group bg-gradient-to-r from-orange-400 to-amber-400 hover:from-orange-500 hover:to-amber-500 text-orange-900 px-10 py-4 rounded-2xl font-bold text-lg transition-all duration-300 shadow-xl hover:shadow-2xl overflow-hidden"
             >
               <span className="relative z-10">Join Free Today</span>
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-secondary-300 to-secondary-400"
+                className="absolute inset-0 bg-gradient-to-r from-amber-300 to-orange-300"
                 initial={{ x: '-100%' }}
                 whileHover={{ x: '100%' }}
                 transition={{ duration: 0.6 }}
@@ -344,7 +367,7 @@ const StatsSection: React.FC = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
               href="/health"
-              className="bg-transparent border-2 border-white/60 hover:border-white text-white hover:bg-white/10 px-10 py-4 rounded-dwm-md font-bold text-lg transition-all duration-300 backdrop-blur-sm"
+              className="bg-emerald-500/10 backdrop-blur-sm border-2 border-emerald-400/40 hover:border-emerald-300/60 text-emerald-50 hover:bg-emerald-400/20 px-10 py-4 rounded-2xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               Take Health Assessment
             </motion.a>
