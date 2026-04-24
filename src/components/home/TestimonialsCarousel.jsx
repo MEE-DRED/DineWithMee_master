@@ -1,10 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const TestimonialsCarousel = ({ testimonials }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+
+  const handleNext = useCallback(() => {
+    setDirection(1);
+    setCurrentIndex(prev => (prev + 1) % testimonials.length);
+  }, [testimonials.length]);
+
+  const handlePrev = useCallback(() => {
+    setDirection(-1);
+    setCurrentIndex(prev => (prev - 1 + testimonials.length) % testimonials.length);
+  }, [testimonials.length]);
 
   // Auto-rotate testimonials every 6 seconds
   useEffect(() => {
@@ -15,25 +25,15 @@ const TestimonialsCarousel = ({ testimonials }) => {
     }, 6000);
 
     return () => clearInterval(interval);
-  }, [currentIndex, isPaused]);
+  }, [handleNext, isPaused]);
 
-  const handleNext = () => {
-    setDirection(1);
-    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
-  };
-
-  const handlePrev = () => {
-    setDirection(-1);
-    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
-  };
-
-  const handleDotClick = (index) => {
+  const handleDotClick = index => {
     setDirection(index > currentIndex ? 1 : -1);
     setCurrentIndex(index);
   };
 
   const slideVariants = {
-    enter: (direction) => ({
+    enter: direction => ({
       x: direction > 0 ? 1000 : -1000,
       opacity: 0,
     }),
@@ -42,7 +42,7 @@ const TestimonialsCarousel = ({ testimonials }) => {
       x: 0,
       opacity: 1,
     },
-    exit: (direction) => ({
+    exit: direction => ({
       zIndex: 0,
       x: direction < 0 ? 1000 : -1000,
       opacity: 0,
@@ -57,9 +57,7 @@ const TestimonialsCarousel = ({ testimonials }) => {
           <span className="inline-block px-4 py-2 bg-amber-400/20 text-amber-400 rounded-full text-sm font-semibold mb-4">
             Success Stories
           </span>
-          <h2 className="text-4xl font-bold mb-4">
-            Real Results from Real People
-          </h2>
+          <h2 className="text-4xl font-bold mb-4">Real Results from Real People</h2>
           <p className="text-xl text-emerald-100 max-w-3xl mx-auto">
             Hear from members who transformed their health with evidence-based African nutrition.
           </p>
@@ -123,8 +121,18 @@ const TestimonialsCarousel = ({ testimonials }) => {
             className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 bg-white/10 backdrop-blur hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
             aria-label="Previous testimonial"
           >
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg
+              className="w-6 h-6 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
           <button
@@ -132,7 +140,12 @@ const TestimonialsCarousel = ({ testimonials }) => {
             className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 bg-white/10 backdrop-blur hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
             aria-label="Next testimonial"
           >
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              className="w-6 h-6 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
