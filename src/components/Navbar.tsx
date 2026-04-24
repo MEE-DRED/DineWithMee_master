@@ -4,7 +4,7 @@ import { useReduxAuth } from '../hooks/useReduxAuth';
 import { useReduxCart } from '../hooks/useReduxCart';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Navbar: React.FC = () => {
+const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
@@ -24,6 +24,7 @@ const Navbar: React.FC = () => {
 
   // Close mobile menu on route change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
@@ -38,7 +39,7 @@ const Navbar: React.FC = () => {
     }
   }, [showUserDropdown]);
 
-  const isActive = (path: string) => {
+  const isActive = path => {
     if (path === '/' && location.pathname === '/') return true;
     if (path !== '/' && location.pathname.startsWith(path)) return true;
     return false;
@@ -74,7 +75,7 @@ const Navbar: React.FC = () => {
         userRole: user?.role,
         userName: user?.name,
         hasPrivilege,
-        privilegedRoles
+        privilegedRoles,
       });
     }
 
@@ -168,20 +169,6 @@ const Navbar: React.FC = () => {
                   </Link>
                 </li>
               )}
-
-              {/* Test Dashboard Link - Development/Admin */}
-              <li>
-                <Link
-                  to="/test-dashboard"
-                  className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
-                    isActive('/test-dashboard')
-                      ? 'text-amber-400 bg-emerald-800/40'
-                      : 'text-white/90 hover:text-amber-400 hover:bg-emerald-800/40'
-                  }`}
-                >
-                  Test
-                </Link>
-              </li>
             </ul>
 
             {/* Actions */}
@@ -205,7 +192,7 @@ const Navbar: React.FC = () => {
               {isAuthenticated ? (
                 <div className="hidden md:flex items-center gap-3 relative">
                   <button
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       setShowUserDropdown(!showUserDropdown);
                     }}
@@ -227,8 +214,18 @@ const Navbar: React.FC = () => {
                     </div>
 
                     {/* Chevron */}
-                    <svg className={`w-4 h-4 transition-transform text-amber-400 ${showUserDropdown ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <svg
+                      className={`w-4 h-4 transition-transform text-amber-400 ${showUserDropdown ? 'rotate-180' : ''}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
                   </button>
 
@@ -266,8 +263,18 @@ const Navbar: React.FC = () => {
                             to={getDashboardLink()}
                             className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-white/90 hover:text-white hover:bg-emerald-700/60 transition-all group"
                           >
-                            <svg className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            <svg
+                              className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                              />
                             </svg>
                             <span className="text-sm">Dashboard</span>
                           </Link>
@@ -276,8 +283,18 @@ const Navbar: React.FC = () => {
                             to="/profile"
                             className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-white/90 hover:text-white hover:bg-emerald-700/60 transition-all group"
                           >
-                            <svg className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            <svg
+                              className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                              />
                             </svg>
                             <span className="text-sm">Profile Settings</span>
                           </Link>
@@ -286,8 +303,18 @@ const Navbar: React.FC = () => {
                             to="/orders"
                             className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-white/90 hover:text-white hover:bg-emerald-700/60 transition-all group"
                           >
-                            <svg className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            <svg
+                              className="w-4 h-4 text-amber-400 group-hover:scale-110 transition-transform"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                              />
                             </svg>
                             <span className="text-sm">My Orders</span>
                           </Link>
@@ -299,8 +326,18 @@ const Navbar: React.FC = () => {
                             onClick={handleLogout}
                             className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all group"
                           >
-                            <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            <svg
+                              className="w-4 h-4 group-hover:scale-110 transition-transform"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                              />
                             </svg>
                             <span className="text-sm font-medium">Logout</span>
                           </button>
@@ -325,8 +362,18 @@ const Navbar: React.FC = () => {
                   >
                     <span className="inline-flex items-center gap-1.5">
                       Join Free
-                      <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      <svg
+                        className="w-4 h-4 group-hover:translate-x-0.5 transition-transform"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M13 7l5 5m0 0l-5 5m5-5H6"
+                        />
                       </svg>
                     </span>
                   </Link>
@@ -339,9 +386,15 @@ const Navbar: React.FC = () => {
                 className="lg:hidden flex flex-col justify-center items-center w-8 h-8 gap-1.5 focus:outline-none"
                 aria-label="Toggle menu"
               >
-                <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-                <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`} />
-                <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+                <span
+                  className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}
+                />
+                <span
+                  className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? 'opacity-0' : ''}`}
+                />
+                <span
+                  className={`block w-6 h-0.5 bg-white transition-all duration-300 ${isMobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}
+                />
               </button>
             </div>
           </div>

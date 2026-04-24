@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useReduxAuth } from '../../hooks/useReduxAuth';
 import { getSidebarNavigation, generateBreadcrumbs } from '../../utils/roleRouting';
-import { 
+import {
   Home,
   Users,
   Calendar,
@@ -15,7 +15,6 @@ import {
   ChevronDown,
   User,
   LogOut,
-  Bell
 } from 'lucide-react';
 
 // Icon mapping
@@ -28,7 +27,6 @@ const iconMap = {
   FileText,
   Settings,
   User,
-  Bell
 };
 
 const RoleBasedNavigation = () => {
@@ -46,20 +44,22 @@ const RoleBasedNavigation = () => {
     navigate('/login');
   };
 
-  const getIcon = (iconName) => {
+  const getIcon = iconName => {
     return iconMap[iconName] || FileText;
   };
 
-  const isActiveRoute = (path) => {
+  const isActiveRoute = path => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+      <div
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         <div className="flex items-center justify-between h-16 px-6 border-b">
           <div className="flex items-center">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
@@ -77,10 +77,10 @@ const RoleBasedNavigation = () => {
 
         <nav className="mt-6 px-3">
           <div className="space-y-1">
-            {navigationItems.map((item) => {
+            {navigationItems.map(item => {
               const Icon = getIcon(item.icon);
               const isActive = isActiveRoute(item.path);
-              
+
               return (
                 <Link
                   key={item.id}
@@ -138,18 +138,14 @@ const RoleBasedNavigation = () => {
               >
                 <Menu className="h-6 w-6" />
               </button>
-              
+
               {/* Breadcrumbs */}
               <nav className="ml-4 flex items-center space-x-2">
                 {breadcrumbs.map((breadcrumb, index) => (
                   <React.Fragment key={breadcrumb.path}>
-                    {index > 0 && (
-                      <span className="text-gray-400">/</span>
-                    )}
+                    {index > 0 && <span className="text-gray-400">/</span>}
                     {breadcrumb.isLast ? (
-                      <span className="text-sm font-medium text-gray-900">
-                        {breadcrumb.name}
-                      </span>
+                      <span className="text-sm font-medium text-gray-900">{breadcrumb.name}</span>
                     ) : (
                       <Link
                         to={breadcrumb.path}
@@ -164,16 +160,6 @@ const RoleBasedNavigation = () => {
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Notifications */}
-              {hasPermission('view_notifications') && (
-                <button className="relative text-gray-400 hover:text-gray-600">
-                  <Bell className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    3
-                  </span>
-                </button>
-              )}
-
               {/* Profile dropdown */}
               <div className="relative">
                 <button
