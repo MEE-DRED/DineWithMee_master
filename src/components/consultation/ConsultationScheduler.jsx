@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useCustomer } from '../../context/CustomerContext';
 import { useNutritionist } from '../../context/NutritionistContext';
-import { useAuth } from '../../context/AuthContext';
+import { useReduxAuth } from '../../hooks/useReduxAuth';
 import { 
   Card, 
   CardContent, 
@@ -22,7 +22,7 @@ import {
 } from '../ui';
 
 const ConsultationScheduler = () => {
-  const { user } = useAuth();
+  const { user } = useReduxAuth();
   const { bookConsultation, upcomingConsultations } = useCustomer();
   const { scheduleConsultation, clients, schedule } = useNutritionist();
   const [isBooking, setIsBooking] = useState(false);

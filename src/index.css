@@ -3,19 +3,39 @@
 
 /* Custom CSS variables for Dine with Mee */
 :root {
-  /* Custom colors */
-  --color-dwm-green-deep: #0D3B2B;
-  --color-dwm-green-mid: #145A3E;
-  --color-dwm-green-light: #1E7A56;
-  --color-dwm-green-pale: #E8F5EF;
-  --color-dwm-gold: #C9973A;
-  --color-dwm-gold-light: #E8B85C;
-  --color-dwm-gold-pale: #FBF3E3;
-  --color-dwm-white: #FFFFFF;
-  --color-dwm-off-white: #F9F6F0;
-  --color-dwm-text-dark: #1A1A1A;
-  --color-dwm-text-mid: #4A4A4A;
-  --color-dwm-text-light: #888888;
+  /* Brand Colors - Using Tailwind Emerald & Amber */
+  --color-primary: #10b981;        /* emerald-500 */
+  --color-primary-dark: #047857;   /* emerald-700 */
+  --color-primary-light: #d1fae5;  /* emerald-100 */
+  --color-secondary: #f59e0b;      /* amber-500 */
+  --color-secondary-dark: #b45309; /* amber-700 */
+  --color-secondary-light: #fef3c7; /* amber-100 */
+
+  /* Semantic Colors */
+  --color-success: #22c55e;        /* green-500 */
+  --color-warning: #f59e0b;        /* amber-500 */
+  --color-error: #ef4444;          /* red-500 */
+  --color-info: #3b82f6;           /* blue-500 */
+
+  /* Neutral Colors */
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-600: #525252;
+  --color-neutral-900: #171717;
+
+  /* Legacy mappings */
+  --color-dwm-green-deep: #047857;
+  --color-dwm-green-mid: #059669;
+  --color-dwm-green-light: #10b981;
+  --color-dwm-green-pale: #d1fae5;
+  --color-dwm-gold: #f59e0b;
+  --color-dwm-gold-light: #fbbf24;
+  --color-dwm-gold-pale: #fef3c7;
+  --color-dwm-white: #ffffff;
+  --color-dwm-off-white: #fafafa;
+  --color-dwm-text-dark: #171717;
+  --color-dwm-text-mid: #525252;
+  --color-dwm-text-light: #a3a3a3;
 
   /* Custom fonts */
   --font-serif: 'Playfair Display', serif;
@@ -30,23 +50,32 @@
 
   body {
     font-family: var(--font-sans);
-    @apply bg-white text-gray-900 leading-relaxed;
+    @apply bg-neutral-50 text-neutral-900 leading-relaxed antialiased;
   }
 
   h1, h2, h3, h4, h5 {
     font-family: var(--font-serif);
-    @apply leading-tight;
+    @apply leading-tight text-neutral-900;
   }
 }
 
 /* Custom component styles */
 @layer components {
+  /* Button Styles */
   .btn-primary {
-    @apply bg-amber-600 hover:bg-amber-500 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg;
+    @apply bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg hover:scale-[1.02] active:scale-[0.98];
   }
 
   .btn-secondary {
-    @apply bg-transparent border-2 border-amber-600 text-amber-600 hover:bg-amber-600 hover:text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300;
+    @apply bg-transparent border-2 border-emerald-600 text-emerald-700 hover:bg-emerald-600 hover:text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300;
+  }
+
+  .btn-success {
+    @apply bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md;
+  }
+
+  .btn-danger {
+    @apply bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md;
   }
 
   .btn-login {
@@ -54,11 +83,12 @@
   }
 
   .btn-cart {
-    @apply bg-green-700 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-sm transition-all duration-300 relative;
+    @apply bg-emerald-700 hover:bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-300 relative hover:scale-105;
   }
 
+  /* Navigation Styles */
   .navbar {
-    @apply fixed top-0 left-0 right-0 z-50 bg-green-900/97 backdrop-blur-md border-b border-amber-600/20 px-[5%] flex items-center justify-between h-[72px] transition-all duration-300;
+    @apply fixed top-0 left-0 right-0 z-50 bg-emerald-900/95 backdrop-blur-md border-b border-amber-500/20 px-[5%] flex items-center justify-between h-18 transition-all duration-300 shadow-lg;
   }
 
   .nav-logo {
@@ -66,7 +96,7 @@
   }
 
   .nav-logo .logo-mark {
-    @apply w-9 h-9 bg-gradient-to-br from-amber-600 to-amber-400 rounded-full flex items-center justify-center font-serif text-lg text-green-900 font-bold;
+    @apply w-9 h-9 bg-linear-to-br from-amber-500 to-amber-400 rounded-full flex items-center justify-center font-serif text-lg text-emerald-900 font-bold shadow-md;
   }
 
   .nav-logo .logo-text {
@@ -74,7 +104,7 @@
   }
 
   .nav-logo .logo-text span {
-    color: var(--color-dwm-gold-light, #E8B85C);
+    @apply text-amber-400;
   }
 
   .nav-links {
@@ -82,16 +112,20 @@
   }
 
   .nav-links a {
-    @apply text-white hover:text-amber-400 px-3 py-2 rounded-sm transition-colors duration-300;
+    @apply text-white/90 hover:text-amber-400 px-3 py-2 rounded-lg transition-colors duration-300 font-medium;
   }
 
   .nav-links a.active {
-    color: var(--color-dwm-gold-light, #E8B85C);
-    @apply bg-green-700/20;
+    @apply text-amber-400 bg-emerald-800/40;
   }
 
+  /* Section Styles */
   .section {
-    @apply py-16 px-[5%];
+    @apply py-16 px-[5%] bg-white;
+  }
+
+  .section-alt {
+    @apply py-16 px-[5%] bg-stone-50;
   }
 
   .section-header {
@@ -99,19 +133,18 @@
   }
 
   .section-tag {
-    color: var(--color-dwm-gold, #C9973A);
-    @apply inline-block font-semibold text-sm uppercase tracking-wider mb-3;
+    @apply inline-block font-semibold text-sm uppercase tracking-wider mb-3 text-amber-600;
   }
 
   .section-header h2 {
-    color: var(--color-dwm-green-deep, #0D3B2B);
-    @apply text-4xl md:text-5xl font-bold mb-4;
+    @apply text-4xl md:text-5xl font-bold mb-4 text-emerald-900;
   }
 
   .section-header p {
-    @apply text-gray-600 text-lg max-w-3xl mx-auto;
+    @apply text-stone-600 text-lg max-w-3xl mx-auto;
   }
 
+  /* Hero Styles */
   .hero-slider {
     @apply relative h-screen overflow-hidden;
   }
@@ -121,8 +154,7 @@
   }
 
   .hero-overlay {
-    background: var(--color-dwm-green-deep, #0D3B2B);
-    @apply absolute inset-0 opacity-50;
+    @apply absolute inset-0 bg-linear-to-b from-emerald-950/70 via-emerald-900/60 to-emerald-950/80;
   }
 
   .hero-content-wrap {
@@ -130,32 +162,33 @@
   }
 
   .hero-content-wrap h1 {
-    @apply text-5xl md:text-7xl font-bold mb-6;
+    @apply text-5xl md:text-7xl font-bold mb-6 drop-shadow-lg;
   }
 
   .hero-content-wrap p {
-    @apply text-xl md:text-2xl mb-8 max-w-2xl mx-auto;
+    @apply text-xl md:text-2xl mb-8 max-w-2xl mx-auto text-white/95 drop-shadow-md;
   }
 
   .hero-cta-row {
     @apply flex flex-col sm:flex-row gap-4 justify-center items-center;
   }
 
+  /* Card Styles */
   .card {
-    @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300;
+    @apply bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-stone-200 hover:border-emerald-300 overflow-hidden;
   }
 
   .card-image {
-    @apply w-full h-48 object-cover rounded-t-lg;
+    @apply w-full h-48 object-cover;
   }
 
   .card-content {
     @apply p-6;
   }
 
+  /* Footer Styles */
   .footer {
-    background: var(--color-dwm-green-deep, #0D3B2B);
-    @apply text-white py-12 px-[5%];
+    @apply bg-emerald-900 text-white py-12 px-[5%] border-t-2 border-amber-500/30;
   }
 
   .footer-grid {
@@ -167,8 +200,7 @@
   }
 
   .footer-col h5 {
-    color: var(--color-dwm-gold-light, #E8B85C);
-    @apply font-serif text-xl font-semibold mb-4;
+    @apply font-serif text-xl font-semibold mb-4 text-amber-400;
   }
 
   .footer-col ul {
@@ -186,7 +218,68 @@
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
-  .bg-gradient-dwm {
-    background: linear-gradient(135deg, var(--tw-gradient-stops));
+  .text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Brand Gradients */
+  .bg-gradient-primary {
+    @apply bg-linear-to-r from-emerald-600 to-emerald-500;
+  }
+
+  .bg-gradient-secondary {
+    @apply bg-linear-to-r from-amber-600 to-amber-500;
+  }
+
+  .bg-gradient-brand {
+    @apply bg-linear-to-br from-emerald-600 via-emerald-500 to-amber-500;
+  }
+
+  /* Health Condition Badges */
+  .badge-diabetes {
+    @apply bg-blue-50 text-blue-700 border border-blue-200;
+  }
+
+  .badge-hypertension {
+    @apply bg-red-50 text-red-700 border border-red-200;
+  }
+
+  .badge-maternal {
+    @apply bg-pink-50 text-pink-700 border border-pink-200;
+  }
+
+  .badge-weight {
+    @apply bg-amber-50 text-amber-700 border border-amber-200;
+  }
+
+  .badge-wellness {
+    @apply bg-green-50 text-green-700 border border-green-200;
+  }
+
+  /* Glass Morphism */
+  .glass {
+    @apply backdrop-blur-md bg-white/80 border border-white/20;
+  }
+
+  .glass-dark {
+    @apply backdrop-blur-md bg-emerald-900/80 border border-white/10;
+  }
+
+  /* Hover Effects */
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-300 hover:scale-105;
+  }
+
+  /* Focus Styles */
+  .focus-primary {
+    @apply focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2;
+  }
+
+  .focus-secondary {
+    @apply focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2;
   }
 }

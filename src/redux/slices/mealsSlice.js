@@ -143,8 +143,12 @@ const mealsSlice = createSlice({
       })
       .addCase(fetchMeals.fulfilled, (state, action) => {
         state.loading = false;
-        state.meals = action.payload;
-        state.filteredMeals = action.payload;
+        // Handle both array response and object with data property
+        const mealsData = Array.isArray(action.payload)
+          ? action.payload
+          : (action.payload?.data || action.payload?.meals || []);
+        state.meals = mealsData;
+        state.filteredMeals = mealsData;
         state.error = null;
       })
       .addCase(fetchMeals.rejected, (state, action) => {
@@ -171,8 +175,12 @@ const mealsSlice = createSlice({
       })
       .addCase(searchMeals.fulfilled, (state, action) => {
         state.loading = false;
-        state.meals = action.payload;
-        state.filteredMeals = action.payload;
+        // Handle both array response and object with data property
+        const mealsData = Array.isArray(action.payload)
+          ? action.payload
+          : (action.payload?.data || action.payload?.meals || []);
+        state.meals = mealsData;
+        state.filteredMeals = mealsData;
         state.error = null;
       })
       .addCase(searchMeals.rejected, (state, action) => {
@@ -186,8 +194,12 @@ const mealsSlice = createSlice({
       })
       .addCase(fetchFeaturedMeals.fulfilled, (state, action) => {
         state.loading = false;
-        state.meals = action.payload;
-        state.filteredMeals = action.payload;
+        // Handle both array response and object with data property
+        const mealsData = Array.isArray(action.payload)
+          ? action.payload
+          : (action.payload?.data || action.payload?.meals || []);
+        state.meals = mealsData;
+        state.filteredMeals = mealsData;
         state.error = null;
       })
       .addCase(fetchFeaturedMeals.rejected, (state, action) => {

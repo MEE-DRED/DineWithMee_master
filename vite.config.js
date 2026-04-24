@@ -30,8 +30,24 @@ export default defineConfig({
     rollupOptions: {
       output: {
         chunkFileNames: 'assets/js/[name]-[hash].js',
-        entryFileNames: 'assets/js/[name]-[hash].js'
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@reduxjs/toolkit') || id.includes('react-redux') || id.includes('redux-logger')) {
+              return 'vendor-redux';
+            }
+            if (id.includes('formik') || id.includes('yup')) {
+              return 'vendor-form';
+            }
+            return 'vendor';
+          }
+        }
       }
-    }
+    },
+    minify: 'esbuild',
+    target: 'es2020'
   }
 })

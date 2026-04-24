@@ -1,7 +1,14 @@
 import axios from 'axios';
 
 // API base configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://new-dine-with-mee-backend.onrender.com';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+// Warn if API URL is not configured
+if (!import.meta.env.VITE_API_URL) {
+  console.warn('⚠️ VITE_API_URL is not defined in .env file. Using fallback:', API_BASE_URL);
+}
+
+console.log('🌐 API Base URL:', API_BASE_URL);
 
 // Create axios instance with default configuration
 const api = axios.create({
@@ -39,5 +46,16 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+
+// Helper to get Unsplash image URLs (no API key needed for URLs)
+export const getUnsplashImageUrl = (query, width = 400, height = 300) => {
+  return `https://images.unsplash.com/photo-${query}?w=${width}&h=${height}&fit=crop`;
+};
+
+// Helper to get random Unsplash image by search term
+export const getRandomFoodImage = (searchTerm = 'food') => {
+  return `https://source.unsplash.com/featured/${400}x${300}/?${searchTerm}`;
+};
 
 export default api;

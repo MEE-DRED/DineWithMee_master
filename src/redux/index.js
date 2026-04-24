@@ -144,6 +144,30 @@ import healthSlice, {
   selectHealthError,
 } from './slices/healthSlice';
 
+// Orders
+import {
+  createOrder,
+  fetchUserOrders,
+  fetchOrderById,
+  clearError as clearOrdersError,
+  clearCurrentOrder,
+  resetCreateOrderState,
+  selectOrders,
+  selectCurrentOrder,
+  selectOrdersLoading,
+  selectOrdersError,
+  selectCreateOrderLoading,
+  selectCreateOrderError,
+} from './slices/ordersSlice';
+
+// Favorites
+import {
+  toggleFavorite,
+  clearFavorites,
+  selectFavorites,
+  selectIsFavorite,
+} from './slices/favoritesSlice';
+
 export {
   // Store
   store,
@@ -167,6 +191,10 @@ export {
   toggleCart,
   setCartOpen,
   loadCartFromStorage,
+  selectCartItems,
+  selectCartIsOpen,
+  selectCartTotalItems,
+  selectCartTotalPrice,
   
   // UI
   addToast,
@@ -265,6 +293,26 @@ export {
   selectMyAssessments,
   selectHealthLoading,
   selectHealthError,
+  
+  // Orders
+  createOrder,
+  fetchUserOrders,
+  fetchOrderById,
+  clearOrdersError,
+  clearCurrentOrder,
+  resetCreateOrderState,
+  selectOrders,
+  selectCurrentOrder,
+  selectOrdersLoading,
+  selectOrdersError,
+  selectCreateOrderLoading,
+  selectCreateOrderError,
+
+  // Favorites
+  toggleFavorite,
+  clearFavorites,
+  selectFavorites,
+  selectIsFavorite,
 };
 
 export default store;

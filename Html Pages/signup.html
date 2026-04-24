@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up | Dine with Mee</title>
+  <meta name="description" content="Create your Dine with Mee account and save your health and meal preferences." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="signup-multistep.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html#home" class="nav-logo">
+    <div class="logo-mark">D</div>
+    <span class="logo-text">Dine with <span>Mee</span></span>
+  </a>
+
+  <ul class="nav-links" id="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="health.html">Health Hub</a></li>
+    <li><a href="marketplace.html">Marketplace</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+
+  <div class="nav-actions">
+    <a href="login.html" class="btn-login">Log in</a>
+    <a href="signup.html" class="btn-primary">Sign Up</a>
+    <div class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<section class="signup-page-wrap">
+  <div class="signup-container">
+    <div class="signup-header">
+      <h1>Create Your Account</h1>
+      <p>Personalize your nutrition profile in three quick steps.</p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" id="progressFill"></div>
+      <div class="progress-steps">
+        <div class="progress-step active" id="step1-indicator">
+          <div class="progress-circle">1</div>
+          <span>Basic Info</span>
+        </div>
+        <div class="progress-step" id="step2-indicator">
+          <div class="progress-circle">2</div>
+          <span>Health Profile</span>
+        </div>
+        <div class="progress-step" id="step3-indicator">
+          <div class="progress-circle">3</div>
+          <span>Lifestyle</span>
+        </div>
+      </div>
+    </div>
+
+    <form id="signup-form" class="signup-multistep-form" novalidate>
+
+      <!-- STEP 1: BASIC INFO -->
+      <section class="signup-step active" data-step="1">
+        <h2>Basic Information</h2>
+        
+        <div class="form-group">
+          <label for="full-name">Full Name *</label>
+          <input id="full-name" type="text" placeholder="Enter your full name" required />
+          <span class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email *</label>
+          <input id="email" type="email" placeholder="Enter your email address" required />
+          <span class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password *</label>
+          <input id="password" type="password" placeholder="Create a strong password" required />
+          <span class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="country">Country *</label>
+          <input id="country" type="text" placeholder="Enter your country" required />
+          <span class="error-message"></span>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-continue" onclick="nextStep()">Continue</button>
+        </div>
+      </section>
+
+      <!-- STEP 2: HEALTH PROFILE -->
+      <section class="signup-step" data-step="2" hidden>
+        <h2>Health Profile</h2>
+
+        <div class="form-group">
+          <label for="health-goal">Health Goals *</label>
+          <select id="health-goal" required>
+            <option value="">Select a health goal</option>
+            <option value="lose-weight">Lose weight</option>
+            <option value="maintain-health">Maintain health</option>
+            <option value="manage-condition">Manage condition</option>
+            <option value="pregnancy-nutrition">Pregnancy nutrition</option>
+          </select>
+          <span class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="health-conditions">Health Conditions</label>
+          <select id="health-conditions" multiple>
+            <option value="diabetes">Diabetes</option>
+            <option value="hypertension">Hypertension</option>
+            <option value="sickle-cell">Sickle Cell</option>
+            <option value="other">Other</option>
+            <option value="none">None</option>
+          </select>
+          <p class="field-hint">Click and select multiple options with checkboxes</p>
+          <span class="error-message"></span>
+        </div>
+
+        <div class="form-group conditional-field" id="other-condition-wrapper" hidden>
+          <label for="other-condition-text">Other Condition (please type)</label>
+          <input id="other-condition-text" type="text" placeholder="Type your condition" />
+          <span class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="dietary-preferences">Dietary Preferences</label>
+          <select id="dietary-preferences" multiple>
+            <option value="high-protein">High protein</option>
+            <option value="low-carb">Low carb</option>
+            <option value="vegetarian">Vegetarian</option>
+            <option value="traditional-african">Traditional African</option>
+          </select>
+          <p class="field-hint">Click and select multiple options with checkboxes</p>
+          <span class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="allergies">Allergies</label>
+          <select id="allergies" multiple>
+            <option value="nuts">Nuts</option>
+            <option value="dairy">Dairy</option>
+            <option value="seafood">Seafood</option>
+          </select>
+          <p class="field-hint">Click and select multiple options with checkboxes</p>
+          <span class="error-message"></span>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-back" onclick="previousStep()">Back</button>
+          <button type="button" class="btn-continue" onclick="nextStep()">Continue</button>
+        </div>
+      </section>
+
+      <!-- STEP 3: LIFESTYLE + PERSONALIZATION -->
+      <section class="signup-step" data-step="3" hidden>
+        <h2>Lifestyle & Personalization</h2>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="age">Age *</label>
+            <input id="age" type="number" placeholder="e.g., 28" min="1" max="120" required />
+            <span class="error-message"></span>
+          </div>
+          <div class="form-group">
+            <label for="gender">Gender *</label>
+            <select id="gender" required>
+              <option value="">Select gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+              <option value="prefer-not">Prefer not to say</option>
+            </select>
+            <span class="error-message"></span>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="weight">Weight (kg) *</label>
+            <input id="weight" type="number" placeholder="e.g., 70" step="0.1" min="1" required />
+            <span class="error-message"></span>
+          </div>
+          <div class="form-group">
+            <label for="height">Height (cm) *</label>
+            <input id="height" type="number" placeholder="e.g., 170" min="1" required />
+            <span class="error-message"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="activity-level">Activity Level *</label>
+          <select id="activity-level" required>
+            <option value="">Select activity level</option>
+            <option value="low">Low</option>
+            <option value="moderate">Moderate</option>
+            <option value="active">Active</option>
+          </select>
+          <span class="error-message"></span>
+        </div>
+
+        <div class="form-group">
+          <label for="meal-plan-preference">Do you want a personalized weekly meal plan?</label>
+          <select id="meal-plan-preference">
+            <option value="no" selected>No</option>
+            <option value="yes">Yes</option>
+          </select>
+          <span class="error-message"></span>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-back" onclick="previousStep()">Back</button>
+          <button type="submit" class="btn-create-account">Create Account</button>
+        </div>
+      </section>
+
+    </form>
+
+    <div class="signup-footer">
+      <p>Already have an account? <a href="login.html">Log In</a></p>
+    </div>
+  </div>
+</section>
+
+<script>
+  window.__DWM_INTEGRATION_AUTH__ = true;
+</script>
+<script src="signup-multistep.js"></script>
+<script src="script.js"></script>
+<script type="module" src="dine-with-mee-integration/dine-with-mee-frontend/src/main.js"></script>
+</body>
+</html>

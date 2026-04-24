@@ -1,14 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Maternal = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect to Health page maternal section
+    navigate('/health#maternal-care-pathway');
+  }, [navigate]);
+
   return (
-    <div className="maternal-page section">
-      <div className="page-hero-content text-center max-w-4xl mx-auto px-6">
-        <h1 className="text-4xl md:text-5xl font-bold text-dwm-green-deep mb-4">
-          Maternal Health
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-emerald-900 mb-4">
+          Redirecting to Maternal Care Pathway...
         </h1>
-        <p className="text-xl text-dwm-text-mid">
-          Nutrition support for mothers and babies
+        <p className="text-gray-600">
+          You'll be redirected to the Health Hub maternal section.
         </p>
       </div>
     </div>

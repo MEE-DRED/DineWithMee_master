@@ -1,8 +1,8 @@
 import React from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useReduxAuth } from '../hooks/useReduxAuth';
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
+  const { user } = useReduxAuth();
 
   return (
     <div className="admin-dashboard-page section">

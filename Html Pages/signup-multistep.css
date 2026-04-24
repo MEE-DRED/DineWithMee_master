@@ -1,0 +1,514 @@
+/* ============================================
+   SIGNUP MULTI-STEP FORM STYLES
+   ============================================ */
+
+:root {
+  --signup-primary: #0d3b2b;
+  --signup-primary-light: #1a5a40;
+  --signup-accent: #c9a646;
+  --signup-accent-dark: #a8842f;
+  --signup-text: #1d2a25;
+  --signup-text-light: #6a7671;
+  --signup-bg: #f5f7f6;
+  --signup-border: #e0e6e3;
+  --signup-white: #ffffff;
+  --signup-error: #d32f2f;
+  --signup-success: #2e7d32;
+}
+
+.signup-page-wrap {
+  min-height: 100vh;
+  background: var(--signup-bg);
+  padding: 40px 20px;
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+}
+
+.signup-container {
+  max-width: 650px;
+  margin: 0 auto;
+  background: var(--signup-white);
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(13, 59, 43, 0.12);
+  padding: 48px 36px;
+}
+
+.signup-header {
+  text-align: center;
+  margin-bottom: 44px;
+}
+
+.signup-header h1 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(2rem, 5vw, 2.4rem);
+  color: var(--signup-primary);
+  margin: 0 0 8px;
+  line-height: 1.2;
+}
+
+.signup-header p {
+  color: var(--signup-text-light);
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* ============================================
+   PROGRESS BAR
+   ============================================ */
+
+.progress-bar-container {
+  margin-bottom: 48px;
+}
+
+.progress-bar-fill {
+  height: 4px;
+  background: var(--signup-accent);
+  border-radius: 4px;
+  margin-bottom: 24px;
+  transition: width 0.4s ease;
+  width: 33.33%;
+}
+
+.progress-steps {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+.progress-step.active {
+  opacity: 1;
+}
+
+.progress-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--signup-border);
+  color: var(--signup-text-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.progress-step.active .progress-circle {
+  background: var(--signup-primary);
+  color: var(--signup-white);
+  border-color: var(--signup-accent);
+}
+
+.progress-step span {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--signup-text);
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .progress-step span {
+    display: none;
+  }
+}
+
+/* ============================================
+   FORM STRUCTURE
+   ============================================ */
+
+.signup-multistep-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.signup-step {
+  animation: fadeIn 0.3s ease;
+}
+
+.signup-step h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 1.6rem;
+  color: var(--signup-primary);
+  margin: 0 0 28px;
+  line-height: 1.2;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   FORM GROUPS & INPUTS
+   ============================================ */
+
+.form-group {
+  margin-bottom: 22px;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--signup-text);
+  font-size: 0.95rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="number"],
+.form-group select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--signup-border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--signup-text);
+  background: var(--signup-white);
+  transition: all 0.25s ease;
+}
+
+.form-group select[multiple] {
+  padding: 10px 12px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(0,0,0,0.6)' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.form-group select[multiple]:focus {
+  outline: none;
+  border-color: var(--signup-primary);
+  box-shadow: 0 0 0 3px rgba(13, 59, 43, 0.08);
+}
+
+.form-group select[multiple] option {
+  padding: 8px 12px;
+  margin: 4px 0;
+}
+
+.field-hint {
+  margin: 6px 0 0;
+  color: var(--signup-text-light);
+  font-size: 0.8rem;
+}
+
+.conditional-field[hidden] {
+  display: none !important;
+}
+
+.form-group input::placeholder {
+  color: var(--signup-text-light);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--signup-primary);
+  box-shadow: 0 0 0 3px rgba(13, 59, 43, 0.08);
+}
+
+.form-group input.error,
+.form-group select.error {
+  border-color: var(--signup-error);
+}
+
+.form-group input.error:focus {
+  box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.08);
+}
+
+.error-message {
+  display: block;
+  color: var(--signup-error);
+  font-size: 0.8rem;
+  margin-top: 4px;
+  height: 1.2em;
+}
+
+/* ============================================
+   CHIP GRIDS (Multi-select & Radio)
+   ============================================ */
+
+.radio-chip-grid,
+.checkbox-chip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.radio-chip,
+.checkbox-chip {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border: 1.5px solid var(--signup-border);
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--signup-white);
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.radio-chip:hover,
+.checkbox-chip:hover {
+  border-color: var(--signup-primary);
+  background: rgba(13, 59, 43, 0.03);
+}
+
+.radio-chip input[type="radio"],
+.checkbox-chip input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  accent-color: var(--signup-primary);
+}
+
+.radio-chip input[type="radio"]:checked ~ span,
+.checkbox-chip input[type="checkbox"]:checked ~ span {
+  color: var(--signup-primary);
+  font-weight: 600;
+}
+
+.radio-chip input[type="radio"]:checked,
+.checkbox-chip input[type="checkbox"]:checked {
+  accent-color: var(--signup-primary);
+}
+
+.radio-chip label,
+.checkbox-chip label {
+  margin: 0;
+}
+
+.radio-chip span,
+.checkbox-chip span {
+  color: var(--signup-text);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.radio-chip:has(input:checked),
+.checkbox-chip:has(input:checked) {
+  border-color: var(--signup-primary);
+  background: rgba(13, 59, 43, 0.08);
+}
+
+/* ============================================
+   CHECKBOX STANDALONE (Meal Plan)
+   ============================================ */
+
+.checkbox-standalone {
+  display: flex;
+  align-items: center;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--signup-border);
+}
+
+.checkbox-standalone label {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--signup-text);
+}
+
+.checkbox-standalone input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  cursor: pointer;
+  accent-color: var(--signup-primary);
+}
+
+.checkbox-standalone span {
+  font-weight: 500;
+}
+
+/* ============================================
+   FORM ACTIONS
+   ============================================ */
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 36px;
+  padding-top: 24px;
+  border-top: 1px solid var(--signup-border);
+}
+
+.btn-back,
+.btn-continue,
+.btn-create-account {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: inherit;
+}
+
+.btn-back {
+  background: transparent;
+  color: var(--signup-text-light);
+  border: 1.5px solid var(--signup-border);
+}
+
+.btn-back:hover {
+  border-color: var(--signup-text-light);
+  color: var(--signup-text);
+  background: rgba(13, 59, 43, 0.03);
+}
+
+.btn-continue,
+.btn-create-account {
+  background: var(--signup-primary);
+  color: var(--signup-white);
+  border: 1.5px solid var(--signup-primary);
+}
+
+.btn-continue:hover,
+.btn-create-account:hover {
+  background: var(--signup-primary-light);
+  border-color: var(--signup-primary-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(13, 59, 43, 0.2);
+}
+
+.btn-continue:active,
+.btn-create-account:active {
+  transform: translateY(0);
+}
+
+/* ============================================
+   SIGNUP FOOTER
+   ============================================ */
+
+.signup-footer {
+  text-align: center;
+  margin-top: 28px;
+  font-size: 0.95rem;
+  color: var(--signup-text-light);
+}
+
+.signup-footer a {
+  color: var(--signup-primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+.signup-footer a:hover {
+  color: var(--signup-accent);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+  .signup-container {
+    padding: 32px 20px;
+  }
+
+  .signup-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .signup-step h2 {
+    font-size: 1.4rem;
+  }
+
+  .form-row-2 {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .radio-chip-grid,
+  .checkbox-chip-grid {
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .btn-back,
+  .btn-continue,
+  .btn-create-account {
+    width: 100%;
+  }
+
+  .progress-step {
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .signup-container {
+    padding: 24px 16px;
+  }
+
+  .signup-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .signup-header {
+    margin-bottom: 32px;
+  }
+
+  .progress-bar-container {
+    margin-bottom: 32px;
+  }
+
+  .progress-circle {
+    width: 36px;
+    height: 36px;
+    font-size: 0.95rem;
+  }
+
+  .radio-chip-grid,
+  .checkbox-chip-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .signup-step h2 {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+}

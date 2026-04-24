@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNutritionist } from '../../context/NutritionistContext';
-import { useAuth } from '../../context/AuthContext';
+import { useReduxAuth } from '../../hooks/useReduxAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -28,7 +28,7 @@ const NutritionistDashboard = () => {
     loading,
     error 
   } = useNutritionist();
-  const { user } = useAuth();
+  const { user } = useReduxAuth();
   const [selectedView, setSelectedView] = useState('overview');
 
   if (loading) {

@@ -26,7 +26,26 @@ const Login = () => {
       const result = await dispatch(loginUser(values));
       if (result.meta.requestStatus === 'fulfilled') {
         success('Login successful! Welcome back.');
-        navigate(values.email.includes('admin') ? '/admin-dashboard' : '/dashboard');
+
+        // Get user role from the response payload
+        const userRole = result.payload?.user?.role || 'customer';
+
+        // Navigate based on actual user role from backend
+        switch (userRole) {
+          case 'admin':
+            navigate('/admin/dashboard');
+            break;
+          case 'nutritionist':
+            navigate('/nutritionist/dashboard');
+            break;
+          case 'pharmacy':
+            navigate('/pharmacy/dashboard');
+            break;
+          case 'customer':
+          default:
+            navigate('/customer/dashboard');
+            break;
+        }
       } else if (result.meta.requestStatus === 'rejected') {
         error(result.payload || 'Login failed. Please try again.');
       }

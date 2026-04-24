@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { useAuth } from './AuthContext';
+import { useReduxAuth } from '../hooks/useReduxAuth';
 
 const NutritionistContext = createContext();
 
@@ -99,7 +99,7 @@ const initialState = {
 
 export const NutritionistProvider = ({ children }) => {
   const [state, dispatch] = useReducer(nutritionistReducer, initialState);
-  const { user } = useAuth();
+  const { user } = useReduxAuth();
 
   const loadNutritionistData = async () => {
     try {

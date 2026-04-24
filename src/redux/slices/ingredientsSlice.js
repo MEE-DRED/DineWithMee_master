@@ -82,7 +82,11 @@ const ingredientsSlice = createSlice({
       })
       .addCase(fetchIngredients.fulfilled, (state, action) => {
         state.loading = false;
-        state.ingredients = action.payload;
+        // Handle both array response and object with data property
+        const ingredientsData = Array.isArray(action.payload)
+          ? action.payload
+          : (action.payload?.data || action.payload?.ingredients || []);
+        state.ingredients = ingredientsData;
         state.error = null;
       })
       .addCase(fetchIngredients.rejected, (state, action) => {
@@ -96,7 +100,11 @@ const ingredientsSlice = createSlice({
       })
       .addCase(searchIngredients.fulfilled, (state, action) => {
         state.loading = false;
-        state.searchResults = action.payload;
+        // Handle both array response and object with data property
+        const searchData = Array.isArray(action.payload)
+          ? action.payload
+          : (action.payload?.data || action.payload?.ingredients || []);
+        state.searchResults = searchData;
         state.error = null;
       })
       .addCase(searchIngredients.rejected, (state, action) => {

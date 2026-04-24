@@ -1,6 +1,9 @@
 import React from 'react';
 
 const UserManagement = ({ users, loading }) => {
+  // Handle both array and object with data property
+  const usersList = Array.isArray(users) ? users : (users?.data || []);
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -61,7 +64,7 @@ const UserManagement = ({ users, loading }) => {
             </tr>
           </thead>
           <tbody>
-            {users?.slice(0, 10).map((user) => {
+            {usersList.slice(0, 10).map((user) => {
               const roleBadge = getRoleBadge(user.role);
               const statusBadge = getStatusBadge(user.account_status);
               
@@ -121,10 +124,10 @@ const UserManagement = ({ users, loading }) => {
         </table>
       </div>
 
-      {users && users.length > 10 && (
+      {usersList.length > 10 && (
         <div className="text-center pt-4">
           <button className="btn-secondary">
-            View All Users ({users.length})
+            View All Users ({usersList.length})
           </button>
         </div>
       )}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useCustomer } from '../../context/CustomerContext';
-import { useAuth } from '../../context/AuthContext';
+import { useReduxAuth } from '../../hooks/useReduxAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -26,7 +26,7 @@ const CustomerDashboard = () => {
     loading,
     error 
   } = useCustomer();
-  const { user } = useAuth();
+  const { user } = useReduxAuth();
   const [selectedTimeRange, setSelectedTimeRange] = useState('month');
 
   if (loading) {

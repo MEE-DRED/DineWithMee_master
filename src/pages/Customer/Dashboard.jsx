@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useAuth } from '../../context/AuthContext';
+import { useReduxAuth } from '../../hooks/useReduxAuth';
 import { 
   fetchHealthProfile, 
   fetchMyAssessments,
@@ -19,8 +19,8 @@ import RecommendedMeals from '../../components/health/RecommendedMeals';
 
 const CustomerDashboard = () => {
   const dispatch = useDispatch();
-  const { user, hasRole } = useAuth();
-  
+  const { user, hasRole } = useReduxAuth();
+
   // Redux state
   const healthProfile = useSelector(selectHealthProfile);
   const assessments = useSelector(selectMyAssessments);
@@ -28,15 +28,18 @@ const CustomerDashboard = () => {
   const meals = useSelector(selectMeals);
   const mealsLoading = useSelector(selectMealsLoading);
 
+  // Check if user is customer
+  const isCustomer = hasRole('customer');
+
   useEffect(() => {
-    if (hasRole('CUSTOMER')) {
+    if (isCustomer) {
       dispatch(fetchHealthProfile());
       dispatch(fetchMyAssessments());
       dispatch(fetchMeals({ limit: 6 })); // Featured meals for homepage
     }
-  }, [dispatch, hasRole]);
+  }, [dispatch, isCustomer]);
 
-  if (!hasRole('CUSTOMER')) {
+  if (!isCustomer) {
     return (
       <div className="text-center py-12">
         <p className="text-red-600">Access denied. Customer dashboard only.</p>

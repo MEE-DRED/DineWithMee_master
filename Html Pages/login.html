@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | Dine with Mee</title>
+  <meta name="description" content="Login to your Dine with Mee account." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html#home" class="nav-logo">
+    <div class="logo-mark">D</div>
+    <span class="logo-text">Dine with <span>Mee</span></span>
+  </a>
+
+  <ul class="nav-links" id="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="health.html">Health Hub</a></li>
+    <li><a href="marketplace.html">Marketplace</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+
+  <div class="nav-actions">
+    <a href="login.html" class="btn-login">Log in</a>
+    <a href="signup.html" class="btn-primary">Sign Up</a>
+    <div class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<section class="form-section">
+  <div class="form-card">
+    <h2>Welcome Back</h2>
+    <p class="sub">Login to continue your nutrition and meal journey.</p>
+
+    <form id="login-form" novalidate>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="you@example.com" required />
+        <small class="error-msg" id="email-err"></small>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="Enter password" required />
+        <small class="error-msg" id="password-err"></small>
+      </div>
+
+      <button type="submit" class="btn-primary btn-full">Login</button>
+    </form>
+
+    <div class="divider">or</div>
+
+    <button type="button" class="btn-google">
+      <span class="g-icon">G</span>
+      Continue with Google
+    </button>
+
+    <p class="form-footer">Don't have an account? <a href="signup.html">Sign Up</a></p>
+  </div>
+</section>
+
+<script>
+  window.__DWM_INTEGRATION_AUTH__ = true;
+</script>
+<script src="script.js"></script>
+<script type="module" src="dine-with-mee-integration/dine-with-mee-frontend/src/main.js"></script>
+</body>
+</html>

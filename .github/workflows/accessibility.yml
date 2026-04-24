@@ -1,0 +1,231 @@
+name: Accessibility Compliance Check
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/**/*.jsx'
+      - 'src/**/*.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'eslint.config.js'
+  push:
+    branches: [main, develop]
+
+jobs:
+  accessibility-lint:
+    name: ESLint Accessibility Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint accessibility checks
+        id: eslint-a11y
+        run: |
+          # Check if lint:a11y script exists, fall back to regular lint if not
+          if grep -q '"lint:a11y"' package.json; then
+            npm run lint:a11y -- --format json --output-file eslint-report.json || true
+          else
+            echo "⚠️ lint:a11y script not found. Run regular ESLint instead."
+            npm run lint -- --format json --output-file eslint-report.json || true
+          fi
+        continue-on-error: true
+
+      - name: Analyze ESLint results
+        id: analyze
+        run: |
+          if [ ! -f eslint-report.json ]; then
+            echo "No ESLint report generated"
+            echo "status=error" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          # Count violations by severity
+          ERRORS=$(jq '[.[].messages[] | select(.severity == 2)] | length' eslint-report.json)
+          WARNINGS=$(jq '[.[].messages[] | select(.severity == 1)] | length' eslint-report.json)
+
+          # Count accessibility-specific violations (jsx-a11y rules)
+          A11Y_ERRORS=$(jq '[.[].messages[] | select(.severity == 2 and (.ruleId | startswith("jsx-a11y/")))] | length' eslint-report.json)
+          A11Y_WARNINGS=$(jq '[.[].messages[] | select(.severity == 1 and (.ruleId | startswith("jsx-a11y/")))] | length' eslint-report.json)
+
+          echo "errors=$ERRORS" >> $GITHUB_OUTPUT
+          echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
+          echo "a11y_errors=$A11Y_ERRORS" >> $GITHUB_OUTPUT
+          echo "a11y_warnings=$A11Y_WARNINGS" >> $GITHUB_OUTPUT
+
+          # Determine status
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "status=failure" >> $GITHUB_OUTPUT
+          elif [ "$WARNINGS" -gt 0 ]; then
+            echo "status=warning" >> $GITHUB_OUTPUT
+          else
+            echo "status=success" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const status = '${{ steps.analyze.outputs.status }}';
+            const errors = parseInt('${{ steps.analyze.outputs.errors }}');
+            const warnings = parseInt('${{ steps.analyze.outputs.warnings }}');
+            const a11yErrors = parseInt('${{ steps.analyze.outputs.a11y_errors }}');
+            const a11yWarnings = parseInt('${{ steps.analyze.outputs.a11y_warnings }}');
+
+            let icon = '✅';
+            let summary = 'All accessibility checks passed!';
+
+            if (status === 'failure') {
+              icon = '❌';
+              summary = 'Accessibility violations found';
+            } else if (status === 'warning') {
+              icon = '⚠️';
+              summary = 'Accessibility warnings found';
+            }
+
+            // Read detailed violations
+            let detailsTable = '';
+            try {
+              const report = JSON.parse(fs.readFileSync('eslint-report.json', 'utf8'));
+              const a11yViolations = report
+                .flatMap(file =>
+                  file.messages
+                    .filter(msg => msg.ruleId && msg.ruleId.startsWith('jsx-a11y/'))
+                    .map(msg => ({
+                      file: file.filePath.replace(process.cwd() + '/', ''),
+                      line: msg.line,
+                      rule: msg.ruleId,
+                      message: msg.message,
+                      severity: msg.severity === 2 ? 'Error' : 'Warning'
+                    }))
+                )
+                .slice(0, 10); // Show first 10 violations
+
+              if (a11yViolations.length > 0) {
+                detailsTable = '\n\n### Top Accessibility Violations\n\n';
+                detailsTable += '| File | Line | Rule | Severity | Message |\n';
+                detailsTable += '|------|------|------|----------|----------|\n';
+                a11yViolations.forEach(v => {
+                  detailsTable += `| \`${v.file}\` | ${v.line} | \`${v.rule}\` | ${v.severity} | ${v.message} |\n`;
+                });
+
+                if (a11yErrors + a11yWarnings > 10) {
+                  detailsTable += `\n*...and ${a11yErrors + a11yWarnings - 10} more violations*\n`;
+                }
+              }
+            } catch (e) {
+              console.error('Error reading ESLint report:', e);
+            }
+
+            const body = `## ${icon} Accessibility Check Results
+
+**Status:** ${summary}
+
+### Summary
+- **Total Errors:** ${errors}
+- **Total Warnings:** ${warnings}
+- **Accessibility Errors:** ${a11yErrors}
+- **Accessibility Warnings:** ${a11yWarnings}
+
+${detailsTable}
+
+### Resources
+- 📚 [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
+- 🔧 [eslint-plugin-jsx-a11y Rules](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y#supported-rules)
+- 📖 [Project Accessibility Guide](../ACCESSIBILITY.md)
+
+---
+*Run \`npm run lint:a11y\` locally to see detailed violations*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Upload ESLint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-accessibility-report
+          path: eslint-report.json
+          retention-days: 30
+
+      - name: Fail on errors
+        if: steps.analyze.outputs.status == 'failure'
+        run: |
+          echo "❌ ESLint found ${{ steps.analyze.outputs.errors }} errors"
+          echo "🔍 ${{ steps.analyze.outputs.a11y_errors }} of these are accessibility violations"
+          echo ""
+          echo "Please fix the errors and commit again."
+          exit 1
+
+  lighthouse-accessibility:
+    name: Lighthouse Accessibility Audit
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          VITE_API_URL: https://new-dine-with-mee-backend.onrender.com
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          urls: |
+            http://localhost:5000
+          configPath: './.lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+        continue-on-error: true
+
+  summary:
+    name: Accessibility Summary
+    runs-on: ubuntu-latest
+    needs: [accessibility-lint, lighthouse-accessibility]
+    if: always()
+
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## 🎯 Accessibility Compliance Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Job Results" >> $GITHUB_STEP_SUMMARY
+          echo "- ESLint Check: ${{ needs.accessibility-lint.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Lighthouse Audit: ${{ needs.lighthouse-accessibility.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Review the detailed reports above" >> $GITHUB_STEP_SUMMARY
+          echo "2. Fix any critical accessibility violations" >> $GITHUB_STEP_SUMMARY
+          echo "3. Run \`npm run lint:a11y\` locally before pushing" >> $GITHUB_STEP_SUMMARY
+          echo "4. Refer to [ACCESSIBILITY.md](../ACCESSIBILITY.md) for guidance" >> $GITHUB_STEP_SUMMARY
