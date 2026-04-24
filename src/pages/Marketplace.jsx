@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useSelector, useDispatch } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import {
   fetchMeals,
   selectMeals,
@@ -80,19 +80,21 @@ const Marketplace = () => {
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(meal =>
-        meal.name.toLowerCase().includes(query) ||
-        meal.desc?.toLowerCase().includes(query) ||
-        meal.country?.toLowerCase().includes(query) ||
-        meal.region?.toLowerCase().includes(query) ||
-        meal.ingredients?.some(ing => ing.toLowerCase().includes(query))
+      filtered = filtered.filter(
+        meal =>
+          meal.name.toLowerCase().includes(query) ||
+          meal.desc?.toLowerCase().includes(query) ||
+          meal.country?.toLowerCase().includes(query) ||
+          meal.region?.toLowerCase().includes(query) ||
+          meal.ingredients?.some(ing => ing.toLowerCase().includes(query))
       );
     }
 
     // Nutrition filters
-    filtered = filtered.filter(meal =>
-      (meal.nutrition?.calories || 0) <= maxCalories &&
-      (meal.nutrition?.protein || 0) >= minProtein
+    filtered = filtered.filter(
+      meal =>
+        (meal.nutrition?.calories || 0) <= maxCalories &&
+        (meal.nutrition?.protein || 0) >= minProtein
     );
 
     // Favorites filter
@@ -102,7 +104,17 @@ const Marketplace = () => {
 
     // Sorting
     return sortMeals(filtered, sortBy);
-  }, [meals, selectedRegion, selectedHealthTags, searchQuery, maxCalories, minProtein, showFavoritesOnly, sortBy, favorites]);
+  }, [
+    meals,
+    selectedRegion,
+    selectedHealthTags,
+    searchQuery,
+    maxCalories,
+    minProtein,
+    showFavoritesOnly,
+    sortBy,
+    favorites,
+  ]);
 
   // Calculate active filter count
   const getActiveFilterCount = () => {
@@ -127,12 +139,12 @@ const Marketplace = () => {
   };
 
   // Handle add to cart
-  const handleAddToCart = (meal) => {
+  const handleAddToCart = meal => {
     dispatch(addToCart({ ...meal, quantity: 1 }));
   };
 
   // Handle toggle favorite
-  const handleToggleFavorite = (mealId) => {
+  const handleToggleFavorite = mealId => {
     dispatch(toggleFavorite(mealId));
   };
 
@@ -146,13 +158,15 @@ const Marketplace = () => {
       <div className="page-hero bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-900 text-white py-16">
         <div className="page-hero-content text-center max-w-4xl mx-auto px-6">
           <div className="breadcrumb text-emerald-200 mb-4">
-            <a href="/" className="text-amber-400 hover:text-amber-300">Home</a> &#8250; Marketplace
+            <a href="/" className="text-amber-400 hover:text-amber-300">
+              Home
+            </a>{' '}
+            &#8250; Marketplace
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            African Marketplace by Region
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">African Marketplace by Region</h1>
           <p className="text-xl text-emerald-100">
-            Shop clinically informed African meals and ingredients across West, East, and Southern Africa.
+            Shop clinically informed African meals and ingredients across West, East, and Southern
+            Africa.
           </p>
         </div>
       </div>
@@ -235,14 +249,14 @@ const Marketplace = () => {
           {/* Items Grid */}
           {!loading && !error && displayItems.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {displayItems.map((item) => (
+              {displayItems.map(item =>
                 activeTab === 'meals' ? (
                   <div key={item.id || item._id} className="relative">
                     <div onClick={() => setSelectedMeal(item)} className="cursor-pointer">
                       <MealCard meal={item} />
                     </div>
                     <button
-                      onClick={(e) => {
+                      onClick={e => {
                         e.stopPropagation();
                         handleToggleFavorite(item.id || item._id);
                       }}
@@ -254,7 +268,7 @@ const Marketplace = () => {
                 ) : (
                   <IngredientCard key={item.id || item._id} ingredient={item} />
                 )
-              ))}
+              )}
             </div>
           )}
 
@@ -262,7 +276,8 @@ const Marketplace = () => {
           {!loading && !error && displayItems.length === 0 && (
             <div className="text-center py-12 bg-white rounded-xl shadow-sm">
               <p className="text-gray-600 text-lg mb-4">
-                No {activeTab} {showFavoritesOnly ? 'favorites' : 'found'} {searchQuery && `matching "${searchQuery}"`}.
+                No {activeTab} {showFavoritesOnly ? 'favorites' : 'found'}{' '}
+                {searchQuery && `matching "${searchQuery}"`}.
               </p>
               {(getActiveFilterCount() > 0 || showFavoritesOnly) && (
                 <button
