@@ -160,6 +160,14 @@ import {
   selectCreateOrderError,
 } from './slices/ordersSlice';
 
+// Favorites
+import {
+  toggleFavorite,
+  clearFavorites,
+  selectFavorites,
+  selectIsFavorite,
+} from './slices/favoritesSlice';
+
 export {
   // Store
   store,
@@ -299,6 +307,12 @@ export {
   selectOrdersError,
   selectCreateOrderLoading,
   selectCreateOrderError,
+
+  // Favorites
+  toggleFavorite,
+  clearFavorites,
+  selectFavorites,
+  selectIsFavorite,
 };
 
 export default store;

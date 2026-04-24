@@ -5,6 +5,11 @@ import HeroSlider from '../components/home/HeroSlider';
 import ClinicalFocusGrid from '../components/home/ClinicalFocusGrid';
 import StatsSection from '../components/home/StatsSection';
 import FeaturedMeals from '../components/home/FeaturedMeals';
+import ProgramCard from '../components/home/ProgramCard';
+import TestimonialsCarousel from '../components/home/TestimonialsCarousel';
+import { programs } from '../data/programs';
+import { testimonials } from '../data/testimonials';
+import MEEImg from '../assets/mee.png'
 
 const Home: React.FC = () => {
   return (
@@ -18,13 +23,14 @@ const Home: React.FC = () => {
       {/* Purpose Section */}
       <section className="py-16 sm:py-20 lg:py-24 bg-white">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left: Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16 items-center">
+            {/* Left: Content - takes 3 columns */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
+              className="lg:col-span-3"
             >
               <span className="section-tag">
                 Our Purpose
@@ -48,20 +54,20 @@ const Home: React.FC = () => {
               </Link>
             </motion.div>
 
-            {/* Right: Image */}
+            {/* Right: Image - takes 2 columns */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="relative"
+              className="relative lg:col-span-2"
             >
-              <div className="relative rounded-dwm-lg overflow-hidden shadow-dwm-lg">
+              <div className="relative rounded-dwm-lg overflow-hidden shadow-dwm-lg max-w-md mx-auto lg:mx-0">
                 <img
-                  src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=800&q=80"
+                  src={MEEImg}
                   alt="Cooking with confidence and style"
                   loading="lazy"
-                  className="w-full h-full object-cover"
+                  className="w-full h-auto object-contain"
                 />
               </div>
               {/* Decorative Element */}
@@ -181,6 +187,42 @@ const Home: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Clinical Wellness Programs Section */}
+      <section className="py-20 bg-gradient-to-b from-white to-emerald-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-12"
+          >
+            <span className="section-tag">
+              Clinical Wellness
+            </span>
+            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-emerald-900 mb-6">
+              Structured Nutrition Programs
+            </h2>
+            <p className="text-xl text-stone-600 max-w-3xl mx-auto">
+              Evidence-based programs designed for specific health conditions
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {programs.map((program, index) => (
+              <ProgramCard
+                key={program.id}
+                program={program}
+                delay={index * 0.1}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Carousel */}
+      <TestimonialsCarousel testimonials={testimonials} />
 
       {/* CTA Section */}
       <section className="py-16 sm:py-20 lg:py-24 bg-linear-to-br from-emerald-700 to-emerald-600 relative overflow-hidden">

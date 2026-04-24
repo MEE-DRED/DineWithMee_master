@@ -14,6 +14,7 @@ import consultationsReducer from './slices/consultationsSlice';
 import mealPlansReducer from './slices/mealPlansSlice';
 import chatReducer from './slices/chatSlice';
 import ordersReducer from './slices/ordersSlice';
+import favoritesReducer from './slices/favoritesSlice';
 
 export const store = configureStore({
   reducer: {
@@ -31,6 +32,7 @@ export const store = configureStore({
     mealPlans: mealPlansReducer,
     chat: chatReducer,
     orders: ordersReducer,
+    favorites: favoritesReducer,
   },
   middleware: (getDefaultMiddleware) => {
     const middlewares = getDefaultMiddleware({
