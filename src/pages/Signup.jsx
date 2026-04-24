@@ -31,8 +31,27 @@ const Signup = () => {
     try {
       const result = await dispatch(registerUser(values));
       if (result.meta.requestStatus === 'fulfilled') {
-        success('Registration successful! Please check your email to verify your account.');
-        navigate('/login');
+        success('Registration successful! Welcome to Dine with Mee!');
+
+        // Get user role from the response payload (new users default to 'customer')
+        const userRole = result.payload?.user?.role || 'customer';
+
+        // Navigate based on actual user role from backend
+        switch (userRole) {
+          case 'admin':
+            navigate('/admin/dashboard');
+            break;
+          case 'nutritionist':
+            navigate('/nutritionist/dashboard');
+            break;
+          case 'pharmacy':
+            navigate('/pharmacy/dashboard');
+            break;
+          case 'customer':
+          default:
+            navigate('/customer/dashboard');
+            break;
+        }
       } else if (result.meta.requestStatus === 'rejected') {
         error(result.payload || 'Registration failed. Please try again.');
       }

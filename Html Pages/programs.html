@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Explore All Programs | Dine with Mee</title>
+  <meta name="description" content="Browse all Dine with Mee programs through a clean editorial index and open full program details." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="program-editorial.css" />
+</head>
+<body>
+  <header class="editorial-topbar">
+    <div class="editorial-brand">Dine with <span>Mee</span></div>
+    <nav class="editorial-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="programs.html">Explore All Programs</a>
+      <a href="health.html">Health Hub</a>
+    </nav>
+  </header>
+
+  <main class="programs-page-wrap">
+    <section class="programs-shell">
+      <header class="programs-header">
+        <p class="category">Clinical Wellness Programs</p>
+        <h1>Explore All Programs</h1>
+        <p>Choose any pathway below to open the full editorial article with implementation guidance and practical nutrition structure.</p>
+      </header>
+
+      <div id="programs-grid" class="programs-grid"></div>
+
+      <div class="article-actions">
+        <button type="button" onclick="goHome()">Return Home</button>
+        <button type="button" onclick="openProgram('glycemic-reset')">Open Featured Program</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="programs.js"></script>
+</body>
+</html>

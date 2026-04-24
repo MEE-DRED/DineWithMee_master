@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program Detail | Dine with Mee</title>
+  <meta name="description" content="Structured editorial program detail page for Dine with Mee clinical pathways." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="program-editorial.css" />
+</head>
+<body>
+  <header class="editorial-topbar">
+    <div class="editorial-brand">Dine with <span>Mee</span></div>
+    <nav class="editorial-nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="programs.html">Explore All Programs</a>
+      <a href="health.html">Health Hub</a>
+    </nav>
+  </header>
+
+  <main class="article-page-wrap">
+    <section class="article-shell">
+      <div class="article-hero">
+        <p class="category" id="article-category">Program Category</p>
+        <h1 id="article-title">Program Title</h1>
+      </div>
+
+      <figure class="article-visual" id="article-visual" hidden>
+        <img id="article-image" src="" alt="" loading="lazy" />
+      </figure>
+
+      <div class="article-meta-bar">
+        <div class="meta" id="article-meta">March 19, 2026 • 6 min read</div>
+      </div>
+
+      <div class="article-content" id="article"></div>
+
+      <div class="article-actions">
+        <button onclick="goHome()" type="button">Return Home</button>
+        <button onclick="goToPrograms()" type="button">Explore All Programs</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="programs.js"></script>
+</body>
+</html>

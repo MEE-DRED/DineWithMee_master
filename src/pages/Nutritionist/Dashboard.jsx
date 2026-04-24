@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useAuth } from '../../context/AuthContext';
-import { 
-  fetchAllUsers, 
+import { useReduxAuth } from '../../hooks/useReduxAuth';
+import {
+  fetchAllUsers,
   selectUsers,
   selectUsersLoading,
   fetchUserAnalytics,
@@ -15,21 +15,24 @@ import AnalyticsWidget from '../../components/dashboard/AnalyticsWidget';
 
 const NutritionistDashboard = () => {
   const dispatch = useDispatch();
-  const { user, hasRole } = useAuth();
-  
+  const { user, hasRole } = useReduxAuth();
+
   // Redux state
   const clients = useSelector(selectUsers);
   const clientsLoading = useSelector(selectUsersLoading);
   const analytics = useSelector(selectUserAnalytics);
 
+  // Check if user is nutritionist
+  const isNutritionist = hasRole('nutritionist');
+
   useEffect(() => {
-    if (hasRole('NUTRITIONIST')) {
+    if (isNutritionist) {
       dispatch(fetchAllUsers({ role: 'CUSTOMER' })); // Get only customer clients
       dispatch(fetchUserAnalytics());
     }
-  }, [dispatch, hasRole]);
+  }, [dispatch, isNutritionist]);
 
-  if (!hasRole('NUTRITIONIST')) {
+  if (!isNutritionist) {
     return (
       <div className="text-center py-12">
         <p className="text-red-600">Access denied. Nutritionist dashboard only.</p>

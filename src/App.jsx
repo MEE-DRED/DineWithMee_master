@@ -2,9 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './redux';
-import { checkAuthState, loadCartFromStorage } from './redux';
-import { AuthProvider } from './context/AuthContext';
-import { CartProvider } from './context/CartContext';
+import { checkAuthState, loadCartFromStorage, getCurrentUser } from './redux';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import CartSidebar from './components/CartSidebar';
@@ -25,10 +23,21 @@ import ProgramDetail from './pages/ProgramDetail';
 import Maternal from './pages/Maternal';
 import Research from './pages/Research';
 import ChefPartner from './pages/ChefPartner';
+import TestDashboard from './pages/TestDashboard';
+import MealDetail from './pages/MealDetail';
+import IngredientDetail from './pages/IngredientDetail';
+import TestMealCard from './components/debug/TestMealCard';
+import Checkout from './pages/Checkout';
+import OrderSuccess from './pages/OrderSuccess';
 
 // Role-based dashboards with lazy loading
 import { lazy, Suspense } from 'react';
 import LoadingSpinner from './components/common/LoadingSpinner';
+import ErrorBoundary from './components/common/ErrorBoundary';
+import { CustomerProvider } from './context/CustomerContext';
+import { AdminProvider } from './context/AdminContext';
+import { NutritionistProvider } from './context/NutritionistContext';
+import { PharmacyProvider } from './context/PharmacyContext';
 
 const CustomerDashboard = lazy(() => import('./pages/Customer/Dashboard'));
 const NutritionistDashboard = lazy(() => import('./pages/Nutritionist/Dashboard'));
@@ -51,13 +60,12 @@ function App() {
 
   return (
     <Provider store={store}>
-      <AuthProvider>
-        <CartProvider>
-          <Router>
-            <div className="min-h-screen flex flex-col">
-              <Navbar />
-              <main className="flex-1 pt-18">
-                <Routes>
+      <ErrorBoundary>
+        <Router>
+          <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <main className="flex-1 pt-18">
+              <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/signup" element={<Signup />} />
@@ -68,31 +76,45 @@ function App() {
                   <Route path="/admin-dashboard" element={<AdminDashboard />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/programs" element={<Programs />} />
-                  <Route path="/programs/:id" element={<ProgramDetail />} />
+                  <Route path="/programs/:programId" element={<ProgramDetail />} />
                   <Route path="/maternal" element={<Maternal />} />
                   <Route path="/research" element={<Research />} />
                   <Route path="/chef-partner" element={<ChefPartner />} />
+                  <Route path="/test-dashboard" element={<TestDashboard />} />
+                  <Route path="/meals/:mealId" element={<MealDetail />} />
+                  <Route path="/ingredients/:ingredientId" element={<IngredientDetail />} />
+                  <Route path="/debug-meal-card" element={<TestMealCard />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/order-success" element={<OrderSuccess />} />
                   
                   {/* Role-based dashboards with lazy loading */}
                   <Route path="/customer/dashboard" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <CustomerDashboard />
-                    </Suspense>
+                    <CustomerProvider>
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <CustomerDashboard />
+                      </Suspense>
+                    </CustomerProvider>
                   } />
                   <Route path="/nutritionist/dashboard" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <NutritionistDashboard />
-                    </Suspense>
+                    <NutritionistProvider>
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <NutritionistDashboard />
+                      </Suspense>
+                    </NutritionistProvider>
                   } />
                   <Route path="/admin/dashboard" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <AdminDashboardNew />
-                    </Suspense>
+                    <AdminProvider>
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <AdminDashboardNew />
+                      </Suspense>
+                    </AdminProvider>
                   } />
                   <Route path="/pharmacy/dashboard" element={
-                    <Suspense fallback={<LoadingSpinner />}>
-                      <PharmacyDashboard />
-                    </Suspense>
+                    <PharmacyProvider>
+                      <Suspense fallback={<LoadingSpinner />}>
+                        <PharmacyDashboard />
+                      </Suspense>
+                    </PharmacyProvider>
                   } />
 
                   {/* Chat with Nia (AI Nutritionist) */}
@@ -107,9 +129,8 @@ function App() {
               <CartSidebar />
               <ToastContainer />
             </div>
-          </Router>
-        </CartProvider>
-      </AuthProvider>
+        </Router>
+      </ErrorBoundary>
     </Provider>
   );
 }

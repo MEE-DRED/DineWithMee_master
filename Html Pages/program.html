@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="refresh" content="0; url=program-detail.html" />
+  <title>Redirecting | Dine with Mee</title>
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var id = params.get("id") || "glycemic-reset";
+      var target = "program-detail.html?id=" + encodeURIComponent(id) + window.location.hash;
+      window.location.replace(target);
+    })();
+  </script>
+</head>
+<body>
+  <p>Redirecting to the program detail page. <a href="program-detail.html">Continue</a>.</p>
+</body>
+</html>

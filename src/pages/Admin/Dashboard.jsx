@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useAuth } from '../../context/AuthContext';
+import { useReduxAuth } from '../../hooks/useReduxAuth';
 import { 
   fetchAllUsers, 
   selectUsers,
@@ -17,23 +17,26 @@ import ContentManagement from '../../components/dashboard/ContentManagement';
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
-  const { user, hasRole } = useAuth();
-  
+  const { user, hasRole } = useReduxAuth();
+
   // Redux state
   const allUsers = useSelector(selectUsers);
   const usersLoading = useSelector(selectUsersLoading);
   const analytics = useSelector(selectUserAnalytics);
   const featuredContent = useSelector(selectFeaturedContent);
 
+  // Check if user is admin
+  const isAdmin = hasRole('admin');
+
   useEffect(() => {
-    if (hasRole('ADMIN')) {
+    if (isAdmin) {
       dispatch(fetchAllUsers());
       dispatch(fetchUserAnalytics());
       dispatch(fetchFeaturedContent());
     }
-  }, [dispatch, hasRole]);
+  }, [dispatch, isAdmin]);
 
-  if (!hasRole('ADMIN')) {
+  if (!isAdmin) {
     return (
       <div className="text-center py-12">
         <p className="text-red-600">Access denied. Admin dashboard only.</p>

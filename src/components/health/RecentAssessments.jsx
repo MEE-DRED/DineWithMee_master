@@ -1,6 +1,9 @@
 import React from 'react';
 
 const RecentAssessments = ({ assessments, loading }) => {
+  // Ensure assessments is always an array
+  const assessmentsList = Array.isArray(assessments) ? assessments : [];
+
   if (loading) {
     return (
       <div className="card">
@@ -15,7 +18,7 @@ const RecentAssessments = ({ assessments, loading }) => {
     );
   }
 
-  if (!assessments || assessments.length === 0) {
+  if (assessmentsList.length === 0) {
     return (
       <div className="card">
         <div className="card-content">
@@ -72,7 +75,7 @@ const RecentAssessments = ({ assessments, loading }) => {
         </h3>
         
         <div className="space-y-3">
-          {assessments.slice(-3).reverse().map((assessment) => {
+          {assessmentsList.slice(-3).reverse().map((assessment) => {
             const healthStatus = getHealthStatus(assessment);
             
             return (

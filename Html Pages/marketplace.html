@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>African Marketplace | Dine with Mee</title>
+  <meta name="description" content="Explore therapeutic African meals by region with health tags, nutrition filters, and condition-focused recommendations." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html#home" class="nav-logo">
+    <div class="logo-mark">D</div>
+    <span class="logo-text">Dine with <span>Mee</span></span>
+  </a>
+
+  <ul class="nav-links" id="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="health.html">Health Hub</a></li>
+    <li><a href="marketplace.html" class="active">Marketplace</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+
+  <div class="nav-actions">
+    <button class="btn-cart" id="cart-btn" type="button">
+      Cart
+      <span class="cart-count" id="cart-count-nav" style="display:none">0</span>
+    </button>
+    <a href="login.html" class="btn-login">Log in</a>
+    <a href="signup.html" class="btn-primary">Join Free</a>
+    <button class="hamburger" id="hamburger" type="button" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<section class="page-hero" id="marketplace-home">
+  <div class="page-hero-content">
+    <div class="breadcrumb"><a href="index.html#home">Home</a> &#8250; Marketplace</div>
+    <h1>African Marketplace by Region</h1>
+    <p>Shop clinically informed African meals and ingredients across West, East, North, and Southern Africa.</p>
+  </div>
+</section>
+
+<section class="section marketplace-shell-section">
+  <div class="marketplace-tabs">
+    <button class="tab-btn active" id="tab-meals" onclick="switchTab('meals')" type="button">African Meals</button>
+    <button class="tab-btn" id="tab-ingredients" onclick="switchTab('ingredients')" type="button">Ingredients</button>
+  </div>
+
+  <div id="panel-meals">
+    <div class="marketplace-top-row">
+      <div class="region-filter" id="region-filter">
+        <button class="region-btn active" onclick="filterRegion('All', this)" type="button">All Regions</button>
+        <button class="region-btn" onclick="filterRegion('West Africa', this)" type="button">West Africa</button>
+        <button class="region-btn" onclick="filterRegion('East Africa', this)" type="button">East Africa</button>
+        <button class="region-btn" onclick="filterRegion('North Africa', this)" type="button">North Africa</button>
+        <button class="region-btn" onclick="filterRegion('Southern Africa', this)" type="button">Southern Africa</button>
+        <button class="region-btn" onclick="filterRegion('Central Africa', this)" type="button">Central Africa</button>
+      </div>
+      <div class="meal-count-text" id="meal-count"></div>
+    </div>
+
+    <div id="filter-bar-container"></div>
+
+    <div class="meal-tools">
+      <div class="health-filter" id="health-filter"></div>
+      <div class="meal-inputs">
+        <div class="meal-search-wrap">
+          <label for="meal-search">Search Meals</label>
+          <input id="meal-search" type="search" placeholder="Search by meal, country, region, or ingredient" />
+        </div>
+        <div class="meal-sort-wrap">
+          <label for="meal-sort">Sort Meals</label>
+          <select id="meal-sort">
+            <option value="featured">Featured</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+            <option value="calories-asc">Calories: Low to High</option>
+            <option value="calories-desc">Calories: High to Low</option>
+            <option value="protein-desc">Protein: High to Low</option>
+            <option value="name-asc">Name: A to Z</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="meal-nutrition-filters">
+      <div class="nutrition-filter">
+        <label for="meal-calories-range">Max Calories: <span id="meal-calories-value">Any</span></label>
+        <input id="meal-calories-range" type="range" min="0" max="1000" step="10" value="1000" />
+      </div>
+
+      <div class="nutrition-filter">
+        <label for="meal-protein-range">Min Protein: <span id="meal-protein-value">0g+</span></label>
+        <input id="meal-protein-range" type="range" min="0" max="60" step="1" value="0" />
+      </div>
+
+      <div class="meal-extra-actions">
+        <button id="meal-favorites-toggle" class="meal-action-btn" type="button">Show Favorites Only</button>
+        <button id="meal-clear-filters" class="meal-action-btn ghost" type="button">Clear Filters</button>
+        <button id="meal-export-json" class="meal-action-btn ghost" type="button">Export Filtered JSON</button>
+      </div>
+    </div>
+
+    <section class="favorites-section" id="favorites-section" style="display:none;">
+      <div class="favorites-section-head">
+        <h3>Saved Favorites</h3>
+        <button id="meal-clear-favorites" class="meal-action-btn ghost" type="button">Clear Saved</button>
+      </div>
+      <div class="meals-grid favorites-grid" id="meal-favorites-grid"></div>
+    </section>
+
+    <div class="meals-grid" id="marketplace-meals"></div>
+
+    <div class="meal-pagination" id="meal-pagination">
+      <button id="meal-load-more" class="meal-load-more" type="button">Load More Meals</button>
+    </div>
+  </div>
+
+  <div id="panel-ingredients" style="display:none;">
+    <div class="region-filter" id="ingredient-region-filter">
+      <button class="region-btn active" onclick="filterIngredients('All', this)" type="button">All Regions</button>
+      <button class="region-btn" onclick="filterIngredients('West Africa', this)" type="button">West Africa</button>
+      <button class="region-btn" onclick="filterIngredients('East Africa', this)" type="button">East Africa</button>
+      <button class="region-btn" onclick="filterIngredients('North Africa', this)" type="button">North Africa</button>
+      <button class="region-btn" onclick="filterIngredients('Southern Africa', this)" type="button">Southern Africa</button>
+      <button class="region-btn" onclick="filterIngredients('Central Africa', this)" type="button">Central Africa</button>
+    </div>
+    <div class="meals-grid" id="marketplace-ingredients"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <span class="logo-text">Dine with <span>Mee</span></span>
+      <p>Clinical-grade nutrition guidance and African meal discovery in one unified platform.</p>
+      <div class="social-links">
+        <a href="#" aria-label="X">X</a>
+        <a href="#" aria-label="LinkedIn">in</a>
+        <a href="#" aria-label="Facebook">F</a>
+        <a href="#" aria-label="Instagram">IG</a>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <h5>Navigation</h5>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="health.html">Health Hub</a></li>
+        <li><a href="marketplace.html">Marketplace</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h5>Clinical Care</h5>
+      <ul>
+        <li><a href="health.html#diabetes">Diabetes</a></li>
+        <li><a href="health.html#hypertension">Hypertension</a></li>
+        <li><a href="health.html#maternal-care-pathway">Maternal Health</a></li>
+        <li><a href="health.html#sickle-cell">Sickle Cell</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h5>Account</h5>
+      <ul>
+        <li><a href="login.html">Log in</a></li>
+        <li><a href="signup.html">Join Free</a></li>
+        <li><a href="contact.html">Contact Team</a></li>
+        <li><a href="index.html#ready-to-heal">Start Journey</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <span>&copy; 2026 Dine with Mee. All rights reserved.</span>
+    <span>Built by <span class="gold">Mee Technologies Ltd.</span></span>
+  </div>
+</footer>
+
+<div class="cart-overlay" id="cart-overlay"></div>
+<div class="cart-sidebar" id="cart-sidebar">
+  <div class="cart-header">
+    <h3>Your Cart</h3>
+    <button class="cart-close" id="cart-close" type="button">X</button>
+  </div>
+  <div class="cart-items" id="cart-items">
+    <div class="cart-empty">
+      <span class="emoji">Meal</span>
+      Your cart is empty.<br />Explore our marketplace!
+    </div>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span>Total</span>
+      <span class="amount" id="cart-total-amount">0 RWF</span>
+    </div>
+    <button class="btn-primary btn-full" type="button" onclick="showToast('Checkout loading...')">Checkout</button>
+  </div>
+</div>
+
+<script>
+  window.__DWM_INTEGRATION_MARKETPLACE__ = true;
+</script>
+<script src="script.js"></script>
+<script type="module" src="dine-with-mee-integration/dine-with-mee-frontend/src/main.js"></script>
+</body>
+</html>

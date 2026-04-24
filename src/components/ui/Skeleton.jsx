@@ -1,55 +1,68 @@
 import React from 'react';
 
-const Skeleton = ({ variant = 'text', className = '', lines = 3 }) => {
+const Skeleton = ({ variant = 'text', className = '', lines = 3, count = 1 }) => {
   const baseClasses = 'animate-pulse bg-dwm-green-pale rounded';
-  
+
   const variants = {
-    text: (
-      <div className={`space-y-2 ${className}`}>
-        {Array.from({ length: lines }).map((_, i) => (
-          <div key={i} className="h-4 bg-dwm-green-pale rounded"></div>
-        ))}
-      </div>
-    ),
-    
-    avatar: (
-      <div className={`w-12 h-12 bg-dwm-green-pale rounded-full ${className}`}></div>
-    ),
-    
-    card: (
-      <div className={`p-4 bg-dwm-green-pale rounded-lg ${className}`}>
-        <div className="h-4 bg-dwm-green-pale rounded mb-4"></div>
-        <div className="h-4 bg-dwm-green-pale rounded mb-2"></div>
-        <div className="h-4 bg-dwm-green-pale rounded"></div>
-      </div>
-    ),
-    
-    title: (
-      <div className={`h-8 w-32 bg-dwm-green-pale rounded mb-4 ${className}`}></div>
-    ),
-    
-    button: (
-      <div className={`h-10 w-24 bg-dwm-green-pale rounded ${className}`}></div>
-    ),
-    
-    input: (
-      <div className={`h-10 w-full bg-dwm-green-pale rounded ${className}`}></div>
-    ),
-    
-    table: (
-      <div className={`space-y-2 ${className}`}>
-        {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="h-12 bg-dwm-green-pale rounded"></div>
-        ))}
-      </div>
-    ),
-    
-    chart: (
-      <div className={`h-48 bg-dwm-green-pale rounded-lg ${className}`}></div>
-    )
+    text: 'h-4 w-full rounded',
+    title: 'h-8 w-3/4 rounded',
+    avatar: 'h-12 w-12 rounded-full',
+    card: 'h-64 w-full rounded-2xl',
+    image: 'h-48 w-full rounded-lg',
+    button: 'h-10 w-24 rounded-lg',
+    input: 'h-10 w-full rounded',
+    table: 'h-12 w-full rounded',
+    chart: 'h-48 w-full rounded-lg',
   };
 
-  return variants[variant] || variants.text;
+  if (variant === 'text' && lines > 1) {
+    return (
+      <div className={`space-y-2 ${className}`}>
+        {Array.from({ length: lines }).map((_, i) => (
+          <div key={i} className={`${baseClasses} ${variants.text}`}></div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {Array.from({ length: count }).map((_, index) => (
+        <div
+          key={index}
+          className={`${baseClasses} ${variants[variant] || variants.text} ${className}`}
+          aria-label="Loading..."
+          role="status"
+        />
+      ))}
+    </>
+  );
 };
+
+// Specific skeleton components for common use cases
+export const MealCardSkeleton = () => (
+  <div className="card">
+    <Skeleton variant="image" />
+    <div className="card-content space-y-3">
+      <Skeleton variant="title" />
+      <Skeleton variant="text" count={2} />
+      <div className="flex gap-2">
+        <Skeleton variant="button" />
+        <Skeleton variant="button" />
+      </div>
+    </div>
+  </div>
+);
+
+export const DashboardSkeleton = () => (
+  <div className="space-y-6">
+    <Skeleton variant="title" className="w-1/3" />
+    <div className="grid grid-cols-3 gap-6">
+      <Skeleton variant="card" />
+      <Skeleton variant="card" />
+      <Skeleton variant="card" />
+    </div>
+  </div>
+);
 
 export { Skeleton };

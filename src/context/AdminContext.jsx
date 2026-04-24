@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
-import { useAuth } from './AuthContext';
+import { useReduxAuth } from '../hooks/useReduxAuth';
 
 const AdminContext = createContext();
 
@@ -112,7 +112,7 @@ const initialState = {
 
 export const AdminProvider = ({ children }) => {
   const [state, dispatch] = useReducer(adminReducer, initialState);
-  const { user } = useAuth();
+  const { user } = useReduxAuth();
 
   const loadAdminData = useCallback(async () => {
     try {

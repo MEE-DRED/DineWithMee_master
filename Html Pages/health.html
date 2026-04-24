@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Health Hub | Dine with Mee</title>
+  <meta name="description" content="Condition-based programs, maternal care pathways, and nutrition research in one unified Health Hub." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="index.html#home" class="nav-logo">
+    <div class="logo-mark">D</div>
+    <span class="logo-text">Dine with <span>Mee</span></span>
+  </a>
+
+  <ul class="nav-links" id="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="health.html" class="active">Health Hub</a></li>
+    <li><a href="marketplace.html">Marketplace</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+
+  <div class="nav-actions">
+    <button class="btn-cart" id="cart-btn" type="button">
+      Cart
+      <span class="cart-count" id="cart-count-nav" style="display:none">0</span>
+    </button>
+    <a href="login.html" class="btn-login">Log in</a>
+    <a href="signup.html" class="btn-primary">Join Free</a>
+    <button class="hamburger" id="hamburger" type="button" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<section class="page-hero" id="health-hub-home">
+  <div class="page-hero-content">
+    <div class="breadcrumb"><a href="index.html#home">Home</a> &#8250; Health Hub</div>
+    <h1>Health Hub</h1>
+    <p>Condition-focused care, maternal nutrition pathways, and research-backed guidance in one place.</p>
+  </div>
+</section>
+
+<section class="section" id="health-conditions">
+  <div class="section-header">
+    <span class="section-tag">Clinical Wellness Library</span>
+    <h2>Condition-Based Nutrition Programs</h2>
+    <p>Each care card covers the condition, clinical risks, and an actionable nutrition strategy with direct meal pathways.</p>
+  </div>
+
+  <div class="resource-grid health-hub-grid">
+    <article class="resource-card guide-card" id="sickle-cell" data-guide-card>
+      <h3>Sickle Cell Support</h3>
+      <p class="guide-preview">Build blood-supportive habits with hydration, iron-folate meals, and anti-inflammatory food patterns.</p>
+      <button class="guide-toggle-btn" type="button" data-guide-toggle aria-expanded="false">Explore Guide</button>
+      <div class="guide-more" data-guide-more>
+        <div class="resource-block">
+          <h4>Clinical focus</h4>
+          <p>Sickle cell disease can reduce oxygen delivery and increase fatigue episodes, making nutrient density and hydration essential.</p>
+        </div>
+        <div class="resource-block">
+          <h4>Nutrition priorities</h4>
+          <ul class="resource-list">
+            <li>Hydration throughout the day</li>
+            <li>Iron and folate-rich foods from greens and legumes</li>
+            <li>Protein support for recovery and energy resilience</li>
+          </ul>
+        </div>
+        <div class="resource-link-row">
+          <a class="resource-link" href="marketplace.html">View supportive meals</a>
+          <a class="resource-link" href="index.html#health-goals">Use goal filter</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="resource-card guide-card" id="hypertension" data-guide-card>
+      <h3>Hypertension Support</h3>
+      <p class="guide-preview">Lower dietary sodium burden while preserving flavor through whole-food African patterns.</p>
+      <button class="guide-toggle-btn" type="button" data-guide-toggle aria-expanded="false">Explore Guide</button>
+      <div class="guide-more" data-guide-more>
+        <div class="resource-block">
+          <h4>Clinical focus</h4>
+          <p>Persistent elevated blood pressure increases long-term cardiovascular and kidney risk.</p>
+        </div>
+        <div class="resource-block">
+          <h4>Nutrition priorities</h4>
+          <ul class="resource-list">
+            <li>Reduce processed salty foods and hidden sodium</li>
+            <li>Increase vegetables, legumes, and potassium-rich ingredients</li>
+            <li>Prefer grilled, boiled, or lightly sauteed meals</li>
+          </ul>
+        </div>
+        <div class="resource-link-row">
+          <a class="resource-link" href="marketplace.html">Explore heart-friendly meals</a>
+          <a class="resource-link" href="#nutrition-research">Read evidence summary</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="resource-card guide-card" id="diabetes" data-guide-card>
+      <h3>Diabetes Care</h3>
+      <p class="guide-preview">Stabilize glucose with high-fiber meals, protein pairing, and improved carbohydrate quality.</p>
+      <button class="guide-toggle-btn" type="button" data-guide-toggle aria-expanded="false">Explore Guide</button>
+      <div class="guide-more" data-guide-more>
+        <div class="resource-block">
+          <h4>Clinical focus</h4>
+          <p>Diabetes management improves with consistent, lower glycemic meal structure and better portion quality.</p>
+        </div>
+        <div class="resource-block">
+          <h4>Nutrition priorities</h4>
+          <ul class="resource-list">
+            <li>Prioritize legumes, vegetables, and whole-grain options</li>
+            <li>Combine carbohydrates with protein or healthy fat</li>
+            <li>Use steady meal timing to reduce sharp glucose swings</li>
+          </ul>
+        </div>
+        <div class="resource-link-row">
+          <a class="resource-link" href="marketplace.html">Find diabetes meals</a>
+          <a class="resource-link" href="index.html#health-goals">Apply diabetes filter</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="resource-card guide-card" id="obesity" data-guide-card>
+      <h3>Weight Management</h3>
+      <p class="guide-preview">Build satiety and reduce excess calories through macro-balanced African meal planning.</p>
+      <button class="guide-toggle-btn" type="button" data-guide-toggle aria-expanded="false">Explore Guide</button>
+      <div class="guide-more" data-guide-more>
+        <div class="resource-block">
+          <h4>Clinical focus</h4>
+          <p>Weight gain risk is often tied to low satiety food patterns and inconsistent meal quality.</p>
+        </div>
+        <div class="resource-block">
+          <h4>Nutrition priorities</h4>
+          <ul class="resource-list">
+            <li>Increase fiber and protein to improve fullness</li>
+            <li>Reduce sugar-dense drinks and ultra-processed snacks</li>
+            <li>Keep meal rhythm predictable and hydration consistent</li>
+          </ul>
+        </div>
+        <div class="resource-link-row">
+          <a class="resource-link" href="marketplace.html">Browse weight-supportive meals</a>
+          <a class="resource-link" href="#nutrition-research">See behavior evidence</a>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <p class="resource-note">This hub is educational and should complement, not replace, personalized medical care.</p>
+</section>
+
+<section class="section maternal-timeline-section" id="maternal-care-pathway">
+  <div class="section-header">
+    <span class="section-tag">Trimester Guidance</span>
+    <h2>Structured Maternal Nutrition by Stage</h2>
+    <p>Each trimester includes nutritional needs, food sources, practical guidance, and recommended meals.</p>
+  </div>
+
+  <div class="trimester-grid">
+    <article class="trimester-card" id="trimester-1">
+      <h3>First Trimester (Weeks 1-12)</h3>
+
+      <div class="trimester-block">
+        <h4>Nutritional needs</h4>
+        <ul class="resource-list">
+          <li>Folate for neural tube support</li>
+          <li>Iron for blood volume preparation</li>
+          <li>Protein to support early tissue formation</li>
+        </ul>
+      </div>
+
+      <div class="trimester-block">
+        <h4>Food sources</h4>
+        <p>Leafy greens, beans, eggs, fish, fortified grains, avocado, and citrus-rich fruits.</p>
+      </div>
+
+      <div class="trimester-block">
+        <h4>Guidance</h4>
+        <p>Prioritize smaller, frequent meals to manage nausea and maintain energy stability through the day.</p>
+      </div>
+
+      <div class="trimester-block">
+        <h4>Recommended meals</h4>
+        <div class="resource-link-row">
+          <a class="resource-link" href="marketplace.html">Moi Moi</a>
+          <a class="resource-link" href="marketplace.html">Efo Riro</a>
+          <a class="resource-link" href="marketplace.html">Molokhia</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="trimester-card" id="trimester-2">
+      <h3>Second Trimester (Weeks 13-26)</h3>
+
+      <div class="trimester-block">
+        <h4>Nutritional needs</h4>
+        <ul class="resource-list">
+          <li>Increased iron and protein for rapid growth</li>
+          <li>Calcium-supportive foods for bone development</li>
+          <li>Fiber for digestive comfort</li>
+        </ul>
+      </div>
+
+      <div class="trimester-block">
+        <h4>Food sources</h4>
+        <p>Lean meats, legumes, milk or fortified alternatives, nuts, whole grains, and colorful vegetables.</p>
+      </div>
+
+      <div class="trimester-block">
+        <h4>Guidance</h4>
+        <p>Build balanced plates with protein, vegetables, and quality carbs while monitoring hydration and satiety.</p>
+      </div>
+
+      <div class="trimester-block">
+        <h4>Recommended meals</h4>
+        <div class="resource-link-row">
+          <a class="resource-link" href="marketplace.html">Ndole</a>
+          <a class="resource-link" href="marketplace.html">Brochettes</a>
+          <a class="resource-link" href="marketplace.html">Afang Soup</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="trimester-card" id="trimester-3">
+      <h3>Third Trimester (Weeks 27-40)</h3>
+
+      <div class="trimester-block">
+        <h4>Nutritional needs</h4>
+        <ul class="resource-list">
+          <li>Protein and iron to support late-stage growth</li>
+          <li>Energy-dense but nutrient-rich meal choices</li>
+          <li>Hydration and anti-inflammatory food support</li>
+        </ul>
+      </div>
+
+      <div class="trimester-block">
+        <h4>Food sources</h4>
+        <p>Fish, poultry, legumes, whole grains, leafy greens, fruit, and omega-supportive oils and seeds.</p>
+      </div>
+
+      <div class="trimester-block">
+        <h4>Guidance</h4>
+        <p>Use digestible meals, avoid long fasting windows, and plan iron-rich combinations with vitamin C sources.</p>
+      </div>
+
+      <div class="trimester-block">
+        <h4>Recommended meals</h4>
+        <div class="resource-link-row">
+          <a class="resource-link" href="marketplace.html">Injera and Doro Wat</a>
+          <a class="resource-link" href="marketplace.html">Tagine</a>
+          <a class="resource-link" href="marketplace.html">Isombe</a>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <div class="maternal-actions">
+    <a href="marketplace.html" class="btn-primary">Browse Pregnancy-Friendly Meals &#8594;</a>
+  </div>
+</section>
+
+<section class="section tele-section" id="maternal-consultation">
+  <div class="tele-card">
+    <div class="tele-copy">
+      <span class="section-tag">Specialist Care</span>
+      <h2>Speak to a Nutrition Expert</h2>
+      <p>Get personalized maternal nutrition coaching aligned with trimester needs, symptoms, lab values, and lifestyle realities.</p>
+    </div>
+    <a href="contact.html" class="btn-primary">Book Expert Session</a>
+  </div>
+</section>
+
+<section class="section research-articles-section" id="nutrition-research">
+  <div class="section-header">
+    <span class="section-tag">Latest Articles</span>
+    <h2>Clinical Nutrition and African Food Systems</h2>
+    <p>Curated resources highlighting food-as-medicine pathways for chronic disease prevention and maternal health outcomes.</p>
+  </div>
+
+  <div class="article-grid">
+    <article class="article-card">
+      <span class="article-tag">Diabetes</span>
+      <h3>High-Fiber African Staples and Glycemic Stability</h3>
+      <p>Reviewing how legumes, fermented grains, and leafy greens improve post-meal blood glucose response in adults.</p>
+      <a href="#" class="article-link">Read Article</a>
+    </article>
+
+    <article class="article-card">
+      <span class="article-tag">Cardiometabolic</span>
+      <h3>Sodium Reduction Strategies in Urban African Diets</h3>
+      <p>Behavior-focused interventions for reducing sodium intake while preserving familiar flavor profiles.</p>
+      <a href="#" class="article-link">Read Article</a>
+    </article>
+
+    <article class="article-card">
+      <span class="article-tag">Maternal Care</span>
+      <h3>Trimester Nutrition Patterns and Birth Outcomes</h3>
+      <p>Association between iron/folate-rich diets and improved maternal and neonatal outcomes in community cohorts.</p>
+      <a href="#" class="article-link">Read Article</a>
+    </article>
+  </div>
+</section>
+
+<section class="section research-summary-section">
+  <div class="section-header">
+    <span class="section-tag">Research Summaries</span>
+    <h2>What the Evidence Says</h2>
+    <p>Concise interpretations of current evidence translated into practical recommendations used inside Dine with Mee.</p>
+  </div>
+
+  <div class="summary-grid">
+    <article class="summary-card">
+      <h3>NCD Prevention</h3>
+      <p><strong>Finding:</strong> Diet quality is one of the strongest modifiable factors in long-term NCD risk reduction.</p>
+      <p><strong>How we apply it:</strong> Goal-based filtering highlights meals with high fiber, lower sodium, and improved nutrient density.</p>
+    </article>
+
+    <article class="summary-card">
+      <h3>Maternal Nutrition</h3>
+      <p><strong>Finding:</strong> Trimester-specific micronutrient intake improves maternal energy and fetal growth outcomes.</p>
+      <p><strong>How we apply it:</strong> Maternal care pathways prioritize stage-based meal recommendations and expert review.</p>
+    </article>
+
+    <article class="summary-card">
+      <h3>Behavior Change</h3>
+      <p><strong>Finding:</strong> People sustain healthier diets when choices remain culturally familiar and easy to access.</p>
+      <p><strong>How we apply it:</strong> Regional meal catalog with local ingredients keeps adherence practical and meaningful.</p>
+    </article>
+  </div>
+</section>
+
+<section class="section faq-section" id="faq">
+  <div class="section-header">
+    <span class="section-tag">FAQ</span>
+    <h2>Research and Clinical Transparency</h2>
+    <p>Answers to common questions about our evidence model and nutrition recommendations.</p>
+  </div>
+
+  <div class="faq-list" data-faq-list>
+    <article class="faq-item">
+      <button class="faq-question" type="button" data-faq-toggle aria-expanded="false">How are meal recommendations validated?</button>
+      <div class="faq-answer" data-faq-answer>
+        <p>Meals are mapped to nutrition profiles, clinical goals, and evidence-informed guidance reviewed by our nutrition advisory team.</p>
+      </div>
+    </article>
+
+    <article class="faq-item">
+      <button class="faq-question" type="button" data-faq-toggle aria-expanded="false">Do your programs replace medical treatment?</button>
+      <div class="faq-answer" data-faq-answer>
+        <p>No. Dine with Mee supports preventive and adjunct nutrition care and should be used alongside clinician guidance.</p>
+      </div>
+    </article>
+
+    <article class="faq-item">
+      <button class="faq-question" type="button" data-faq-toggle aria-expanded="false">Why focus on culturally relevant African foods?</button>
+      <div class="faq-answer" data-faq-answer>
+        <p>Familiar foods improve adherence, reduce friction, and help users sustain healthier patterns over the long term.</p>
+      </div>
+    </article>
+
+    <article class="faq-item">
+      <button class="faq-question" type="button" data-faq-toggle aria-expanded="false">How often is research content updated?</button>
+      <div class="faq-answer" data-faq-answer>
+        <p>Our summaries are reviewed quarterly and updated whenever high-quality evidence materially changes clinical recommendations.</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="section ready-cta mini-ready">
+  <div class="ready-cta-box">
+    <span class="section-tag">Clinical Action</span>
+    <h2>Ready to turn guidance into daily meals?</h2>
+    <a href="marketplace.html" class="btn-primary">Open Marketplace &#8594;</a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <span class="logo-text">Dine with <span>Mee</span></span>
+      <p>Clinical-grade nutrition guidance and African meal discovery in one unified platform.</p>
+      <div class="social-links">
+        <a href="#" aria-label="X">X</a>
+        <a href="#" aria-label="LinkedIn">in</a>
+        <a href="#" aria-label="Facebook">F</a>
+        <a href="#" aria-label="Instagram">IG</a>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <h5>Clinical Focus</h5>
+      <ul>
+        <li><a href="#diabetes">Diabetes</a></li>
+        <li><a href="#hypertension">Hypertension</a></li>
+        <li><a href="#sickle-cell">Sickle Cell</a></li>
+        <li><a href="#obesity">Weight Management</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h5>Platform</h5>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="health.html">Health Hub</a></li>
+        <li><a href="marketplace.html">Marketplace</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h5>Account</h5>
+      <ul>
+        <li><a href="login.html">Log in</a></li>
+        <li><a href="signup.html">Join Free</a></li>
+        <li><a href="index.html#ready-to-heal">Start Journey</a></li>
+        <li><a href="marketplace.html">Order Meals</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <span>&copy; 2026 Dine with Mee. All rights reserved.</span>
+    <span>Built by <span class="gold">Mee Technologies Ltd.</span></span>
+  </div>
+</footer>
+
+<div class="cart-overlay" id="cart-overlay"></div>
+<div class="cart-sidebar" id="cart-sidebar">
+  <div class="cart-header">
+    <h3>Your Cart</h3>
+    <button class="cart-close" id="cart-close" type="button">X</button>
+  </div>
+  <div class="cart-items" id="cart-items">
+    <div class="cart-empty">
+      <span class="emoji">Meal</span>
+      Your cart is empty.<br />Explore our marketplace!
+    </div>
+  </div>
+  <div class="cart-footer">
+    <div class="cart-total">
+      <span>Total</span>
+      <span class="amount" id="cart-total-amount">0 RWF</span>
+    </div>
+    <button class="btn-primary btn-full" type="button" onclick="showToast('Checkout loading...')">Checkout</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAdmin } from '../../context/AdminContext';
-import { useAuth } from '../../context/AuthContext';
+import { useReduxAuth } from '../../hooks/useReduxAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -32,7 +32,7 @@ const AdminDashboard = () => {
     loading,
     error 
   } = useAdmin();
-  const { user } = useAuth();
+  const { user } = useReduxAuth();
   const [selectedView, setSelectedView] = useState('overview');
 
   if (loading) {
@@ -53,6 +53,12 @@ const AdminDashboard = () => {
       </div>
     );
   }
+
+  // Ensure data is always arrays
+  const usersList = Array.isArray(users) ? users : [];
+  const contentList = Array.isArray(content) ? content : [];
+  const nutritionistsList = Array.isArray(nutritionists) ? nutritionists : [];
+  const partnersList = Array.isArray(partners) ? partners : [];
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -150,7 +156,7 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {users.slice(0, 3).map((user) => (
+                    {usersList.slice(0, 3).map((user) => (
                       <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div>
                           <p className="font-medium">{user.name}</p>
@@ -176,7 +182,7 @@ const AdminDashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {content.filter(item => item.status === 'pending').slice(0, 3).map((item) => (
+                    {contentList.filter(item => item.status === 'pending').slice(0, 3).map((item) => (
                       <div key={item.id} className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
                         <div>
                           <p className="font-medium">{item.title}</p>
@@ -221,7 +227,7 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {users.map((user) => (
+                {usersList.map((user) => (
                   <div key={user.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-3">
                       <div>
@@ -355,7 +361,7 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {nutritionists.map((nutritionist) => (
+                {nutritionistsList.map((nutritionist) => (
                   <div key={nutritionist.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-3">
                       <div>
@@ -423,7 +429,7 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {partners.map((partner) => (
+                {partnersList.map((partner) => (
                   <div key={partner.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-3">
                       <div>

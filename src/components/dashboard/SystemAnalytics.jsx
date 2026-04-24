@@ -1,6 +1,9 @@
 import React from 'react';
 
 const SystemAnalytics = ({ analytics, users, loading }) => {
+  // Ensure users is always an array
+  const usersList = Array.isArray(users) ? users : [];
+
   if (loading) {
     return (
       <div className="animate-pulse">
@@ -16,8 +19,8 @@ const SystemAnalytics = ({ analytics, users, loading }) => {
 
   // Mock analytics data
   const systemData = {
-    totalUsers: users?.length || 1247,
-    activeUsers: users?.filter(u => u.account_status === 'ACTIVE').length || 892,
+    totalUsers: usersList.length || 1247,
+    activeUsers: usersList.filter(u => u.account_status === 'ACTIVE' || u.accountStatus === 'ACTIVE').length || 892,
     newUsersThisMonth: 156,
     systemUptime: '99.8%',
     avgResponseTime: '234ms',
@@ -141,7 +144,7 @@ const SystemAnalytics = ({ analytics, users, loading }) => {
               User Distribution
             </h3>
             <div className="space-y-3">
-              {users && (
+              {usersList.length > 0 ? (
                 <>
                   <div className="flex justify-between items-center p-3 bg-dwm-green-pale rounded">
                     <div className="flex items-center space-x-3">
@@ -149,40 +152,44 @@ const SystemAnalytics = ({ analytics, users, loading }) => {
                       <span className="text-sm font-medium">Customers</span>
                     </div>
                     <span className="text-sm font-bold text-dwm-green-deep">
-                      {users.filter(u => u.role === 'CUSTOMER').length}
+                      {usersList.filter(u => u.role === 'CUSTOMER' || u.role === 'customer').length}
                     </span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center p-3 bg-dwm-green-pale rounded">
                     <div className="flex items-center space-x-3">
                       <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                       <span className="text-sm font-medium">Nutritionists</span>
                     </div>
                     <span className="text-sm font-bold text-dwm-green-deep">
-                      {users.filter(u => u.role === 'NUTRITIONIST').length}
+                      {usersList.filter(u => u.role === 'NUTRITIONIST' || u.role === 'nutritionist').length}
                     </span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center p-3 bg-dwm-green-pale rounded">
                     <div className="flex items-center space-x-3">
                       <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
                       <span className="text-sm font-medium">Admins</span>
                     </div>
                     <span className="text-sm font-bold text-dwm-green-deep">
-                      {users.filter(u => u.role === 'ADMIN').length}
+                      {usersList.filter(u => u.role === 'ADMIN' || u.role === 'admin').length}
                     </span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center p-3 bg-dwm-green-pale rounded">
                     <div className="flex items-center space-x-3">
                       <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
                       <span className="text-sm font-medium">Pharmacy Partners</span>
                     </div>
                     <span className="text-sm font-bold text-dwm-green-deep">
-                      {users.filter(u => u.role === 'PHARMACY_PARTNER').length}
+                      {usersList.filter(u => u.role === 'PHARMACY_PARTNER' || u.role === 'pharmacy').length}
                     </span>
                   </div>
                 </>
+              ) : (
+                <div className="text-center py-8 text-dwm-text-mid">
+                  <p>No user data available</p>
+                </div>
               )}
             </div>
           </div>

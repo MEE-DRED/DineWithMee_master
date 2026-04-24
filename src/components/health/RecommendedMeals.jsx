@@ -1,6 +1,9 @@
 import React from 'react';
 
 const RecommendedMeals = ({ meals, loading, healthProfile }) => {
+  // Ensure meals is always an array
+  const mealsList = Array.isArray(meals) ? meals : [];
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -17,7 +20,7 @@ const RecommendedMeals = ({ meals, loading, healthProfile }) => {
     );
   }
 
-  if (!meals || meals.length === 0) {
+  if (mealsList.length === 0) {
     return (
       <div className="text-center py-12">
         <div className="text-4xl mb-4"></div>
@@ -32,10 +35,10 @@ const RecommendedMeals = ({ meals, loading, healthProfile }) => {
   }
 
   const getSuitableMeals = () => {
-    if (!healthProfile) return meals.slice(0, 6);
+    if (!healthProfile) return mealsList.slice(0, 6);
     
     // Filter meals based on health conditions
-    return meals.filter(meal => {
+    return mealsList.filter(meal => {
       // For hypertension patients
       if (healthProfile.bp_category && healthProfile.bp_category !== 'NORMAL') {
         if (meal.htn_suitability === 'AVOID') return false;
@@ -112,10 +115,10 @@ const RecommendedMeals = ({ meals, loading, healthProfile }) => {
               </div>
               
               {/* Suitability Badges */}
-              {badges.length > 0 && (
+              {badges && badges.length > 0 && (
                 <div className="flex flex-wrap gap-1 mb-3">
                   {badges.map((badge, index) => (
-                    <span 
+                    <span
                       key={index}
                       className={`px-2 py-1 rounded-full text-xs font-medium bg-${badge.color}-100 text-${badge.color}-800`}
                     >

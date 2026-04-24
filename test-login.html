@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Auth Flow</title>
+</head>
+<body>
+    <h2>Test Authentication Flow</h2>
+    <button onclick="clearStorage()">Clear Storage</button>
+    <button onclick="checkStorage()">Check Storage</button>
+    <pre id="output"></pre>
+
+    <script>
+        function clearStorage() {
+            localStorage.removeItem('dwm-token');
+            localStorage.removeItem('dwm-user');
+            document.getElementById('output').textContent = 'Storage cleared!';
+        }
+
+        function checkStorage() {
+            const token = localStorage.getItem('dwm-token');
+            const user = localStorage.getItem('dwm-user');
+            const output = {
+                token: token ? 'Present' : 'None',
+                user: user ? JSON.parse(user) : 'None'
+            };
+            document.getElementById('output').textContent = JSON.stringify(output, null, 2);
+        }
+
+        // Auto-check on load
+        checkStorage();
+    </script>
+</body>
+</html>

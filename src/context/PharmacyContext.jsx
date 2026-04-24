@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react';
-import { useAuth } from './AuthContext';
+import { useReduxAuth } from '../hooks/useReduxAuth';
 
 const PharmacyContext = createContext();
 
@@ -128,7 +128,7 @@ const initialState = {
 
 export const PharmacyProvider = ({ children }) => {
   const [state, dispatch] = useReducer(pharmacyReducer, initialState);
-  const { user } = useAuth();
+  const { user } = useReduxAuth();
 
   const loadPharmacyData = useCallback(async () => {
     try {

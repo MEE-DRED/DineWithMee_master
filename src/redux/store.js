@@ -13,6 +13,7 @@ import roleManagementReducer from './slices/roleManagementSlice';
 import consultationsReducer from './slices/consultationsSlice';
 import mealPlansReducer from './slices/mealPlansSlice';
 import chatReducer from './slices/chatSlice';
+import ordersReducer from './slices/ordersSlice';
 
 export const store = configureStore({
   reducer: {
@@ -29,6 +30,7 @@ export const store = configureStore({
     consultations: consultationsReducer,
     mealPlans: mealPlansReducer,
     chat: chatReducer,
+    orders: ordersReducer,
   },
   middleware: (getDefaultMiddleware) => {
     const middlewares = getDefaultMiddleware({

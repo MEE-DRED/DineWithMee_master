@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useReduxAuth } from '../../hooks/useReduxAuth';
 import { getSidebarNavigation, generateBreadcrumbs } from '../../utils/roleRouting';
 import { 
   Home,
@@ -32,7 +32,7 @@ const iconMap = {
 };
 
 const RoleBasedNavigation = () => {
-  const { user, logout, hasPermission } = useAuth();
+  const { user, logout } = useReduxAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);

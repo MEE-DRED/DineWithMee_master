@@ -36,4 +36,50 @@ export const adminAPI = {
     const response = await api.patch(`/admin/users/${userId}`, { role });
     return response.data;
   },
+
+  // Get dashboard statistics
+  getDashboardStats: async () => {
+    const response = await api.get('/api/v1/admin/dashboard/stats');
+    return response.data;
+  },
+
+  // Verify/unverify nutritionist
+  verifyNutritionist: async (userId, verificationData) => {
+    const response = await api.put(`/api/v1/admin/users/${userId}/verify`, verificationData);
+    return response.data;
+  },
+
+  // Get content moderation stats
+  getContentModerationStats: async () => {
+    const response = await api.get('/api/v1/admin/content/moderation');
+    return response.data;
+  },
+
+  // Get pending content
+  getPendingContent: async () => {
+    const response = await api.get('/api/v1/admin/content/pending');
+    return response.data;
+  },
+
+  // Approve content
+  approveContent: async (contentId, type) => {
+    const response = await api.put(`/api/v1/admin/content/${contentId}/approve`, null, {
+      params: { type }
+    });
+    return response.data;
+  },
+
+  // Reject content
+  rejectContent: async (contentId, type) => {
+    const response = await api.put(`/api/v1/admin/content/${contentId}/reject`, null, {
+      params: { type }
+    });
+    return response.data;
+  },
+
+  // Get system health
+  getSystemHealth: async () => {
+    const response = await api.get('/api/v1/admin/system/health');
+    return response.data;
+  },
 };

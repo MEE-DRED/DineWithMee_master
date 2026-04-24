@@ -7,16 +7,27 @@ export const loginUser = createAsyncThunk(
   async ({ email, password }, { rejectWithValue }) => {
     try {
       const response = await authAPI.login({ email, password });
-      
+
+      // Handle backend response format: { data: { user, tokens } }
+      const userData = response.data?.user || response.user;
+      const token = response.data?.tokens?.accessToken || response.token;
+
+      // Normalize user data (convert role to lowercase for consistency)
+      const normalizedUser = {
+        ...userData,
+        role: userData.role?.toLowerCase(),
+        name: `${userData.firstName} ${userData.lastName}`.trim() || userData.name,
+      };
+
       // Store JWT token and user data
-      if (response.token) {
-        localStorage.setItem('dwm-token', response.token);
+      if (token) {
+        localStorage.setItem('dwm-token', token);
       }
-      if (response.user) {
-        localStorage.setItem('dwm-user', JSON.stringify(response.user));
+      if (normalizedUser) {
+        localStorage.setItem('dwm-user', JSON.stringify(normalizedUser));
       }
-      
-      return { user: response.user, token: response.token };
+
+      return { user: normalizedUser, token };
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Login failed. Please try again.';
       return rejectWithValue(errorMessage);
@@ -29,16 +40,27 @@ export const registerUser = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await authAPI.register(userData);
-      
+
+      // Handle backend response format: { data: { user, tokens } }
+      const user = response.data?.user || response.user;
+      const token = response.data?.tokens?.accessToken || response.token;
+
+      // Normalize user data (convert role to lowercase for consistency)
+      const normalizedUser = {
+        ...user,
+        role: user.role?.toLowerCase(),
+        name: `${user.firstName} ${user.lastName}`.trim() || user.name,
+      };
+
       // Store JWT token and user data
-      if (response.token) {
-        localStorage.setItem('dwm-token', response.token);
+      if (token) {
+        localStorage.setItem('dwm-token', token);
       }
-      if (response.user) {
-        localStorage.setItem('dwm-user', JSON.stringify(response.user));
+      if (normalizedUser) {
+        localStorage.setItem('dwm-user', JSON.stringify(normalizedUser));
       }
-      
-      return { user: response.user, token: response.token };
+
+      return { user: normalizedUser, token };
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Registration failed. Please try again.';
       return rejectWithValue(errorMessage);
@@ -51,7 +73,23 @@ export const getCurrentUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await authAPI.getCurrentUser();
-      return response;
+
+      // Handle backend response format
+      const userData = response.data?.user || response.data || response;
+
+      // Normalize user data (convert role to lowercase for consistency)
+      const normalizedUser = {
+        ...userData,
+        role: userData.role?.toLowerCase(),
+        name: userData.name || `${userData.firstName} ${userData.lastName}`.trim(),
+      };
+
+      // Update localStorage with fresh user data
+      if (normalizedUser) {
+        localStorage.setItem('dwm-user', JSON.stringify(normalizedUser));
+      }
+
+      return normalizedUser;
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Failed to get user data.';
       return rejectWithValue(errorMessage);
@@ -100,7 +138,14 @@ const authSlice = createSlice({
       if (savedToken && savedUser) {
         try {
           const userData = JSON.parse(savedUser);
-          state.user = userData;
+
+          // Normalize role to lowercase for consistency
+          const normalizedUser = {
+            ...userData,
+            role: userData.role?.toLowerCase(),
+          };
+
+          state.user = normalizedUser;
           state.token = savedToken;
           state.isAuthenticated = true;
         } catch (error) {

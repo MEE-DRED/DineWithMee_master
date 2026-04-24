@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useAuth } from '../../context/AuthContext';
-import { 
-  fetchAllUsers, 
+import { useReduxAuth } from '../../hooks/useReduxAuth';
+import {
+  fetchAllUsers,
   selectUsers,
   selectUsersLoading,
   fetchUserAnalytics,
@@ -15,21 +15,24 @@ import ComplianceTracker from '../../components/dashboard/ComplianceTracker';
 
 const PharmacyDashboard = () => {
   const dispatch = useDispatch();
-  const { user, hasRole } = useAuth();
-  
+  const { user, hasRole } = useReduxAuth();
+
   // Redux state
   const patients = useSelector(selectUsers);
   const patientsLoading = useSelector(selectUsersLoading);
   const analytics = useSelector(selectUserAnalytics);
 
+  // Check if user is pharmacy
+  const isPharmacy = hasRole('pharmacy');
+
   useEffect(() => {
-    if (hasRole('PHARMACY_PARTNER')) {
+    if (isPharmacy) {
       dispatch(fetchAllUsers({ role: 'CUSTOMER' })); // Get patients
       dispatch(fetchUserAnalytics());
     }
-  }, [dispatch, hasRole]);
+  }, [dispatch, isPharmacy]);
 
-  if (!hasRole('PHARMACY_PARTNER')) {
+  if (!isPharmacy) {
     return (
       <div className="text-center py-12">
         <p className="text-red-600">Access denied. Pharmacy partner dashboard only.</p>

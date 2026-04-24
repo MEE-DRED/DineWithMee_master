@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { useAuth } from './AuthContext';
+import { useReduxAuth } from '../hooks/useReduxAuth';
 import { useDispatch } from 'react-redux';
 import { fetchHealthProfile, fetchMyAssessments } from '../redux/slices/healthSlice';
 
@@ -81,7 +81,7 @@ const initialState = {
 
 export const CustomerProvider = ({ children }) => {
   const [state, dispatch] = useReducer(customerReducer, initialState);
-  const { user } = useAuth();
+  const { user } = useReduxAuth();
   const reduxDispatch = useDispatch();
 
   // Load customer data when user is available

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { usePharmacy } from '../../context/PharmacyContext';
-import { useAuth } from '../../context/AuthContext';
+import { useReduxAuth } from '../../hooks/useReduxAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -33,7 +33,7 @@ const PharmacyDashboard = () => {
     loading,
     error 
   } = usePharmacy();
-  const { user } = useAuth();
+  const { user } = useReduxAuth();
   const [selectedView, setSelectedView] = useState('overview');
 
   if (loading) {
