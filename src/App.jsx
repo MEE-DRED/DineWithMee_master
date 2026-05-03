@@ -30,6 +30,8 @@ import TestMealCard from './components/debug/TestMealCard';
 import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
 
+import ProtectedRoute from './components/common/ProtectedRoute';
+
 // Role-based dashboards with lazy loading
 import { lazy, Suspense } from 'react';
 import LoadingSpinner from './components/common/LoadingSpinner';
@@ -50,7 +52,7 @@ function App() {
     // Initialize Redux state from localStorage
     store.dispatch(checkAuthState());
     store.dispatch(loadCartFromStorage());
-    
+
     // Get current user if token exists
     const token = localStorage.getItem('dwm-token');
     if (token) {
@@ -64,71 +66,114 @@ function App() {
         <Router>
           <div className="min-h-screen flex flex-col">
             <Navbar />
-            <main className="flex-1 pt-18">
+            <main className="flex-1 pt-20">
               <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/signup" element={<Signup />} />
-                  <Route path="/health" element={<Health />} />
-                  <Route path="/marketplace" element={<Marketplace />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/admin-dashboard" element={<AdminDashboard />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/programs" element={<Programs />} />
-                  <Route path="/programs/:programId" element={<ProgramDetail />} />
-                  <Route path="/maternal" element={<Maternal />} />
-                  <Route path="/research" element={<Research />} />
-                  <Route path="/chef-partner" element={<ChefPartner />} />
-                  <Route path="/test-dashboard" element={<TestDashboard />} />
-                  <Route path="/meals/:mealId" element={<MealDetail />} />
-                  <Route path="/ingredients/:ingredientId" element={<IngredientDetail />} />
-                  <Route path="/debug-meal-card" element={<TestMealCard />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/order-success" element={<OrderSuccess />} />
-                  
-                  {/* Role-based dashboards with lazy loading */}
-                  <Route path="/customer/dashboard" element={
-                    <CustomerProvider>
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <CustomerDashboard />
-                      </Suspense>
-                    </CustomerProvider>
-                  } />
-                  <Route path="/nutritionist/dashboard" element={
-                    <NutritionistProvider>
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <NutritionistDashboard />
-                      </Suspense>
-                    </NutritionistProvider>
-                  } />
-                  <Route path="/admin/dashboard" element={
-                    <AdminProvider>
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <AdminDashboardNew />
-                      </Suspense>
-                    </AdminProvider>
-                  } />
-                  <Route path="/pharmacy/dashboard" element={
-                    <PharmacyProvider>
-                      <Suspense fallback={<LoadingSpinner />}>
-                        <PharmacyDashboard />
-                      </Suspense>
-                    </PharmacyProvider>
-                  } />
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/health" element={<Health />} />
+                <Route path="/marketplace" element={<Marketplace />} />
+                <Route path="/contact" element={<Contact />} />
 
-                  {/* Chat with Nia (AI Nutritionist) */}
-                  <Route path="/chat" element={
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/programs" element={<Programs />} />
+                <Route path="/programs/:programId" element={<ProgramDetail />} />
+                <Route path="/maternal" element={<Maternal />} />
+                <Route path="/research" element={<Research />} />
+                <Route path="/chef-partner" element={<ChefPartner />} />
+                <Route path="/test-dashboard" element={<TestDashboard />} />
+                <Route path="/meals/:mealId" element={<MealDetail />} />
+                <Route path="/ingredients/:ingredientId" element={<IngredientDetail />} />
+                <Route path="/debug-meal-card" element={<TestMealCard />} />
+                <Route
+                  path="/checkout"
+                  element={
+                    <ProtectedRoute>
+                      <Checkout />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/order-success"
+                  element={
+                    <ProtectedRoute>
+                      <OrderSuccess />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Role-based dashboards with lazy loading */}
+                <Route
+                  path="/customer/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <CustomerProvider>
+                        <Suspense fallback={<LoadingSpinner />}>
+                          <CustomerDashboard />
+                        </Suspense>
+                      </CustomerProvider>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/nutritionist/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <NutritionistProvider>
+                        <Suspense fallback={<LoadingSpinner />}>
+                          <NutritionistDashboard />
+                        </Suspense>
+                      </NutritionistProvider>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <AdminProvider>
+                        <Suspense fallback={<LoadingSpinner />}>
+                          <AdminDashboardNew />
+                        </Suspense>
+                      </AdminProvider>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/pharmacy/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <PharmacyProvider>
+                        <Suspense fallback={<LoadingSpinner />}>
+                          <PharmacyDashboard />
+                        </Suspense>
+                      </PharmacyProvider>
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Chat with Nia (AI Nutritionist) */}
+                <Route
+                  path="/chat"
+                  element={
                     <Suspense fallback={<LoadingSpinner />}>
                       <ChatWithMee />
                     </Suspense>
-                  } />
-                </Routes>
-              </main>
-              <Footer />
-              <CartSidebar />
-              <ToastContainer />
-            </div>
+                  }
+                />
+              </Routes>
+            </main>
+            <Footer />
+            <CartSidebar />
+            <ToastContainer />
+          </div>
         </Router>
       </ErrorBoundary>
     </Provider>

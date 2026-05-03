@@ -1,108 +1,104 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FaTwitter, FaLinkedinIn, FaFacebookF, FaInstagram } from 'react-icons/fa';
+import { FiHome, FiHeart, FiShoppingCart, FiMail, FiLogIn, FiUserPlus } from 'react-icons/fi';
 
 const Footer = () => {
   return (
-    <footer className="footer">
-      <div className="footer-grid">
-        <div className="footer-brand">
-          <span className="logo-text text-2xl mb-4 block">Dine with <span className="text-dwm-gold-light">Mee</span></span>
-          <p className="text-dwm-white/80 mb-6">
-            Premium African health-tech platform delivering clinically informed nutrition pathways and therapeutic meal discovery.
-          </p>
-          <div className="social-links flex gap-4">
-            <a 
-              href="#" 
-              aria-label="X (Twitter)"
-              className="w-8 h-8 bg-dwm-gold/20 hover:bg-dwm-gold/40 rounded-full flex items-center justify-center text-dwm-white hover:text-dwm-gold-light transition-colors"
-            >
-              X
-            </a>
-            <a 
-              href="#" 
-              aria-label="LinkedIn"
-              className="w-8 h-8 bg-dwm-gold/20 hover:bg-dwm-gold/40 rounded-full flex items-center justify-center text-dwm-white hover:text-dwm-gold-light transition-colors"
-            >
-              in
-            </a>
-            <a 
-              href="#" 
-              aria-label="Facebook"
-              className="w-8 h-8 bg-dwm-gold/20 hover:bg-dwm-gold/40 rounded-full flex items-center justify-center text-dwm-white hover:text-dwm-gold-light transition-colors"
-            >
-              F
-            </a>
-            <a 
-              href="#" 
-              aria-label="Instagram"
-              className="w-8 h-8 bg-dwm-gold/20 hover:bg-dwm-gold/40 rounded-full flex items-center justify-center text-dwm-white hover:text-dwm-gold-light transition-colors"
-            >
-              IG
-            </a>
+    <footer className="bg-emerald-900 text-white border-t-2 border-amber-500/30">
+      <div className="max-w-screen-xl mx-auto px-6 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+          {/* Brand Section */}
+          <div className="lg:col-span-1 space-y-4">
+            <Link to="/" className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-400 flex items-center justify-center font-serif text-lg font-bold text-emerald-900 shadow-md">
+                D
+              </div>
+              <span className="font-serif text-2xl text-white tracking-wide">
+                Dine with <span className="text-amber-400">Mee</span>
+              </span>
+            </Link>
+            <p className="text-emerald-200/80 text-sm leading-relaxed">
+              Clinically informed nutrition pathways and therapeutic meal discovery for a healthier
+              you.
+            </p>
+            <div className="flex gap-3 pt-2">
+              <SocialLink href="#" icon={<FaTwitter />} label="Twitter" />
+              <SocialLink href="#" icon={<FaLinkedinIn />} label="LinkedIn" />
+              <SocialLink href="#" icon={<FaFacebookF />} label="Facebook" />
+              <SocialLink href="#" icon={<FaInstagram />} label="Instagram" />
+            </div>
           </div>
+
+          {/* Clinical Areas */}
+          <FooterColumn title="Clinical Areas">
+            <FooterLink to="/health#diabetes" icon={<FiHeart />} label="Diabetes Care" />
+            <FooterLink to="/health#hypertension" icon={<FiHeart />} label="Hypertension Support" />
+            <FooterLink
+              to="/health#maternal-care-pathway"
+              icon={<FiHeart />}
+              label="Maternal Health"
+            />
+            <FooterLink to="/health#obesity" icon={<FiHeart />} label="Weight Management" />
+          </FooterColumn>
+
+          {/* Platform */}
+          <FooterColumn title="Platform">
+            <FooterLink to="/" icon={<FiHome />} label="Home" />
+            <FooterLink to="/health" icon={<FiHeart />} label="Health Hub" />
+            <FooterLink to="/marketplace" icon={<FiShoppingCart />} label="Marketplace" />
+            <FooterLink to="/contact" icon={<FiMail />} label="Contact" />
+          </FooterColumn>
+
+          {/* Account */}
+          <FooterColumn title="Account">
+            <FooterLink to="/login" icon={<FiLogIn />} label="Log In" />
+            <FooterLink to="/signup" icon={<FiUserPlus />} label="Join Free" />
+            <FooterLink to="/signup" icon={<FiUserPlus />} label="Create Health Profile" />
+            <FooterLink to="/marketplace" icon={<FiShoppingCart />} label="Start Ordering" />
+          </FooterColumn>
         </div>
 
-        <div className="footer-col">
-          <h5>Clinical Areas</h5>
-          <ul>
-            <li>
-              <Link to="/health#diabetes">Diabetes Care</Link>
-            </li>
-            <li>
-              <Link to="/health#hypertension">Hypertension Support</Link>
-            </li>
-            <li>
-              <Link to="/health#maternal-care-pathway">Maternal Health</Link>
-            </li>
-            <li>
-              <Link to="/health#obesity">Weight Management</Link>
-            </li>
-          </ul>
+        {/* Bottom Bar */}
+        <div className="border-t border-amber-500/20 pt-6 mt-10 flex flex-col md:flex-row justify-between items-center text-sm text-emerald-300/70">
+          <span>&copy; {new Date().getFullYear()} Dine with Mee. All rights reserved.</span>
+          <span>
+            Built by <span className="font-semibold text-amber-400">Mee Technologies Ltd.</span>
+          </span>
         </div>
-
-        <div className="footer-col">
-          <h5>Platform</h5>
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/health">Health Hub</Link>
-            </li>
-            <li>
-              <Link to="/marketplace">Marketplace</Link>
-            </li>
-            <li>
-              <Link to="/contact">Contact</Link>
-            </li>
-          </ul>
-        </div>
-
-        <div className="footer-col">
-          <h5>Account</h5>
-          <ul>
-            <li>
-              <Link to="/login">Log in</Link>
-            </li>
-            <li>
-              <Link to="/signup">Join Free</Link>
-            </li>
-            <li>
-              <Link to="/signup">Create Health Profile</Link>
-            </li>
-            <li>
-              <Link to="/marketplace">Start Ordering</Link>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div className="footer-bottom border-t border-dwm-gold/20 pt-8 mt-12 flex flex-col md:flex-row justify-between items-center text-dwm-white/60 text-sm">
-        <span>&copy; 2026 Dine with Mee. All rights reserved.</span>
-        <span>Built by <span className="text-dwm-gold-light">Mee Technologies Ltd.</span></span>
       </div>
     </footer>
   );
 };
+
+// Helper components for cleaner structure
+const FooterColumn = ({ title, children }) => (
+  <div>
+    <h5 className="font-serif text-xl font-semibold mb-5 text-amber-400 tracking-wider">{title}</h5>
+    <ul className="space-y-3">{children}</ul>
+  </div>
+);
+
+const FooterLink = ({ to, icon, label }) => (
+  <li>
+    <Link
+      to={to}
+      className="flex items-center gap-3 text-emerald-200/90 hover:text-amber-400 hover:translate-x-1 transition-all duration-300"
+    >
+      {React.cloneElement(icon, { className: 'w-4 h-4 text-amber-500' })}
+      <span className="text-sm">{label}</span>
+    </Link>
+  </li>
+);
+
+const SocialLink = ({ href, icon, label }) => (
+  <a
+    href={href}
+    aria-label={label}
+    className="w-9 h-9 bg-emerald-800/70 hover:bg-amber-500/20 rounded-full flex items-center justify-center text-amber-400 hover:text-white transition-all duration-300 transform hover:scale-110"
+  >
+    {icon}
+  </a>
+);
 
 export default Footer;

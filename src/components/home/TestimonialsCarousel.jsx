@@ -50,7 +50,7 @@ const TestimonialsCarousel = ({ testimonials }) => {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-br from-emerald-900 to-emerald-800 text-white overflow-hidden">
+    <section className="py-20 bg-gradient-to-br from-emerald-900 to-emerald-800 text-white">
       <div className="max-w-6xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-12">
@@ -69,7 +69,7 @@ const TestimonialsCarousel = ({ testimonials }) => {
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-          <div className="relative h-96 md:h-80">
+          <div className="relative h-96 md:h-80 overflow-hidden rounded-2xl">
             <AnimatePresence initial={false} custom={direction}>
               <motion.div
                 key={currentIndex}
@@ -118,7 +118,7 @@ const TestimonialsCarousel = ({ testimonials }) => {
           {/* Navigation Arrows */}
           <button
             onClick={handlePrev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 bg-white/10 backdrop-blur hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 bg-white/10 backdrop-blur hover:bg-white/20 rounded-full flex items-center justify-center transition-colors z-10"
             aria-label="Previous testimonial"
           >
             <svg
@@ -137,7 +137,7 @@ const TestimonialsCarousel = ({ testimonials }) => {
           </button>
           <button
             onClick={handleNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 bg-white/10 backdrop-blur hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 bg-white/10 backdrop-blur hover:bg-white/20 rounded-full flex items-center justify-center transition-colors z-10"
             aria-label="Next testimonial"
           >
             <svg

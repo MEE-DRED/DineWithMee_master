@@ -1,0 +1,24 @@
+@keyframes ken-burns {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  100% {
+    transform: scale(1.1) translate(-2%, 2%);
+  }
+}
+
+.ken-burns-effect {
+  animation: ken-burns 20s infinite alternate ease-in-out;
+}
+
+.text-shadow-kicker {
+  text-shadow: 0px 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.text-shadow-title {
+  text-shadow: 0px 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.text-shadow-description {
+  text-shadow: 0px 1px 5px rgba(0, 0, 0, 0.7);
+}

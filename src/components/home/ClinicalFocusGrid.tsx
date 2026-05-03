@@ -15,7 +15,8 @@ const programs: ClinicalProgram[] = [
   {
     id: 'diabetes',
     title: 'Diabetes Care',
-    description: 'Low glycemic meal support, fiber-first planning, and guided blood sugar nutrition strategies.',
+    description:
+      'Low glycemic meal support, fiber-first planning, and guided blood sugar nutrition strategies.',
     image: 'https://www.azpcps.com/wp-content/uploads/2024/01/Diet-for-Diabetes-Management.jpg',
     link: '/programs/diabetes',
     color: 'blue',
@@ -23,34 +24,12 @@ const programs: ClinicalProgram[] = [
   {
     id: 'hypertension',
     title: 'Hypertension Support',
-    description: 'Heart-conscious food pathways designed to lower sodium load and improve cardiometabolic outcomes.',
-    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&h=300&q=80',
+    description:
+      'Heart-conscious food pathways designed to lower sodium load and improve cardiometabolic outcomes.',
+    image:
+      'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&h=300&q=80',
     link: '/programs/hypertension',
     color: 'red',
-  },
-  {
-    id: 'maternal',
-    title: 'Maternal Health',
-    description: 'Trimester-aligned nutrition protocols to support fetal development and maternal recovery.',
-    image: 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=600&h=300&q=80',
-    link: '/maternal',
-    color: 'pink',
-  },
-  {
-    id: 'obesity',
-    title: 'Weight Management',
-    description: 'Portion-smart, high satiety meal pathways supporting sustainable fat loss and metabolic balance.',
-    image: 'https://www.heart.org/-/media/AHA/H4GM/Article-Images/Lose-Weight-and-Keep-It-Off.jpg?sc_lang=en',
-    link: '/programs/weight-management',
-    color: 'orange',
-  },
-  {
-    id: 'sickle-cell',
-    title: 'Sickle Cell Support',
-    description: 'Iron and folate aware nutrition support to improve blood health, energy levels, and recovery resilience.',
-    image: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&h=300&q=80',
-    link: '/programs/sickle-cell',
-    color: 'purple',
   },
 ];
 
@@ -107,7 +86,8 @@ const ClinicalFocusGrid: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-lg text-stone-600 leading-relaxed"
           >
-            Every care path combines personalized nutrition intelligence with culturally relevant African meals and practical expert guidance.
+            Every care path combines personalized nutrition intelligence with culturally relevant
+            African meals and practical expert guidance.
           </motion.p>
         </div>
 
@@ -119,7 +99,7 @@ const ClinicalFocusGrid: React.FC = () => {
           viewport={{ once: true, margin: '-100px' }}
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
         >
-          {programs.map((program) => (
+          {programs.map(program => (
             <motion.article
               key={program.id}
               variants={cardVariants}
@@ -156,7 +136,12 @@ const ClinicalFocusGrid: React.FC = () => {
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
                   </svg>
                 </Link>
               </div>
@@ -175,13 +160,8 @@ const ClinicalFocusGrid: React.FC = () => {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="mt-12 text-center"
         >
-          <p className="text-stone-600 mb-6 text-lg">
-            Not sure which program is right for you?
-          </p>
-          <Link
-            to="/health"
-            className="btn-secondary inline-block"
-          >
+          <p className="text-stone-600 mb-6 text-lg">Not sure which program is right for you?</p>
+          <Link to="/health" className="btn-secondary inline-block">
             Take Health Assessment
           </Link>
         </motion.div>

@@ -62,6 +62,7 @@ import mealsSlice, {
   selectFilters,
   selectAllRegions,
   selectAllHealthTags,
+  fetchFeaturedMeals,
 } from './slices/mealsSlice';
 
 // Regions
@@ -171,7 +172,7 @@ import {
 export {
   // Store
   store,
-  
+
   // Auth
   loginUser,
   registerUser,
@@ -182,7 +183,7 @@ export {
   checkAuthState,
   setToken,
   selectAuth,
-  
+
   // Cart
   addToCart,
   removeFromCart,
@@ -195,7 +196,7 @@ export {
   selectCartIsOpen,
   selectCartTotalItems,
   selectCartTotalPrice,
-  
+
   // UI
   addToast,
   removeToast,
@@ -206,9 +207,10 @@ export {
   showErrorToast,
   showWarningToast,
   showInfoToast,
-  
+
   // Meals
   fetchMeals,
+  fetchFeaturedMeals,
   setRegionFilter,
   setHealthTagFilter,
   clearHealthTagFilters,
@@ -223,7 +225,7 @@ export {
   selectFilters,
   selectAllRegions,
   selectAllHealthTags,
-  
+
   // Regions
   fetchRegions,
   fetchRegionById,
@@ -233,7 +235,7 @@ export {
   selectCurrentRegion,
   selectRegionsLoading,
   selectRegionsError,
-  
+
   // Ingredients
   fetchIngredients,
   searchIngredients,
@@ -248,7 +250,7 @@ export {
   selectCurrentIngredient,
   selectIngredientsLoading,
   selectIngredientsError,
-  
+
   // Users
   fetchAllUsers,
   fetchUserById,
@@ -261,7 +263,7 @@ export {
   selectUserAnalytics,
   selectUsersLoading,
   selectUsersError,
-  
+
   // Content
   fetchContentByTopic,
   fetchFeaturedContent,
@@ -273,7 +275,7 @@ export {
   selectCurrentContent,
   selectContentLoading,
   selectContentError,
-  
+
   // Health
   fetchHealthProfile,
   fetchHealthProfileById,
@@ -293,7 +295,7 @@ export {
   selectMyAssessments,
   selectHealthLoading,
   selectHealthError,
-  
+
   // Orders
   createOrder,
   fetchUserOrders,

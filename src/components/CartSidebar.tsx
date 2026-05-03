@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReduxCart } from '../hooks/useReduxCart';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FiX, FiTrash2, FiEye, FiShoppingCart } from 'react-icons/fi';
 
 const CartSidebar: React.FC = () => {
   const navigate = useNavigate();
@@ -11,6 +12,11 @@ const CartSidebar: React.FC = () => {
     if (newQuantity > 0 && newQuantity <= 99) {
       updateItemQuantity(itemId, newQuantity);
     }
+  };
+
+  const handleViewDetails = (slug: string) => {
+    closeCart();
+    navigate(`/meal/${slug}`);
   };
 
   return (
@@ -23,7 +29,7 @@ const CartSidebar: React.FC = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
             onClick={closeCart}
           />
 
@@ -32,20 +38,18 @@ const CartSidebar: React.FC = () => {
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 h-full w-96 max-w-full bg-white shadow-dwm-lg z-50 flex flex-col"
+            transition={{ type: 'spring', damping: 30, stiffness: 220 }}
+            className="fixed right-0 top-0 h-full w-112.5 max-w-full bg-white shadow-2xl z-50 flex flex-col"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-dwm-green-pale">
-              <h3 className="text-xl font-serif font-semibold text-dwm-green-deep">Your Cart</h3>
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h3 className="text-2xl font-serif font-semibold text-gray-800">Your Cart</h3>
               <button
                 onClick={closeCart}
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-dwm-green-pale text-dwm-text-mid hover:text-dwm-green-deep transition-all"
+                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-800 transition-all"
                 aria-label="Close cart"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <FiX size={24} />
               </button>
             </div>
 
@@ -53,77 +57,79 @@ const CartSidebar: React.FC = () => {
             <div className="flex-1 overflow-y-auto p-6">
               {items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center py-12">
-                  <div className="w-24 h-24 mb-6 rounded-full bg-dwm-green-pale flex items-center justify-center">
-                    <svg className="w-12 h-12 text-dwm-green-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                      />
-                    </svg>
+                  <div className="w-28 h-28 mb-6 rounded-full bg-gray-100 flex items-center justify-center">
+                    <FiShoppingCart size={50} className="text-gray-400" />
                   </div>
-                  <h4 className="text-lg font-semibold text-dwm-green-deep mb-2">Your cart is empty</h4>
-                  <p className="text-dwm-text-mid mb-6">
-                    Browse our marketplace to find delicious, health-focused meals!
+                  <h4 className="text-xl font-semibold text-gray-800 mb-2">Your cart is empty</h4>
+                  <p className="text-gray-500 mb-6 max-w-xs">
+                    Looks like you haven't added any meals yet. Let's find something delicious!
                   </p>
                   <button
                     onClick={closeCart}
-                    className="bg-dwm-gold hover:bg-dwm-gold-light text-dwm-green-deep px-6 py-2.5 rounded-lg font-semibold transition-all"
+                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
                   >
                     Explore Meals
                   </button>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {items.map((item) => (
+                <div className="space-y-5">
+                  {items.map(item => (
                     <motion.div
                       key={item.id}
                       layout
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: 100 }}
-                      className="flex gap-4 p-4 bg-dwm-off-white rounded-dwm-md hover:shadow-dwm-sm transition-all"
+                      exit={{ opacity: 0, x: 100, transition: { duration: 0.2 } }}
+                      className="flex gap-4 p-4 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-all"
                     >
                       {item.image && (
                         <img
                           src={item.image}
                           alt={item.name}
-                          className="w-20 h-20 object-cover rounded-dwm-sm"
+                          className="w-24 h-24 object-cover rounded-md"
                         />
                       )}
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-dwm-green-deep truncate">{item.name}</h4>
-                        <p className="text-dwm-gold font-bold text-lg">
+                        <h4 className="font-semibold text-gray-800 truncate mb-1">{item.name}</h4>
+                        <p className="text-green-600 font-bold text-xl mb-3">
                           {item.currency || 'RWF'} {(item.price || 0).toLocaleString()}
                         </p>
-                        <div className="flex items-center gap-3 mt-3">
+                        <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                              className="w-7 h-7 flex items-center justify-center rounded-md bg-dwm-green-pale hover:bg-dwm-green-light hover:text-white text-dwm-green-deep transition-all"
+                              className="w-8 h-8 flex items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200 text-gray-600 transition-all"
                               aria-label="Decrease quantity"
                             >
                               −
                             </button>
-                            <span className="w-10 text-center font-semibold text-dwm-green-deep">
+                            <span className="w-10 text-center font-bold text-lg text-gray-800">
                               {item.quantity}
                             </span>
                             <button
                               onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                              className="w-7 h-7 flex items-center justify-center rounded-md bg-dwm-green-pale hover:bg-dwm-green-light hover:text-white text-dwm-green-deep transition-all"
+                              className="w-8 h-8 flex items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200 text-gray-600 transition-all"
                               aria-label="Increase quantity"
                             >
                               +
                             </button>
                           </div>
-                          <button
-                            onClick={() => removeItem(item.id)}
-                            className="ml-auto text-red-500 hover:text-red-700 text-sm font-medium transition-colors"
-                            aria-label={`Remove ${item.name} from cart`}
-                          >
-                            Remove
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleViewDetails(item.slug || '')}
+                              className="w-9 h-9 flex items-center justify-center rounded-full text-gray-500 hover:bg-blue-100 hover:text-blue-600 transition-colors"
+                              aria-label={`View details for ${item.name}`}
+                            >
+                              <FiEye size={18} />
+                            </button>
+                            <button
+                              onClick={() => removeItem(item.id)}
+                              className="w-9 h-9 flex items-center justify-center rounded-full text-gray-500 hover:bg-red-100 hover:text-red-600 transition-colors"
+                              aria-label={`Remove ${item.name} from cart`}
+                            >
+                              <FiTrash2 size={18} />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </motion.div>
@@ -134,28 +140,26 @@ const CartSidebar: React.FC = () => {
 
             {/* Footer */}
             {items.length > 0 && (
-              <div className="border-t border-dwm-green-pale p-6 space-y-4 bg-dwm-green-pale/30">
+              <div className="border-t border-gray-200 p-6 space-y-4 bg-gray-50">
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold text-dwm-green-deep">Subtotal</span>
-                  <span className="text-2xl font-bold text-dwm-gold">
+                  <span className="text-lg font-semibold text-gray-700">Subtotal</span>
+                  <span className="text-2xl font-bold text-green-600">
                     {items[0]?.currency || 'RWF'} {totalPrice.toLocaleString()}
                   </span>
                 </div>
-                <p className="text-xs text-dwm-text-mid">
-                  Taxes and shipping calculated at checkout
-                </p>
+                <p className="text-sm text-gray-500">Taxes and shipping calculated at checkout.</p>
                 <button
-                  className="w-full bg-dwm-gold hover:bg-dwm-gold-light text-dwm-green-deep py-3.5 rounded-lg font-bold text-base transition-all shadow-dwm-sm hover:shadow-dwm-md"
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-lg font-bold text-lg transition-all shadow-lg hover:shadow-xl"
                   onClick={() => {
                     closeCart();
                     navigate('/checkout');
                   }}
                 >
-                  Proceed to Checkout • {items[0]?.currency || 'RWF'} {totalPrice.toLocaleString()}
+                  Proceed to Checkout
                 </button>
                 <button
                   onClick={closeCart}
-                  className="w-full bg-transparent border-2 border-dwm-green-light text-dwm-green-deep py-3 rounded-lg font-semibold text-base hover:bg-dwm-green-pale transition-all"
+                  className="w-full bg-transparent border-2 border-gray-300 text-gray-700 py-3.5 rounded-lg font-semibold text-base hover:bg-gray-100 hover:border-gray-400 transition-all"
                 >
                   Continue Shopping
                 </button>
