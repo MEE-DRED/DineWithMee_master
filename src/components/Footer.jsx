@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaTwitter, FaLinkedinIn, FaFacebookF, FaInstagram } from 'react-icons/fa';
-import logo from '../assets/image/logo.png';
+import logo from '../assets/image/logo_white.png';
 import { FiHome, FiHeart, FiShoppingCart, FiMail, FiLogIn, FiUserPlus } from 'react-icons/fi';
 
 const Footer = () => {

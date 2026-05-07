@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useReduxAuth } from '../hooks/useReduxAuth';
 import { useReduxCart } from '../hooks/useReduxCart';
-import logo from '../assets/image/logo.png';
+import logo from '../assets/image/logo_white.png';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
