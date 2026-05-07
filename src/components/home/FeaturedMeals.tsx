@@ -3,7 +3,7 @@ import { motion, Variants } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
 import { FiHeart, FiZap, FiGitMerge, FiPlus, FiFeather } from 'react-icons/fi';
 import { MealCardSkeleton } from '../ui/Skeleton';
-import { fetchMeals, addToCart } from '../../redux';
+import { fetchFeaturedMeals, addToCart } from '../../redux';
 import type { RootState, AppDispatch } from '../../redux/store';
 
 interface Meal {
@@ -23,14 +23,14 @@ interface Meal {
 const FeaturedMeals: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const {
-    meals,
+    featuredMeals,
     status: mealStatus,
     error: mealError,
   } = useSelector((state: RootState) => state.meals);
 
   useEffect(() => {
     if (mealStatus === 'idle') {
-      dispatch(fetchMeals());
+      dispatch(fetchFeaturedMeals());
     }
   }, [mealStatus, dispatch]);
 
@@ -110,7 +110,7 @@ const FeaturedMeals: React.FC = () => {
           animate="visible"
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
         >
-          {meals.slice(0, 3).map((meal: Meal) => (
+          {featuredMeals.slice(0, 3).map((meal: Meal) => (
             <motion.article
               key={meal._id}
               variants={cardVariants}

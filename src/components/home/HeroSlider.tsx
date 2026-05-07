@@ -34,24 +34,12 @@ const slides: Slide[] = [
   {
     id: 2,
     image:
-      'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1800&q=80',
-    kicker: 'Preventive Care Through Nutrition',
-    title: "Nature's Prescription",
-    description: 'Nutrition-powered prevention for NCDs',
-    cta: {
-      primary: { label: 'Visit Health Hub', link: '/health' },
-      secondary: { label: 'Read Nutrition Research', link: '/research' },
-    },
-  },
-  {
-    id: 3,
-    image:
       'https://images.unsplash.com/photo-1466637574441-749b8f19452f?auto=format&fit=crop&w=1800&q=80',
     kicker: 'Future-Ready Family Wellness',
     title: 'Generational Wellness',
     description: 'Building healthier African futures through food',
     cta: {
-      primary: { label: 'Maternal Wellness Pathways', link: '/maternal' },
+      primary: { label: 'Take Health Assessment', link: '/health-assessment' },
       secondary: { label: 'Start Your Journey', link: '/signup' },
     },
   },
@@ -133,9 +121,10 @@ const HeroSlider: React.FC = () => {
           }}
           className="absolute inset-0"
         >
+          {/* webhint-disable-next-line no-inline-styles */}
           <div
             className="absolute inset-0 bg-cover bg-center ken-burns-effect"
-            style={{ backgroundImage: `url(${slide.image})` }}
+            style={{ '--bg-image': `url(${slide.image})` } as React.CSSProperties}
           />
           <div className="absolute inset-0 bg-linear-to-r from-black/80 via-transparent to-transparent shadow-[inset_0_0_250px_50px_rgba(0,0,0,0.9)]" />
           <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent" />

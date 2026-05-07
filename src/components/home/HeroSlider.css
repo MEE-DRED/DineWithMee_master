@@ -9,6 +9,7 @@
 
 .ken-burns-effect {
   animation: ken-burns 20s infinite alternate ease-in-out;
+  background-image: var(--bg-image);
 }
 
 .text-shadow-kicker {

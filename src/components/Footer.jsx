@@ -1,22 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaTwitter, FaLinkedinIn, FaFacebookF, FaInstagram } from 'react-icons/fa';
+import logo from '../assets/image/logo.png';
 import { FiHome, FiHeart, FiShoppingCart, FiMail, FiLogIn, FiUserPlus } from 'react-icons/fi';
 
 const Footer = () => {
   return (
     <footer className="bg-emerald-900 text-white border-t-2 border-amber-500/30">
-      <div className="max-w-screen-xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand Section */}
           <div className="lg:col-span-1 space-y-4">
             <Link to="/" className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-400 flex items-center justify-center font-serif text-lg font-bold text-emerald-900 shadow-md">
-                D
-              </div>
-              <span className="font-serif text-2xl text-white tracking-wide">
-                Dine with <span className="text-amber-400">Mee</span>
-              </span>
+              <img src={logo} alt="Dine with Mee" className="h-12" />
             </Link>
             <p className="text-emerald-200/80 text-sm leading-relaxed">
               Clinically informed nutrition pathways and therapeutic meal discovery for a healthier

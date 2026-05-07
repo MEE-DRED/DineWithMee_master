@@ -26,28 +26,28 @@ const AnimatedCounter = ({ target, suffix }: { target: number; suffix: string })
 const stats = [
   {
     id: 'meals',
-    value: 500,
+    value: 1000,
     suffix: '+',
     label: 'Therapeutic Meals',
     icon: <FiBookOpen className="w-8 h-8" />,
   },
   {
     id: 'users',
-    value: 15000,
+    value: 25000,
     suffix: '+',
     label: 'Active Users',
     icon: <FiUsers className="w-8 h-8" />,
   },
   {
     id: 'chefs',
-    value: 50,
+    value: 100,
     suffix: '+',
     label: 'Partner Chefs',
     icon: <FiAward className="w-8 h-8" />,
   },
   {
     id: 'satisfaction',
-    value: 98,
+    value: 99,
     suffix: '%',
     label: 'Satisfaction Rate',
     icon: <FiHeart className="w-8 h-8" />,

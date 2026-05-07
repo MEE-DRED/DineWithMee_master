@@ -44,7 +44,7 @@ const MealDetailModal = ({ meal, onClose, onAddToCart, isFavorite, onToggleFavor
           whileHover={{ scale: 1.03 }}
         >
           <img src={meal.image} alt={meal.name} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/50 to-transparent" />
           <button
             onClick={() => onToggleFavorite(meal.id)}
             className="absolute top-4 right-4 p-3 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all text-3xl shadow-lg"
@@ -55,7 +55,7 @@ const MealDetailModal = ({ meal, onClose, onAddToCart, isFavorite, onToggleFavor
 
         {/* Right Column: Details */}
         <div className="md:col-span-3 flex flex-col space-y-6">
-          <div className="flex-grow">
+          <div className="grow">
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-2">

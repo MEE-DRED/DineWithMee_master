@@ -34,8 +34,8 @@ const Home: React.FC = () => {
               transition={{ duration: 0.8 }}
               className="lg:col-span-3"
             >
-              <span className="section-tag">Our Purpose</span>
-              <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-emerald-900 mb-6">
+              <span className="section-tag font-bold">Our Purpose</span>
+              <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold text-emerald-900 mb-6 tracking-tight">
                 The Dine with Mee Mission
               </h2>
               <div className="space-y-4 text-lg text-stone-600 leading-relaxed mb-8">
@@ -49,7 +49,10 @@ const Home: React.FC = () => {
                   evidence-backed, and deeply human.
                 </p>
               </div>
-              <Link to="/health" className="btn-primary inline-block">
+              <Link
+                to="/health"
+                className="inline-block bg-amber-500 text-white font-bold text-base px-8 py-3 rounded-lg shadow-md hover:bg-amber-400 hover:scale-105 transform transition-all duration-300"
+              >
                 Explore Our Evidence Model
               </Link>
             </motion.div>
@@ -198,7 +201,7 @@ const Home: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <span className="section-tag">Clinical Wellness</span>
+            <span className="section-tag font-bold text-lg">Clinical Wellness</span>
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-emerald-900 mb-6">
               Structured Nutrition Programs
             </h2>

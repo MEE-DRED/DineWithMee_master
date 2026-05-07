@@ -68,7 +68,7 @@ const ClinicalFocusGrid: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="section-tag"
           >
-            Clinical Nutrition First
+            Our Approach
           </motion.span>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -77,7 +77,7 @@ const ClinicalFocusGrid: React.FC = () => {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-emerald-900 mb-4"
           >
-            Our Clinical Focus
+            A Focus on Clinical Wellness
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -97,7 +97,7 @@ const ClinicalFocusGrid: React.FC = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-100px' }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 lg:gap-8"
         >
           {programs.map(program => (
             <motion.article
@@ -161,7 +161,7 @@ const ClinicalFocusGrid: React.FC = () => {
           className="mt-12 text-center"
         >
           <p className="text-stone-600 mb-6 text-lg">Not sure which program is right for you?</p>
-          <Link to="/health" className="btn-secondary inline-block">
+          <Link to="/health-assessment" className="btn-secondary inline-block">
             Take Health Assessment
           </Link>
         </motion.div>
