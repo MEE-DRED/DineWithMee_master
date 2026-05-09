@@ -1,4 +1,5 @@
 import React from 'react';
+import SortDropdown from './SortDropdown';
 
 const sortOptions = [
   { value: 'featured', label: 'Featured' },
@@ -52,17 +53,7 @@ const MarketplaceFilters = ({
           </div>
           <div>
             <label className="text-base font-semibold text-gray-800 mb-3 block">Sort By</label>
-            <select
-              value={sortBy}
-              onChange={e => onSortChange(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-emerald-500 focus:outline-none transition-colors"
-            >
-              {sortOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <SortDropdown sortBy={sortBy} onSortChange={onSortChange} />
           </div>
         </div>
       </div>
@@ -93,7 +84,7 @@ const MarketplaceFilters = ({
       <div className="border-b border-gray-200 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <label className="text-base font-semibold text-gray-800 mb-3 block flex justify-between">
+            <label className="text-base font-semibold text-gray-800 mb-3 flex justify-between">
               <span>Max Calories</span>
               <span className="font-bold text-emerald-700">{maxCalories}</span>
             </label>
@@ -108,7 +99,7 @@ const MarketplaceFilters = ({
             />
           </div>
           <div>
-            <label className="text-base font-semibold text-gray-800 mb-3 block flex justify-between">
+            <label className="text-base font-semibold text-gray-800 mb-3 flex justify-between">
               <span>Min Protein</span>
               <span className="font-bold text-emerald-700">{minProtein}g</span>
             </label>

@@ -155,15 +155,15 @@ const Marketplace = () => {
   return (
     <div className="marketplace-page">
       {/* Hero Section */}
-      <div className="page-hero bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-900 text-white py-16">
+      <div className="page-hero bg-linear-to-br from-emerald-900 via-emerald-800 to-emerald-900 text-white py-16">
         <div className="page-hero-content text-center max-w-4xl mx-auto px-6">
-          <div className="breadcrumb text-emerald-200 mb-4">
+          <div className="breadcrumb text-emerald-200 mb-gi">
             <a href="/" className="text-amber-400 hover:text-amber-300">
               Home
             </a>{' '}
             &#8250; Marketplace
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">African Marketplace by Region</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-gi">African Marketplace by Region</h1>
           <p className="text-xl text-emerald-100">
             Shop clinically informed African meals and ingredients across West, East, and Southern
             Africa.
@@ -171,7 +171,7 @@ const Marketplace = () => {
         </div>
       </div>
 
-      <section className="section bg-gray-50">
+      <section className="section bg-gray-50 mt-gi">
         <div className="max-w-7xl mx-auto px-6">
           {/* Tab Navigation */}
           <div className="flex justify-center mb-8">
@@ -227,7 +227,9 @@ const Marketplace = () => {
             <div className="mb-6">
               <p className="text-gray-700 font-medium">
                 {filteredMeals.length} meal{filteredMeals.length !== 1 ? 's' : ''} found
-                {showFavoritesOnly && <span className="ml-2 text-amber-600">· Favorites Only</span>}
+                {showFavoritesOnly && (
+                  <span className="ml-2 text-amber-600">Â· Favorites Only</span>
+                )}
               </p>
             </div>
           )}
@@ -262,7 +264,7 @@ const Marketplace = () => {
                       }}
                       className="absolute top-4 right-4 p-2 bg-white/90 backdrop-blur rounded-full hover:bg-white transition-colors z-10"
                     >
-                      {favorites.includes(item.id || item._id) ? '❤️' : '🤍'}
+                      {favorites.includes(item.id || item._id) ? '💖' : '🤍'}
                     </button>
                   </div>
                 ) : (
