@@ -26,44 +26,70 @@ const Home: React.FC = () => {
       <section className="py-16 sm:py-20 lg:py-24 bg-white">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16 items-center">
-            {/* Left: Content - takes 3 columns */}
+            {/* Content for mobile and desktop */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="lg:col-span-3"
+              className="lg:col-span-3 flex flex-col"
             >
-              <span className="section-tag font-bold">Our Purpose</span>
-              <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold text-emerald-900 mb-6 tracking-tight">
-                The Dine with Mee Mission
-              </h2>
-              <div className="space-y-4 text-lg text-stone-600 leading-relaxed mb-8">
-                <p>
-                  We exist to close the gap between clinical nutrition science and the foods African
-                  families already trust. Dine with Mee translates care plans into everyday meals,
-                  empowering households to prevent disease and heal with confidence.
-                </p>
-                <p>
-                  From chronic condition management, we build tools that feel local,
-                  evidence-backed, and deeply human.
-                </p>
+              <div className="lg:order-1 text-center lg:text-left">
+                <span className="section-tag font-bold">Our Purpose</span>
+                <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold text-emerald-900 mb-6 tracking-tight">
+                  The Dine with Mee Mission
+                </h2>
+                <div className="space-y-4 text-lg text-stone-600 leading-relaxed mb-8">
+                  <p>
+                    We exist to close the gap between clinical nutrition science and the foods
+                    African families already trust. Dine with Mee translates care plans into
+                    everyday meals, empowering households to prevent disease and heal with
+                    confidence.
+                  </p>
+                  <p>
+                    From chronic condition management, we build tools that feel local,
+                    evidence-backed, and deeply human.
+                  </p>
+                </div>
               </div>
-              <Link
-                to="/health"
-                className="inline-block bg-amber-500 text-white font-bold text-base px-8 py-3 rounded-lg shadow-md hover:bg-amber-400 hover:scale-105 transform transition-all duration-300"
+
+              {/* Image for mobile view, hidden on desktop */}
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="relative lg:hidden my-8"
               >
-                Explore Our Evidence Model
-              </Link>
+                <div className="relative rounded-dwm-lg overflow-hidden shadow-dwm-lg max-w-md mx-auto">
+                  <img
+                    src={MEEImg}
+                    alt="Cooking with confidence and style"
+                    loading="lazy"
+                    className="w-full h-auto object-contain"
+                  />
+                </div>
+                <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl -z-10" />
+                <div className="absolute -top-6 -left-6 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl -z-10" />
+              </motion.div>
+
+              <div className="lg:order-2 flex justify-center lg:justify-start">
+                <Link
+                  to="/health"
+                  className="inline-block bg-amber-500 text-white font-bold text-base px-8 py-3 rounded-lg shadow-md hover:bg-amber-400 hover:scale-105 transform transition-all duration-300"
+                >
+                  Explore Our Evidence Model
+                </Link>
+              </div>
             </motion.div>
 
-            {/* Right: Image - takes 2 columns */}
+            {/* Image for desktop view, hidden on mobile */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="relative lg:col-span-2"
+              className="relative hidden lg:block lg:col-span-2"
             >
               <div className="relative rounded-dwm-lg overflow-hidden shadow-dwm-lg max-w-md mx-auto lg:mx-0">
                 <img
@@ -73,7 +99,6 @@ const Home: React.FC = () => {
                   className="w-full h-auto object-contain"
                 />
               </div>
-              {/* Decorative Element */}
               <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl -z-10" />
               <div className="absolute -top-6 -left-6 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl -z-10" />
             </motion.div>
