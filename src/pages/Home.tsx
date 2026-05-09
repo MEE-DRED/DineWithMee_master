@@ -9,7 +9,9 @@ import ProgramCard from '../components/home/ProgramCard';
 import TestimonialsCarousel from '../components/home/TestimonialsCarousel';
 import { programs } from '../data/programs';
 import { testimonials } from '../data/testimonials';
-import MEEImg from '../assets/mee.png'
+import MEEImg from '../assets/mee.png';
+
+import { FiFileText, FiCpu, FiShoppingCart, FiTrendingUp } from 'react-icons/fi';
 
 const Home: React.FC = () => {
   return (
@@ -24,43 +26,70 @@ const Home: React.FC = () => {
       <section className="py-16 sm:py-20 lg:py-24 bg-white">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-16 items-center">
-            {/* Left: Content - takes 3 columns */}
+            {/* Content for mobile and desktop */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="lg:col-span-3"
+              className="lg:col-span-3 flex flex-col"
             >
-              <span className="section-tag">
-                Our Purpose
-              </span>
-              <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-emerald-900 mb-6">
-                The Dine with Mee Mission
-              </h2>
-              <div className="space-y-4 text-lg text-stone-600 leading-relaxed mb-8">
-                <p>
-                  We exist to close the gap between clinical nutrition science and the foods African families already trust. Dine with Mee translates care plans into everyday meals, empowering households to prevent disease and heal with confidence.
-                </p>
-                <p>
-                  From chronic condition management to maternal nourishment, we build tools that feel local, evidence-backed, and deeply human.
-                </p>
+              <div className="lg:order-1 text-center lg:text-left">
+                <span className="section-tag font-bold">Our Purpose</span>
+                <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold text-emerald-900 mb-6 tracking-tight">
+                  The Dine with Mee Mission
+                </h2>
+                <div className="space-y-4 text-lg text-stone-600 leading-relaxed mb-8">
+                  <p>
+                    We exist to close the gap between clinical nutrition science and the foods
+                    African families already trust. Dine with Mee translates care plans into
+                    everyday meals, empowering households to prevent disease and heal with
+                    confidence.
+                  </p>
+                  <p>
+                    From chronic condition management, we build tools that feel local,
+                    evidence-backed, and deeply human.
+                  </p>
+                </div>
               </div>
-              <Link
-                to="/health"
-                className="btn-primary inline-block"
+
+              {/* Image for mobile view, hidden on desktop */}
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="relative lg:hidden my-8"
               >
-                Explore Our Evidence Model
-              </Link>
+                <div className="relative rounded-dwm-lg overflow-hidden shadow-dwm-lg max-w-md mx-auto">
+                  <img
+                    src={MEEImg}
+                    alt="Cooking with confidence and style"
+                    loading="lazy"
+                    className="w-full h-auto object-contain"
+                  />
+                </div>
+                <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl -z-10" />
+                <div className="absolute -top-6 -left-6 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl -z-10" />
+              </motion.div>
+
+              <div className="lg:order-2 flex justify-center lg:justify-start">
+                <Link
+                  to="/health"
+                  className="inline-block bg-amber-500 text-white font-bold text-base px-8 py-3 rounded-lg shadow-md hover:bg-amber-400 hover:scale-105 transform transition-all duration-300"
+                >
+                  Explore Our Evidence Model
+                </Link>
+              </div>
             </motion.div>
 
-            {/* Right: Image - takes 2 columns */}
+            {/* Image for desktop view, hidden on mobile */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className="relative lg:col-span-2"
+              className="relative hidden lg:block lg:col-span-2"
             >
               <div className="relative rounded-dwm-lg overflow-hidden shadow-dwm-lg max-w-md mx-auto lg:mx-0">
                 <img
@@ -70,7 +99,6 @@ const Home: React.FC = () => {
                   className="w-full h-auto object-contain"
                 />
               </div>
-              {/* Decorative Element */}
               <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-amber-500/20 rounded-full blur-3xl -z-10" />
               <div className="absolute -top-6 -left-6 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl -z-10" />
             </motion.div>
@@ -85,111 +113,111 @@ const Home: React.FC = () => {
       <FeaturedMeals />
 
       {/* How It Works Section */}
-      <section className="py-16 sm:py-20 lg:py-24 bg-white">
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 lg:py-28 bg-linear-to-b from-white to-primary-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12 lg:mb-16"
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+            className="text-center mb-16"
           >
-            <span className="section-tag">
+            <span className="text-sm font-bold text-primary-600 bg-primary-100 px-3 py-1 rounded-full">
               Simple Process
             </span>
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-primary-900 mb-4">
-              How Dine with Mee Works
+            <h2 className="font-serif text-4xl sm:text-5xl font-extrabold text-primary-900 mt-4 mb-5">
+              Health Transformation in 4 Steps
             </h2>
-            <p className="text-lg text-stone-600 max-w-2xl mx-auto">
-              Four simple steps to transform your health through nutrition
+            <p className="text-lg text-neutral-600 max-w-3xl mx-auto">
+              We translate complex nutritional science into a simple, empowering journey that honors
+              your heritage and fits your life.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12 relative"
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
+            transition={{ staggerChildren: 0.2 }}
+          >
+            {/* Dashed Connector Line */}
+            <div className="hidden lg:block absolute top-1/3 left-0 w-full h-px">
+              <svg width="100%" height="100%">
+                <line
+                  x1="0"
+                  y1="0"
+                  x2="100%"
+                  y2="0"
+                  strokeWidth="2"
+                  strokeDasharray="8 8"
+                  className="stroke-primary-200"
+                />
+              </svg>
+            </div>
+
             {[
               {
                 step: '01',
-                title: 'Health Assessment',
-                description: 'Tell us about your health conditions, goals, and dietary preferences',
-                icon: (
-                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                ),
+                title: 'Discover Your Path',
+                description:
+                  'Start with a quick, confidential health assessment. We listen to your story—your goals, conditions, and preferences.',
+                icon: <FiFileText className="w-7 h-7" />,
               },
               {
                 step: '02',
-                title: 'Personalized Plan',
-                description: 'Get AI-powered meal recommendations tailored to your health needs',
-                icon: (
-                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                  </svg>
-                ),
+                title: 'Receive Your Plan',
+                description:
+                  'Our nutritionists craft a personalized meal plan featuring delicious, culturally-rich African dishes.',
+                icon: <FiCpu className="w-7 h-7" />,
               },
               {
                 step: '03',
-                title: 'Browse & Order',
-                description: 'Choose from culturally relevant, nutritionist-approved African meals',
-                icon: (
-                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                ),
+                title: 'Enjoy & Nourish',
+                description:
+                  'Explore the marketplace, order your meals, and enjoy food that heals, delivered with care.',
+                icon: <FiShoppingCart className="w-7 h-7" />,
               },
               {
                 step: '04',
-                title: 'Track Progress',
-                description: 'Monitor your health metrics and celebrate improvements over time',
-                icon: (
-                  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                ),
+                title: 'Thrive & Track',
+                description:
+                  'See your progress with integrated health tracking and celebrate every step towards a healthier you.',
+                icon: <FiTrendingUp className="w-7 h-7" />,
               },
-            ].map((item, index) => (
+            ].map(item => (
               <motion.div
                 key={item.step}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="relative"
+                variants={{
+                  initial: { opacity: 0, y: 50 },
+                  animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
+                }}
+                className="relative z-10 text-center bg-white p-6 rounded-2xl border border-transparent hover:border-primary-200 transition-all duration-300 group"
               >
-                <div className="text-center">
-                  {/* Step Number */}
-                  <div className="inline-block text-6xl font-serif font-bold text-amber-500/20 mb-4">
-                    {item.step}
-                  </div>
-
-                  {/* Icon */}
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 mb-4">
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: -5 }}
+                  transition={{ type: 'spring', stiffness: 300 }}
+                >
+                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-linear-to-br from-primary-100 to-amber-100 text-primary-600 mb-5 border-4 border-white shadow-sm">
                     {item.icon}
                   </div>
+                </motion.div>
 
-                  {/* Title */}
-                  <h3 className="font-serif text-xl font-semibold text-emerald-900 mb-3">
-                    {item.title}
-                  </h3>
+                <h3 className="text-xl font-bold text-primary-900 mb-2">{item.title}</h3>
 
-                  {/* Description */}
-                  <p className="text-stone-600 leading-relaxed">
-                    {item.description}
-                  </p>
+                <p className="text-neutral-600 text-sm leading-relaxed">{item.description}</p>
+
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-white font-bold text-sm w-10 h-10 flex items-center justify-center rounded-full border-4 border-white shadow-md">
+                  {item.step}
                 </div>
-
-                {/* Connector Line (except last item) */}
-                {index < 3 && (
-                  <div className="hidden lg:block absolute top-20 left-full w-full h-0.5 bg-linear-to-r from-emerald-500 to-transparent" />
-                )}
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Clinical Wellness Programs Section */}
-      <section className="py-20 bg-gradient-to-b from-white to-emerald-50">
+      <section className="py-20 bg-linear-to-b from-white to-emerald-50">
         <div className="max-w-7xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -198,9 +226,7 @@ const Home: React.FC = () => {
             transition={{ duration: 0.6 }}
             className="text-center mb-12"
           >
-            <span className="section-tag">
-              Clinical Wellness
-            </span>
+            <span className="section-tag font-bold text-lg">Clinical Wellness</span>
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-emerald-900 mb-6">
               Structured Nutrition Programs
             </h2>
@@ -211,11 +237,7 @@ const Home: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {programs.map((program, index) => (
-              <ProgramCard
-                key={program.id}
-                program={program}
-                delay={index * 0.1}
-              />
+              <ProgramCard key={program.id} program={program} delay={index * 0.1} />
             ))}
           </div>
         </div>
@@ -225,38 +247,37 @@ const Home: React.FC = () => {
       <TestimonialsCarousel testimonials={testimonials} />
 
       {/* CTA Section */}
-      <section className="py-16 sm:py-20 lg:py-24 bg-linear-to-br from-emerald-700 to-emerald-600 relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-amber-500 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-amber-400 rounded-full blur-3xl" />
-        </div>
+      <section className="relative py-20 sm:py-24 lg:py-32 bg-primary-900 overflow-hidden">
+        {/* Abstract SVG background */}
+        <div className="absolute inset-0 opacity-5 cta-background"></div>
 
-        <div className="relative max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="relative max-w-3xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
           >
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
-              Ready to Transform Your Health?
+            <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white">
+              Begin Your Wellness Journey
             </h2>
-            <p className="text-lg sm:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              Join thousands of Africans who are reclaiming their health through culturally relevant nutrition
+            <p className="mt-6 text-lg sm:text-xl text-primary-200 max-w-2xl mx-auto">
+              Take the first step towards a healthier, more vibrant you. Our platform makes it
+              simple to align your diet with your health goals, without sacrificing the flavors you
+              love.
             </p>
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 to="/signup"
-                className="btn-primary inline-block"
+                className="w-full sm:w-auto inline-block bg-amber-500 text-primary-900 font-bold text-base px-8 py-4 rounded-lg shadow-lg hover:bg-amber-400 hover:scale-105 transform transition-all duration-300"
               >
-                Get Started Free
+                Create Your Free Account
               </Link>
               <Link
                 to="/health"
-                className="bg-transparent border-2 border-white/80 text-white hover:bg-white/10 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300"
+                className="w-full sm:w-auto inline-block bg-transparent border-2 border-amber-500 text-amber-500 font-semibold text-base px-8 py-4 rounded-lg hover:bg-amber-500 hover:text-primary-900 transform transition-all duration-300"
               >
-                Take Health Assessment
+                Take a Health Assessment
               </Link>
             </div>
           </motion.div>

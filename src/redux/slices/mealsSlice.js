@@ -52,8 +52,9 @@ export const fetchFeaturedMeals = createAsyncThunk(
 
 const initialState = {
   meals: [],
+  featuredMeals: [],
   filteredMeals: [],
-  loading: false,
+  status: 'idle',
   error: null,
   filters: {
     region: 'all',
@@ -138,72 +139,61 @@ const mealsSlice = createSlice({
     builder
       // Fetch meals
       .addCase(fetchMeals.pending, (state) => {
-        state.loading = true;
+        state.status = 'loading';
         state.error = null;
       })
       .addCase(fetchMeals.fulfilled, (state, action) => {
-        state.loading = false;
-        // Handle both array response and object with data property
+        state.status = 'succeeded';
         const mealsData = Array.isArray(action.payload)
           ? action.payload
           : (action.payload?.data || action.payload?.meals || []);
         state.meals = mealsData;
         state.filteredMeals = mealsData;
-        state.error = null;
       })
       .addCase(fetchMeals.rejected, (state, action) => {
-        state.loading = false;
+        state.status = 'failed';
         state.error = action.payload;
       })
-      // Fetch meal by ID
       .addCase(fetchMealById.pending, (state) => {
-        state.loading = true;
+        state.status = 'loading';
         state.error = null;
       })
       .addCase(fetchMealById.fulfilled, (state, action) => {
-        state.loading = false;
-        state.error = null;
+        state.status = 'succeeded';
       })
       .addCase(fetchMealById.rejected, (state, action) => {
-        state.loading = false;
+        state.status = 'failed';
         state.error = action.payload;
       })
-      // Search meals
       .addCase(searchMeals.pending, (state) => {
-        state.loading = true;
+        state.status = 'loading';
         state.error = null;
       })
       .addCase(searchMeals.fulfilled, (state, action) => {
-        state.loading = false;
-        // Handle both array response and object with data property
+        state.status = 'succeeded';
         const mealsData = Array.isArray(action.payload)
           ? action.payload
           : (action.payload?.data || action.payload?.meals || []);
         state.meals = mealsData;
         state.filteredMeals = mealsData;
-        state.error = null;
       })
       .addCase(searchMeals.rejected, (state, action) => {
-        state.loading = false;
+        state.status = 'failed';
         state.error = action.payload;
       })
-      // Fetch featured meals
       .addCase(fetchFeaturedMeals.pending, (state) => {
-        state.loading = true;
+        state.status = 'loading';
         state.error = null;
       })
       .addCase(fetchFeaturedMeals.fulfilled, (state, action) => {
-        state.loading = false;
-        // Handle both array response and object with data property
+        state.status = 'succeeded';
         const mealsData = Array.isArray(action.payload)
           ? action.payload
           : (action.payload?.data || action.payload?.meals || []);
-        state.meals = mealsData;
-        state.filteredMeals = mealsData;
-        state.error = null;
+        state.featuredMeals = mealsData;
       })
       .addCase(fetchFeaturedMeals.rejected, (state, action) => {
-        state.loading = false;
+        state.status = 'failed';
         state.error = action.payload;
       });
   },
@@ -225,9 +215,9 @@ export const selectFilteredMeals = (state) => state.meals.filteredMeals;
 export const selectMealsLoading = (state) => state.meals.loading;
 export const selectMealsError = (state) => state.meals.error;
 export const selectFilters = (state) => state.meals.filters;
-export const selectAllRegions = (state) => 
+export const selectAllRegions = (state) =>
   [...new Set(state.meals.meals.map(meal => meal.region))];
-export const selectAllHealthTags = (state) => 
+export const selectAllHealthTags = (state) =>
   [...new Set(state.meals.meals.flatMap(meal => meal.healthTags))];
 
 export default mealsSlice.reducer;

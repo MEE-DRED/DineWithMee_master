@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useReduxAuth } from '../hooks/useReduxAuth';
 import { useReduxCart } from '../hooks/useReduxCart';
+import logo from '../assets/image/logo_white.png';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
@@ -39,7 +40,7 @@ const Navbar = () => {
     }
   }, [showUserDropdown]);
 
-  const isActive = path => {
+  const isActive = (path: string) => {
     if (path === '/' && location.pathname === '/') return true;
     if (path !== '/' && location.pathname.startsWith(path)) return true;
     return false;
@@ -91,16 +92,11 @@ const Navbar = () => {
             : 'bg-emerald-900/95 backdrop-blur-md'
         } border-b border-amber-500/20`}
       >
-        <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-18">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-400 flex items-center justify-center font-serif text-lg sm:text-xl font-bold text-emerald-900 group-hover:scale-105 transition-transform shadow-md">
-                D
-              </div>
-              <span className="font-serif text-lg sm:text-xl text-white tracking-wide hidden sm:block">
-                Dine with <span className="text-amber-400">Mee</span>
-              </span>
+              <img src={logo} alt="Dine with Mee" className="h-10" />
             </Link>
 
             {/* Desktop Navigation */}
@@ -199,7 +195,7 @@ const Navbar = () => {
                     className="flex items-center gap-3 bg-emerald-800/60 border border-amber-500/30 hover:bg-emerald-700/60 hover:border-amber-500/50 px-4 py-2 rounded-lg transition-all duration-300"
                   >
                     {/* Enhanced Avatar with gradient and ring */}
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-amber-400 flex items-center justify-center text-sm font-bold text-emerald-900 ring-2 ring-amber-400/30">
+                    <div className="w-8 h-8 rounded-full bg-linear-to-br from-amber-500 to-amber-400 flex items-center justify-center text-sm font-bold text-emerald-900 ring-2 ring-amber-400/30">
                       {user?.name?.[0]?.toUpperCase() || 'U'}
                     </div>
 
@@ -242,7 +238,7 @@ const Navbar = () => {
                         {/* User Info Header */}
                         <div className="p-4 bg-emerald-900/40 border-b border-amber-500/10">
                           <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-400 flex items-center justify-center text-base font-bold text-emerald-900 ring-2 ring-amber-400/30">
+                            <div className="w-10 h-10 rounded-full bg-linear-to-br from-amber-500 to-amber-400 flex items-center justify-center text-base font-bold text-emerald-900 ring-2 ring-amber-400/30">
                               {user?.name?.[0]?.toUpperCase() || 'U'}
                             </div>
                             <div className="flex-1">
@@ -352,13 +348,13 @@ const Navbar = () => {
                     to="/login"
                     className="group relative px-4 py-2 rounded-lg text-sm font-medium text-white/90 hover:text-white border border-white/20 hover:border-amber-400/40 transition-all overflow-hidden"
                   >
-                    <span className="relative z-10">Log in</span>
+                    <span className="relative z-10">Login</span>
                     <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </Link>
 
                   <Link
                     to="/signup"
-                    className="group relative px-5 py-2 rounded-lg text-sm font-semibold bg-gradient-to-r from-amber-500 to-amber-400 text-emerald-900 hover:shadow-lg hover:shadow-amber-500/20 transition-all hover:scale-105"
+                    className="group relative px-5 py-2 rounded-lg text-sm font-semibold bg-linear-to-r from-amber-500 to-amber-400 text-emerald-900 hover:shadow-lg hover:shadow-amber-500/20 transition-all hover:scale-105"
                   >
                     <span className="inline-flex items-center gap-1.5">
                       Join Free
@@ -425,13 +421,15 @@ const Navbar = () => {
             >
               <div className="p-6">
                 {/* Close Button */}
-                <button
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-white hover:text-amber-400 text-3xl leading-none mb-8 transition-colors"
-                  aria-label="Close menu"
-                >
-                  ×
-                </button>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="text-white hover:text-amber-400 text-3xl leading-none mb-8 transition-colors"
+                    aria-label="Close menu"
+                  >
+                    ×
+                  </button>
+                </div>
 
                 {/* Navigation Links */}
                 <ul className="space-y-2">
@@ -508,7 +506,7 @@ const Navbar = () => {
                       {/* Enhanced User Card */}
                       <div className="p-4 bg-emerald-800/60 rounded-xl border border-amber-500/20">
                         <div className="flex items-center gap-3 mb-3">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-amber-400 flex items-center justify-center text-lg font-bold text-emerald-900 ring-2 ring-amber-400/30">
+                          <div className="w-12 h-12 rounded-full bg-linear-to-br from-amber-500 to-amber-400 flex items-center justify-center text-lg font-bold text-emerald-900 ring-2 ring-amber-400/30">
                             {user?.name?.[0]?.toUpperCase() || 'U'}
                           </div>
                           <div className="flex-1">
@@ -557,7 +555,7 @@ const Navbar = () => {
                       </Link>
                       <Link
                         to="/signup"
-                        className="block w-full text-center bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-600 hover:to-amber-500 text-emerald-900 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-md"
+                        className="block w-full text-center bg-linear-to-r from-amber-500 to-amber-400 hover:from-amber-600 hover:to-amber-500 text-emerald-900 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-md"
                       >
                         Join Free
                       </Link>

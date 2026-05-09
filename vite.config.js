@@ -5,26 +5,28 @@ import { visualizer } from 'rollup-plugin-visualizer'
 import imagemin from 'vite-plugin-imagemin'
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     react(),
     tailwindcss(),
-    visualizer({ 
-      filename: 'dist/stats.html',
-      open: true,
-      gzipSize: true
-    }),
-    imagemin({
-      gifsicle: { optimizationLevel: 7 },
-      mozjpeg: { quality: 80 },
-      pngquant: { quality: [0.65, 0.8] },
-      svgo: {
-        plugins: [
-          { name: 'removeViewBox', active: false },
-          { name: 'removeEmptyAttrs', active: false }
-        ]
-      }
-    })
+    ...(command === 'build' ? [
+      visualizer({
+        filename: 'dist/stats.html',
+        open: true,
+        gzipSize: true
+      }),
+      imagemin({
+        gifsicle: { optimizationLevel: 7 },
+        mozjpeg: { quality: 80 },
+        pngquant: { quality: [0.65, 0.8] },
+        svgo: {
+          plugins: [
+            { name: 'removeViewBox', active: false },
+            { name: 'removeEmptyAttrs', active: false }
+          ]
+        }
+      })
+    ] : [])
   ],
   build: {
     rollupOptions: {
@@ -49,5 +51,10 @@ export default defineConfig({
     },
     minify: 'esbuild',
     target: 'es2020'
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.js',
   }
-})
+}))

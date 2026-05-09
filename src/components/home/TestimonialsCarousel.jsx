@@ -50,7 +50,7 @@ const TestimonialsCarousel = ({ testimonials }) => {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-br from-emerald-900 to-emerald-800 text-white overflow-hidden">
+    <section className="py-20 bg-linear-to-br from-emerald-900 to-emerald-800 text-white">
       <div className="max-w-6xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-12">
@@ -69,7 +69,7 @@ const TestimonialsCarousel = ({ testimonials }) => {
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-          <div className="relative h-96 md:h-80">
+          <div className="relative h-96 md:h-80 overflow-hidden rounded-2xl">
             <AnimatePresence initial={false} custom={direction}>
               <motion.div
                 key={currentIndex}
@@ -84,17 +84,19 @@ const TestimonialsCarousel = ({ testimonials }) => {
                 }}
                 className="absolute inset-0"
               >
-                <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 md:p-12 h-full flex flex-col justify-between">
-                  {/* Quote */}
-                  <div className="flex-1">
-                    <div className="text-6xl text-amber-400 mb-4">"</div>
-                    <p className="text-xl md:text-2xl leading-relaxed mb-6">
+                <div className="relative bg-white/10 backdrop-blur-lg rounded-2xl p-8 md:p-12 h-full flex flex-col">
+                  <div className="text-8xl text-amber-400 absolute top-4 left-8 opacity-10 font-serif">
+                    "
+                  </div>
+                  <div className="relative z-10 grow">
+                    {/* Quote */}
+                    <p className="text-xl md:text-2xl leading-relaxed mb-6 font-style: italic">
                       {testimonials[currentIndex].quote}
                     </p>
                   </div>
 
                   {/* Author Info */}
-                  <div className="flex items-center gap-4">
+                  <div className="shrink-0 flex items-center gap-4 mt-6 pt-6 border-t border-white/10">
                     <img
                       src={testimonials[currentIndex].image}
                       alt={testimonials[currentIndex].author}
@@ -118,7 +120,7 @@ const TestimonialsCarousel = ({ testimonials }) => {
           {/* Navigation Arrows */}
           <button
             onClick={handlePrev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 bg-white/10 backdrop-blur hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 bg-white/10 backdrop-blur hover:bg-white/20 rounded-full flex items-center justify-center transition-colors z-10"
             aria-label="Previous testimonial"
           >
             <svg
@@ -137,7 +139,7 @@ const TestimonialsCarousel = ({ testimonials }) => {
           </button>
           <button
             onClick={handleNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 bg-white/10 backdrop-blur hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 bg-white/10 backdrop-blur hover:bg-white/20 rounded-full flex items-center justify-center transition-colors z-10"
             aria-label="Next testimonial"
           >
             <svg

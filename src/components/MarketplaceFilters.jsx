@@ -8,9 +8,6 @@ const MarketplaceFilters = ({ onFilterChange, filters }) => {
     { value: 'all', label: 'All Regions' },
     { value: 'west', label: 'West Africa' },
     { value: 'east', label: 'East Africa' },
-    { value: 'north', label: 'North Africa' },
-    { value: 'southern', label: 'Southern Africa' },
-    { value: 'central', label: 'Central Africa' },
   ];
 
   const healthTags = [
@@ -31,30 +28,30 @@ const MarketplaceFilters = ({ onFilterChange, filters }) => {
     { value: 'name-asc', label: 'Name: A to Z' },
   ];
 
-  const handleRegionChange = (region) => {
+  const handleRegionChange = region => {
     onFilterChange({ ...filters, region });
   };
 
-  const handleHealthTagToggle = (tag) => {
+  const handleHealthTagToggle = tag => {
     const newTags = filters.healthTags?.includes(tag)
       ? filters.healthTags.filter(t => t !== tag)
       : [...(filters.healthTags || []), tag];
     onFilterChange({ ...filters, healthTags: newTags });
   };
 
-  const handleSearchChange = (e) => {
+  const handleSearchChange = e => {
     onFilterChange({ ...filters, search: e.target.value });
   };
 
-  const handleSortChange = (e) => {
+  const handleSortChange = e => {
     onFilterChange({ ...filters, sort: e.target.value });
   };
 
-  const handleCaloriesChange = (e) => {
+  const handleCaloriesChange = e => {
     onFilterChange({ ...filters, maxCalories: parseInt(e.target.value) });
   };
 
-  const handleProteinChange = (e) => {
+  const handleProteinChange = e => {
     onFilterChange({ ...filters, minProtein: parseInt(e.target.value) });
   };
 
@@ -100,8 +97,18 @@ const MarketplaceFilters = ({ onFilterChange, filters }) => {
             onChange={handleSearchChange}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-dwm-sm focus:outline-none focus:ring-2 focus:ring-dwm-gold focus:border-transparent"
           />
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
           </svg>
         </div>
         <select
@@ -219,7 +226,16 @@ const MarketplaceFilters = ({ onFilterChange, filters }) => {
       {/* Clear Filters */}
       {(filters.region !== 'all' || filters.healthTags?.length > 0 || filters.search) && (
         <button
-          onClick={() => onFilterChange({ region: 'all', healthTags: [], search: '', sort: 'featured', maxCalories: 1000, minProtein: 0 })}
+          onClick={() =>
+            onFilterChange({
+              region: 'all',
+              healthTags: [],
+              search: '',
+              sort: 'featured',
+              maxCalories: 1000,
+              minProtein: 0,
+            })
+          }
           className="mt-4 text-sm text-dwm-text-mid hover:text-dwm-green-deep transition-colors underline"
         >
           Clear all filters
