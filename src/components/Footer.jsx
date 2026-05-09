@@ -70,7 +70,7 @@ const Footer = () => {
 // Helper components for cleaner structure
 const FooterColumn = ({ title, children }) => (
   <div>
-    <h5 className="font-serif text-xl font-semibold mb-5 text-amber-400 tracking-wider">{title}</h5>
+    <h5 className="font-serif text-xl font-semibold mb-5 text-white tracking-wider">{title}</h5>
     <ul className="space-y-3">{children}</ul>
   </div>
 );
@@ -81,7 +81,7 @@ const FooterLink = ({ to, icon, label }) => (
       to={to}
       className="flex items-center gap-3 text-emerald-200/90 hover:text-amber-400 hover:translate-x-1 transition-all duration-300"
     >
-      {React.cloneElement(icon, { className: 'w-4 h-4 text-amber-500' })}
+      {React.cloneElement(icon, { className: 'w-4 h-4 text-white' })}
       <span className="text-sm">{label}</span>
     </Link>
   </li>
@@ -91,7 +91,7 @@ const SocialLink = ({ href, icon, label }) => (
   <a
     href={href}
     aria-label={label}
-    className="w-9 h-9 bg-emerald-800/70 hover:bg-amber-500/20 rounded-full flex items-center justify-center text-amber-400 hover:text-white transition-all duration-300 transform hover:scale-110"
+    className="w-9 h-9 bg-emerald-800/70 hover:bg-amber-500/20 rounded-full flex items-center justify-center text-white hover:text-white transition-all duration-300 transform hover:scale-110"
   >
     {icon}
   </a>
