@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './components/Home.jsx';
 import Navbar from './Navbar.jsx';
 
+
 function App() {
   
 
@@ -14,7 +15,7 @@ function App() {
             <Navbar />
             <main className="flex-1 pt-20">
              <Routes>
-              <Route path="/" element={<Home />} />
+              {/* <Route path="/" element={<Home />} /> */}
             </Routes>
             </main>
             
