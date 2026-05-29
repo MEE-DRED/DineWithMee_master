@@ -33,6 +33,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import NutritionDashboard from "./components/NutritionDashboard.jsx";
 import MealPlan from "./components/MealPlan.jsx";
 
+
 function App() {
   return (
     <Router>
