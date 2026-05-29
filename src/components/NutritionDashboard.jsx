@@ -1428,10 +1428,11 @@ const Icon = {
 const navItems = [
   { id: "dashboard", label: "Dashboard", icon: "Home", path: "/dashboard" },
   { id: "meals", label: "Meal Plans", icon: "Fork", path: "/meals" },
-  { id: "schedule", label: "Health Stats", icon: "Chart", path: "/dashboard" },
-  { id: "analytics", label: "Analytics", icon: "Chart", path: "/dashboard" },
-  { id: "health", label: "Health", icon: "Heart", path: "/dashboard" },
-  { id: "profile", label: "Profile", icon: "User", path: "/dashboard" },
+  { id: "healthStats", label: "Health Stats", icon: "Calendar", path: "/dashboard" },
+  { id: "consultations", label: "Consultations", icon: "Chart", path: "/dashboard" },
+  { id: "orders", label: "Orders", icon: "Heart", path: "/dashboard" },
+  { id: "subscriptions", label: "Subscriptions", icon: "Monitor", path: "/dashboard" },
+  { id: "profile", label: "Settings", icon: "User", path: "/dashboard" },
 ];
 
 const searchSuggestions = [
