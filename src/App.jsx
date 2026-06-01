@@ -66,6 +66,7 @@ import Healthprofile from "./component/Healthprofile.jsx";
 import Consultations from "./component/Consultations.jsx";
 import Orders from "./component/Orders.jsx";
 import SecuritySettings from "./component/SecuritySettings.jsx";
+import Subscriptions from "./component/Subscriptions.jsx";
 
 function App() {
   return (
@@ -74,15 +75,16 @@ function App() {
         <Routes>
           {/* Default Route falls back to dashboard */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          
+
           {/* Core App Module Routes */}
-          <Route path="/dashboard" element={<NutritionDashboard />} />
-          <Route path="/meals" element={<MealPlan />} />
+          <Route path="/dashboard"     element={<NutritionDashboard />} />
+          <Route path="/meals"         element={<MealPlan />} />
           <Route path="/healthprofile" element={<Healthprofile />} />
           <Route path="/consultations" element={<Consultations />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/security" element={<SecuritySettings />} />
-          
+          <Route path="/orders"        element={<Orders />} />
+          <Route path="/security"      element={<SecuritySettings />} />
+          <Route path="/subscriptions" element={<Subscriptions />} />
+
           {/* Fallback Catch-all to Dashboard */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
