@@ -372,6 +372,7 @@
 
 
 import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 const Icon = ({ d, size = 20, className = "" }) => (
@@ -412,12 +413,12 @@ const weightData = [
 const glucoseData = [4, 7, 5, 9, 6, 4, 7, 5, 8];
 
 const navItems = [
-  { label: "Dashboard", icon: icons.dashboard },
-  { label: "Meal Plans", icon: icons.meal },
-  { label: "Health Stats", icon: icons.health, active: true },
-  { label: "Consultations", icon: icons.consult },
-  { label: "Orders", icon: icons.orders },
-  { label: "Settings", icon: icons.settings },
+  { label: "Dashboard",     icon: icons.dashboard, path: "/dashboard"     },
+  { label: "Meal Plans",    icon: icons.meal,      path: "/meals"         },
+  { label: "Health Stats",  icon: icons.health,    path: "/healthprofile" },
+  { label: "Consultations", icon: icons.consult,   path: "/consultations" },
+  { label: "Orders",        icon: icons.orders,    path: "/orders"        },
+  { label: "Settings",      icon: icons.settings,  path: "/security"      },
 ];
 
 const goals = [
@@ -508,8 +509,8 @@ function MedCard({ item }) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function HealthProfile() {
-  const [activeNav, setActiveNav] = useState("Health Stats");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
 
   return (
     <div className="min-h-screen bg-[#f5f3ef] font-sans flex flex-col">
@@ -555,20 +556,24 @@ export default function HealthProfile() {
 
           {/* Nav */}
           <nav className="flex-1 px-3 space-y-0.5">
-            {navItems.map((item) => (
-              <button
-                key={item.label}
-                onClick={() => { setActiveNav(item.label); setSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                  activeNav === item.label
-                    ? "bg-[#f0ede8] text-[#1a2e2a] font-semibold"
-                    : "text-gray-400 hover:text-[#1a2e2a] hover:bg-gray-50"
-                }`}
-              >
-                <Icon d={item.icon} size={17} />
-                {item.label}
-              </button>
-            ))}
+            {navItems.map((item) => {
+              const active = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.label}
+                  to={item.path}
+                  onClick={() => setSidebarOpen(false)}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    active
+                      ? "bg-[#f0ede8] text-[#1a2e2a] font-semibold"
+                      : "text-gray-400 hover:text-[#1a2e2a] hover:bg-gray-50"
+                  }`}
+                >
+                  <Icon d={item.icon} size={17} />
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* New Meal Plan CTA */}

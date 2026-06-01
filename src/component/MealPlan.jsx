@@ -468,12 +468,12 @@ const CircularProgress = ({ pct }) => {
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const NAV = [
-  { icon: "grid",     label: "Dashboard", path: "/dashboard" },
-  { icon: "fork",     label: "Meal Plans", path: "/meals" },
-  { icon: "chart",    label: "Health Stats", path: "/dashboard" },
-  { icon: "calendar", label: "Consultations", path: "/dashboard" },
-  { icon: "bag",      label: "Orders", path: "/dashboard" },
-  { icon: "gear",     label: "Settings", path: "/dashboard" },
+  { icon: "grid",     label: "Dashboard",     path: "/dashboard"     },
+  { icon: "fork",     label: "Meal Plans",    path: "/meals"         },
+  { icon: "chart",    label: "Health Stats",  path: "/healthprofile" },
+  { icon: "calendar", label: "Consultations", path: "/consultations" },
+  { icon: "bag",      label: "Orders",        path: "/orders"        },
+  { icon: "gear",     label: "Settings",      path: "/security"      },
 ];
 
 const SWAPS = [

@@ -1426,13 +1426,13 @@ const Icon = {
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const navItems = [
-  { id: "dashboard", label: "Dashboard", icon: "Home", path: "/dashboard" },
-  { id: "meals", label: "Meal Plans", icon: "Fork", path: "/meals" },
-  { id: "healthStats", label: "Health Stats", icon: "Calendar", path: "/dashboard" },
-  { id: "consultations", label: "Consultations", icon: "Chart", path: "/dashboard" },
-  { id: "orders", label: "Orders", icon: "Heart", path: "/dashboard" },
-  { id: "subscriptions", label: "Subscriptions", icon: "Monitor", path: "/dashboard" },
-  { id: "profile", label: "Settings", icon: "User", path: "/dashboard" },
+  { id: "dashboard",     label: "Dashboard",     icon: "Home",     path: "/dashboard"    },
+  { id: "meals",         label: "Meal Plans",    icon: "Fork",     path: "/meals"        },
+  { id: "healthStats",   label: "Health Stats",  icon: "Calendar", path: "/healthprofile" },
+  { id: "consultations", label: "Consultations", icon: "Chart",    path: "/consultations" },
+  { id: "orders",        label: "Orders",        icon: "Heart",    path: "/orders"       },
+  { id: "subscriptions", label: "Subscriptions", icon: "Monitor",  path: "/dashboard"    },
+  { id: "profile",       label: "Settings",      icon: "User",     path: "/security"     },
 ];
 
 const searchSuggestions = [
@@ -1621,11 +1621,11 @@ function Sidebar({ collapsed, setCollapsed }) {
 
       {/* Bottom */}
       <div className="border-t border-white/10 px-2 py-4 space-y-1">
-        <button title={collapsed ? "Settings" : ""}
+        <Link to="/security" title={collapsed ? "Settings" : ""}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/60 hover:bg-white/10 hover:text-white transition-all ${collapsed ? "justify-center" : ""}`}>
           <Icon.Settings />
           {!collapsed && <span>Settings</span>}
-        </button>
+        </Link>
         <button onClick={() => setCollapsed(c => !c)} title={collapsed ? "Expand" : "Collapse"}
           className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/50 hover:bg-white/10 hover:text-white transition-all ${collapsed ? "justify-center" : ""}`}>
           <span className={`transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`}>
