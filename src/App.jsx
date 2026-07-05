@@ -54,6 +54,8 @@ import Consultations      from "./components/Consultations.jsx";
 import Orders             from "./components/Orders.jsx";
 import SecuritySettings   from "./components/SecuritySettings.jsx";
 import Subscriptions      from "./components/Subscriptions.jsx";
+import AdminDashboard from "./components/AdminDashboard.jsx";
+import AdminMealManagemer from "./components/AdminMealManager.jsx";
  
 function App() {
   return (
@@ -73,6 +75,10 @@ function App() {
           <Route path="/orders"        element={<Orders />} />
           <Route path="/security"      element={<SecuritySettings />} />
           <Route path="/subscriptions" element={<Subscriptions />} />
+
+          {/* ── Admin pages ───────────────────────────── */}
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/meal-manager" element={<AdminMealManager />} />
  
           {/* ── Fallback → Landing ───────────────────────── */}
           <Route path="*"              element={<Navigate to="/" replace />} />

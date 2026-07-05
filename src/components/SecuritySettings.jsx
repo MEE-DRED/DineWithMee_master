@@ -767,7 +767,7 @@ export default function SecuritySettings() {
                   </div>
                 )}
 
-                <button type="submit" className="bg-[#2d5a3d] hover:bg-[#234830] active:scale-[0.98] text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-all duration-150 shadow-sm">
+                <button type="submit" className="bg-[#000201] hover:bg-[#234830] active:scale-[0.98] text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-all duration-150 shadow-sm">
                   Update Password
                 </button>
               </form>

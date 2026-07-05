@@ -898,8 +898,8 @@ export default function LandingPage() {
           <div className="flex items-center gap-2">
             <Logo size={30} />
             <div className="leading-none">
-              <p className="text-xs font-extrabold text-[#1a3d2e]">Dine</p>
-              <p className="text-xs font-extrabold text-[#1a3d2e]">with Mee</p>
+              <p className="text-xs font-extrabold text-[#1a3d2e]">DineWithMee</p>
+              {/* <p className="text-xs font-extrabold text-[#1a3d2e]">with Mee</p> */}
             </div>
           </div>
 
