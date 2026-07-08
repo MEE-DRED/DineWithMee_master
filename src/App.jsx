@@ -74,7 +74,9 @@ import SignUpPage from "./components/SignupPage.jsx";
 import AdminAll from "./components/AdminAll.jsx";
 // import AdminDashboard from "./components/AdminDashboard.jsx";
 // import AdminMealManager from "./components/AdminMealManager.jsx"; // Fixed variable name to match route
- 
+
+// Pharmacist Module Components
+import Pharmacist from "./components/Pharmacist.jsx";
 
 function App() {
   return (
@@ -98,7 +100,12 @@ function App() {
           {/* ── Admin pages ───────────────────────────── */}
           <Route path="/admin"         element={<AdminAll />} />
           {/* <Route path="/adminmealmgr"  element={<AdminMealManager />} /> Now matches the import exactly */}
- 
+
+
+          {/* ── Pharmacist pages ───────────────────────────── */}
+          <Route path="/pharmacist"    element={<Pharmacist />} />
+
+
           {/* ── Fallback → Landing ───────────────────────── */}
           <Route path="*"              element={<Navigate to="/" replace />} />
         </Routes>
