@@ -761,7 +761,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             <p className="text-sm font-black text-white tracking-tight leading-tight">System Terminal</p>
-            <p className="text-[10px] text-emerald-500 font-bold tracking-widest uppercase">Dine With Mee</p>
+            <p className="text-[10px] text-emerald-500 font-bold tracking-widest uppercase">DineWithMee</p>
           </div>
         </div>
 

@@ -71,9 +71,11 @@ import SignInPage from "./components/SignInPage.jsx";
 import SignUpPage from "./components/SignupPage.jsx";
 
 // Admin Module Components
-import AdminDashboard from "./components/AdminDashboard.jsx";
-import AdminMealManager from "./components/AdminMealManager.jsx"; // Fixed variable name to match route
+import AdminAll from "./components/AdminAll.jsx";
+// import AdminDashboard from "./components/AdminDashboard.jsx";
+// import AdminMealManager from "./components/AdminMealManager.jsx"; // Fixed variable name to match route
  
+
 function App() {
   return (
     <Router>
@@ -94,8 +96,8 @@ function App() {
           <Route path="/subscriptions" element={<Subscriptions />} />
 
           {/* ── Admin pages ───────────────────────────── */}
-          <Route path="/admin"         element={<AdminDashboard />} />
-          <Route path="/adminmealmgr"  element={<AdminMealManager />} /> {/* Now matches the import exactly */}
+          <Route path="/admin"         element={<AdminAll />} />
+          {/* <Route path="/adminmealmgr"  element={<AdminMealManager />} /> Now matches the import exactly */}
  
           {/* ── Fallback → Landing ───────────────────────── */}
           <Route path="*"              element={<Navigate to="/" replace />} />
