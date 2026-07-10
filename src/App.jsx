@@ -78,6 +78,9 @@ import AdminAll from "./components/AdminAll.jsx";
 // Pharmacist Module Components
 import Pharmacist from "./components/Pharmacist.jsx";
 
+//Clincal Nutritionist Module Components
+import ClinicalNutritionist from "./components/ClinicalNutritionist.jsx";
+
 function App() {
   return (
     <Router>
@@ -104,6 +107,9 @@ function App() {
 
           {/* ── Pharmacist pages ───────────────────────────── */}
           <Route path="/pharmacist"    element={<Pharmacist />} />
+
+          {/* ── Clinical Nutritionist pages ───────────────────────────── */}
+          <Route path="/clinicalnutritionist" element={<ClinicalNutritionist />} />
 
 
           {/* ── Fallback → Landing ───────────────────────── */}
