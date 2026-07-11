@@ -100,16 +100,21 @@ function App() {
           <Route path="/security"      element={<SecuritySettings />} />
           <Route path="/subscriptions" element={<Subscriptions />} />
 
+          {/* Connect the administration pathways here */}
+        <Route path="/AdminAll" element={<AdminAll />} />
+        <Route path="/ClinicalNutritional" element={<ClinicalNutritionist />} />
+        <Route path="/Pharmacist" element={<Pharmacist />} />
+
           {/* ── Admin pages ───────────────────────────── */}
-          <Route path="/admin"         element={<AdminAll />} />
+          {/* <Route path="/admin"         element={<AdminAll />} /> */}
           {/* <Route path="/adminmealmgr"  element={<AdminMealManager />} /> Now matches the import exactly */}
 
 
           {/* ── Pharmacist pages ───────────────────────────── */}
-          <Route path="/pharmacist"    element={<Pharmacist />} />
+          {/* <Route path="/pharmacist"    element={<Pharmacist />} /> */}
 
           {/* ── Clinical Nutritionist pages ───────────────────────────── */}
-          <Route path="/clinicalnutritionist" element={<ClinicalNutritionist />} />
+          {/* <Route path="/clinicalnutritionist" element={<ClinicalNutritionist />} /> */}
 
 
           {/* ── Fallback → Landing ───────────────────────── */}
