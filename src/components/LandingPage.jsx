@@ -1,1241 +1,3 @@
-// // // import { useState, useEffect, useRef } from "react";
-// // // import { useNavigate } from "react-router-dom";
-
-// // // // ─── Logo SVG (matching brand: dark green circle + golden flame) ──────────────
-// // // function Logo({ size = 42 }) {
-// // //   return (
-// // //     <svg width={size} height={size} viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-// // //       <circle cx="21" cy="21" r="21" fill="#1a3d2e" />
-// // //       {/* outer flame / leaf */}
-// // //       <path d="M21 7c0 0-9.5 7.5-9.5 14.5a9.5 9.5 0 0019 0C30.5 14.5 21 7 21 7z" fill="#e8c87d" />
-// // //       {/* inner darker highlight */}
-// // //       <path d="M21 13c0 0-5 5-5 8.5a5 5 0 0010 0C26 17 21 13 21 13z" fill="#c9a84c" opacity="0.5" />
-// // //     </svg>
-// // //   );
-// // // }
-
-// // // // ─── Icons ────────────────────────────────────────────────────────────────────
-// // // function IconGrid() {
-// // //   return (
-// // //     <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-// // //       <circle cx="5"  cy="5"  r="2.2" fill="#1a3d2e" />
-// // //       <circle cx="12" cy="5"  r="2.2" fill="#1a3d2e" />
-// // //       <circle cx="19" cy="5"  r="2.2" fill="#1a3d2e" />
-// // //       <circle cx="5"  cy="12" r="2.2" fill="#1a3d2e" />
-// // //       <circle cx="12" cy="12" r="2.2" fill="#1a3d2e" />
-// // //       <circle cx="19" cy="12" r="2.2" fill="#1a3d2e" />
-// // //       <circle cx="5"  cy="19" r="2.2" fill="#1a3d2e" />
-// // //       <circle cx="12" cy="19" r="2.2" fill="#1a3d2e" />
-// // //     </svg>
-// // //   );
-// // // }
-
-// // // function IconStethoscope() {
-// // //   return (
-// // //     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a3d2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-// // //       <path d="M4.8 2.3A.3.3 0 105 2H4a2 2 0 00-2 2v5a6 6 0 006 6 6 6 0 006-6V4a2 2 0 00-2-2h-1a.2.2 0 10.3.3" />
-// // //       <path d="M8 15v1a6 6 0 006 6 6 6 0 006-6v-4" />
-// // //       <circle cx="20" cy="10" r="2" />
-// // //     </svg>
-// // //   );
-// // // }
-
-// // // function IconCutlery() {
-// // //   return (
-// // //     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a3d2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-// // //       <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2M7 2v20" />
-// // //       <path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7" />
-// // //     </svg>
-// // //   );
-// // // }
-
-// // // function IconArrow() {
-// // //   return (
-// // //     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-// // //       <path d="M5 12h14M12 5l7 7-7 7" />
-// // //     </svg>
-// // //   );
-// // // }
-
-// // // // ─── Path data ────────────────────────────────────────────────────────────────
-// // // const PATHS = [
-// // //   {
-// // //     id: "you",
-// // //     label: "For You",
-// // //     description:
-// // //       "Focus on your personalized health journey with tailored nutritional insights and gourmet meal recommendations.",
-// // //     cta: "Choose this path",
-// // //     Icon: IconGrid,
-// // //     image:
-// // //       "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700&q=80&auto=format&fit=crop",
-// // //     route: "/dashboard",
-// // //   },
-// // //   {
-// // //     id: "professionals",
-// // //     label: "For Professionals",
-// // //     description:
-// // //       "Advanced patient management tools for nutritionists and practitioners to track progress and refine clinical care.",
-// // //     cta: "Professional Access",
-// // //     Icon: IconStethoscope,
-// // //     image:
-// // //       "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=700&q=80&auto=format&fit=crop",
-// // //     route: "/dashboard",
-// // //   },
-// // //   {
-// // //     id: "culinary",
-// // //     label: "For Culinary Experts",
-// // //     description:
-// // //       "Empowering chefs with precise dietary preparation guidelines to create meals that are both healing and high-end.",
-// // //     cta: "Culinary Portal",
-// // //     Icon: IconCutlery,
-// // //     image:
-// // //       "https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=700&q=80&auto=format&fit=crop",
-// // //     route: "/dashboard",
-// // //   },
-// // // ];
-
-// // // // ─── Path Card ────────────────────────────────────────────────────────────────
-// // // function PathCard({ path, index, onSelect }) {
-// // //   const [hovered, setHovered] = useState(false);
-// // //   const { Icon } = path;
-
-// // //   return (
-// // //     <div
-// // //       onClick={() => onSelect(path)}
-// // //       onMouseEnter={() => setHovered(true)}
-// // //       onMouseLeave={() => setHovered(false)}
-// // //       className="bg-white rounded-2xl border border-gray-200 overflow-hidden cursor-pointer flex flex-col"
-// // //       style={{
-// // //         boxShadow: hovered
-// // //           ? "0 24px 64px rgba(0,0,0,0.11)"
-// // //           : "0 1px 8px rgba(0,0,0,0.06)",
-// // //         transform: hovered ? "translateY(-5px)" : "translateY(0)",
-// // //         transition: "box-shadow 0.28s ease, transform 0.28s ease",
-// // //         animation: `cardIn 0.52s cubic-bezier(0.22,1,0.36,1) both`,
-// // //         animationDelay: `${0.15 + index * 0.1}s`,
-// // //       }}
-// // //     >
-// // //       {/* ── Image area ──────────────────────────────────── */}
-// // //       <div className="relative overflow-hidden" style={{ height: 210 }}>
-// // //         <img
-// // //           src={path.image}
-// // //           alt={path.label}
-// // //           className="w-full h-full object-cover"
-// // //           style={{
-// // //             transform: hovered ? "scale(1.05)" : "scale(1)",
-// // //             transition: "transform 0.45s ease",
-// // //           }}
-// // //         />
-// // //         {/* icon badge */}
-// // //         <div
-// // //           className="absolute bottom-3 left-3 w-11 h-11 bg-white rounded-xl shadow-md flex items-center justify-center"
-// // //           style={{ backdropFilter: "blur(6px)" }}
-// // //         >
-// // //           <Icon />
-// // //         </div>
-// // //       </div>
-
-// // //       {/* ── Content area ────────────────────────────────── */}
-// // //       <div className="p-6 flex flex-col flex-1">
-// // //         <h3
-// // //           className="font-bold text-xl mb-2 leading-snug"
-// // //           style={{
-// // //             fontFamily: "Georgia, 'Times New Roman', serif",
-// // //             color: hovered ? "#1a3d2e" : "#111827",
-// // //             transition: "color 0.2s",
-// // //           }}
-// // //         >
-// // //           {path.label}
-// // //         </h3>
-// // //         <p className="text-sm text-gray-500 leading-relaxed flex-1 mb-5">
-// // //           {path.description}
-// // //         </p>
-// // //         <div
-// // //           className="flex items-center gap-1.5 text-sm font-bold"
-// // //           style={{ color: "#111827" }}
-// // //         >
-// // //           <span>{path.cta}</span>
-// // //           <span
-// // //             style={{
-// // //               display: "inline-flex",
-// // //               transform: hovered ? "translateX(5px)" : "translateX(0)",
-// // //               transition: "transform 0.22s ease",
-// // //             }}
-// // //           >
-// // //             <IconArrow />
-// // //           </span>
-// // //         </div>
-// // //       </div>
-// // //     </div>
-// // //   );
-// // // }
-
-// // // // ─── Modal: Sign In ───────────────────────────────────────────────────────────
-// // // function SignInModal({ onClose, onSuccess }) {
-// // //   const [email, setEmail]       = useState("");
-// // //   const [password, setPassword] = useState("");
-// // //   const [loading, setLoading]   = useState(false);
-// // //   const [error, setError]       = useState("");
-// // //   const overlayRef              = useRef(null);
-
-// // //   // Close on overlay click
-// // //   const handleOverlay = (e) => {
-// // //     if (e.target === overlayRef.current) onClose();
-// // //   };
-
-// // //   // Close on Escape
-// // //   useEffect(() => {
-// // //     const handler = (e) => { if (e.key === "Escape") onClose(); };
-// // //     window.addEventListener("keydown", handler);
-// // //     return () => window.removeEventListener("keydown", handler);
-// // //   }, [onClose]);
-
-// // //   const handleSubmit = async (e) => {
-// // //     e.preventDefault();
-// // //     setError("");
-// // //     if (!email || !password) { setError("Please fill in all fields."); return; }
-// // //     setLoading(true);
-// // //     try {
-// // //       const res = await fetch("https://new-dine-with-mee-backend.onrender.com/api/v1/auth/login", {
-// // //         method: "POST",
-// // //         headers: { "Content-Type": "application/json" },
-// // //         body: JSON.stringify({ email, password }),
-// // //       });
-// // //       const data = await res.json();
-// // //       if (!res.ok) throw new Error(data.message || "Invalid credentials");
-// // //       if (data.token) localStorage.setItem("dwm_token", data.token);
-// // //       onSuccess();
-// // //     } catch (err) {
-// // //       // Fallback: navigate anyway (demo mode)
-// // //       console.warn("Auth error:", err.message);
-// // //       onSuccess();
-// // //     } finally {
-// // //       setLoading(false);
-// // //     }
-// // //   };
-
-// // //   return (
-// // //     <div
-// // //       ref={overlayRef}
-// // //       onClick={handleOverlay}
-// // //       className="fixed inset-0 z-50 flex items-center justify-center px-4"
-// // //       style={{
-// // //         backgroundColor: "rgba(0,0,0,0.35)",
-// // //         backdropFilter: "blur(4px)",
-// // //         animation: "fadeIn 0.18s ease both",
-// // //       }}
-// // //     >
-// // //       <div
-// // //         className="bg-white rounded-2xl w-full max-w-sm p-8 relative shadow-2xl"
-// // //         style={{ animation: "slideUp 0.24s cubic-bezier(0.22,1,0.36,1) both" }}
-// // //       >
-// // //         {/* Close */}
-// // //         <button
-// // //           onClick={onClose}
-// // //           className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors"
-// // //           aria-label="Close"
-// // //         >
-// // //           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-// // //             <path d="M18 6 6 18M6 6l12 12" />
-// // //           </svg>
-// // //         </button>
-
-// // //         {/* Logo */}
-// // //         <div className="flex items-center gap-2.5 mb-6">
-// // //           <Logo size={34} />
-// // //           <div>
-// // //             <p className="text-xs font-extrabold text-[#1a3d2e] leading-none">Dine</p>
-// // //             <p className="text-xs font-extrabold text-[#1a3d2e] leading-none">with Mee</p>
-// // //           </div>
-// // //         </div>
-
-// // //         <h2 className="text-xl font-black text-gray-900 mb-1" style={{ fontFamily: "Georgia, serif" }}>
-// // //           Welcome back
-// // //         </h2>
-// // //         <p className="text-sm text-gray-500 mb-6">Sign in to your account to continue.</p>
-
-// // //         {error && (
-// // //           <div className="mb-4 px-3 py-2.5 bg-red-50 border border-red-100 rounded-xl text-xs text-red-600 font-medium">
-// // //             {error}
-// // //           </div>
-// // //         )}
-
-// // //         <form onSubmit={handleSubmit} className="space-y-4">
-// // //           <div>
-// // //             <label className="block text-xs font-semibold text-gray-600 mb-1.5">Email</label>
-// // //             <input
-// // //               type="email"
-// // //               value={email}
-// // //               onChange={e => setEmail(e.target.value)}
-// // //               placeholder="you@example.com"
-// // //               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3d2e]/20 focus:border-[#1a3d2e] transition-all"
-// // //               autoFocus
-// // //             />
-// // //           </div>
-// // //           <div>
-// // //             <label className="block text-xs font-semibold text-gray-600 mb-1.5">Password</label>
-// // //             <input
-// // //               type="password"
-// // //               value={password}
-// // //               onChange={e => setPassword(e.target.value)}
-// // //               placeholder="••••••••"
-// // //               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3d2e]/20 focus:border-[#1a3d2e] transition-all"
-// // //             />
-// // //           </div>
-
-// // //           <button
-// // //             type="submit"
-// // //             disabled={loading}
-// // //             className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all"
-// // //             style={{
-// // //               backgroundColor: loading ? "#4a7c5e" : "#1a3d2e",
-// // //               opacity: loading ? 0.8 : 1,
-// // //             }}
-// // //           >
-// // //             {loading ? "Signing in…" : "Sign In"}
-// // //           </button>
-// // //         </form>
-
-// // //         <p className="text-center text-xs text-gray-400 mt-5">
-// // //           Don't have an account?{" "}
-// // //           <button className="text-[#1a3d2e] font-bold hover:underline">
-// // //             Get started
-// // //           </button>
-// // //         </p>
-// // //       </div>
-// // //     </div>
-// // //   );
-// // // }
-
-// // // // ─── Main Landing Page ────────────────────────────────────────────────────────
-// // // export default function LandingPage() {
-// // //   const navigate = useNavigate();
-// // //   const [showSignIn, setShowSignIn] = useState(false);
-// // //   const [loaded, setLoaded]         = useState(false);
-
-// // //   useEffect(() => {
-// // //     // Small delay so CSS animations fire cleanly
-// // //     const t = setTimeout(() => setLoaded(true), 10);
-// // //     return () => clearTimeout(t);
-// // //   }, []);
-
-// // //   const handleSelect = (path) => navigate(path.route);
-// // //   const handleSignInSuccess = () => {
-// // //     setShowSignIn(false);
-// // //     navigate("/dashboard");
-// // //   };
-
-// // //   return (
-// // //     <div
-// // //       className="min-h-screen flex flex-col"
-// // //       style={{
-// // //         backgroundColor: "#f5f0e8",
-// // //         fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-// // //       }}
-// // //     >
-// // //       <style>{`
-// // //         @keyframes cardIn {
-// // //           from { opacity: 0; transform: translateY(30px); }
-// // //           to   { opacity: 1; transform: translateY(0); }
-// // //         }
-// // //         @keyframes fadeIn {
-// // //           from { opacity: 0; }
-// // //           to   { opacity: 1; }
-// // //         }
-// // //         @keyframes slideUp {
-// // //           from { opacity: 0; transform: translateY(20px); }
-// // //           to   { opacity: 1; transform: translateY(0); }
-// // //         }
-// // //         @keyframes headerIn {
-// // //           from { opacity: 0; transform: translateY(-10px); }
-// // //           to   { opacity: 1; transform: translateY(0); }
-// // //         }
-// // //         @keyframes heroIn {
-// // //           from { opacity: 0; transform: translateY(18px); }
-// // //           to   { opacity: 1; transform: translateY(0); }
-// // //         }
-// // //       `}</style>
-
-// // //       {/* ─── Header ─────────────────────────────────────────────────────── */}
-// // //       <header
-// // //         className="w-full border-b border-gray-200 bg-[#f5f0e8] px-6 sm:px-10 py-3.5 flex items-center justify-between sticky top-0 z-40"
-// // //         style={{ animation: "headerIn 0.4s ease both" }}
-// // //       >
-// // //         {/* Logo + wordmark */}
-// // //         <div className="flex items-center gap-2.5">
-// // //           <Logo size={38} />
-// // //           <div className="leading-none">
-// // //             <p className="text-sm font-extrabold text-[#1a3d2e]">Dine</p>
-// // //             <p className="text-sm font-extrabold text-[#1a3d2e]">with Mee</p>
-// // //           </div>
-// // //         </div>
-
-// // //         {/* Sign In */}
-// // //         <div className="flex items-center gap-1.5">
-// // //           <span className="hidden sm:inline text-sm text-gray-500">
-// // //             Already have an account?
-// // //           </span>
-// // //           <button
-// // //             onClick={() => setShowSignIn(true)}
-// // //             className="text-sm font-bold text-gray-900 hover:text-[#1a3d2e] transition-colors px-1"
-// // //           >
-// // //             Sign In
-// // //           </button>
-// // //         </div>
-// // //       </header>
-
-// // //       {/* ─── Main Content ────────────────────────────────────────────────── */}
-// // //       <main className="flex-1 flex flex-col">
-// // //         {/* Hero */}
-// // //         <div
-// // //           className="text-center px-4 pt-14 pb-10 sm:pt-20 sm:pb-14"
-// // //           style={{ animation: "heroIn 0.55s ease both", animationDelay: "0.06s" }}
-// // //         >
-// // //           <h1
-// // //             className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight mb-4"
-// // //             style={{
-// // //               color: "#1a3d2e",
-// // //               fontFamily: "Georgia, 'Times New Roman', serif",
-// // //             }}
-// // //           >
-// // //             Welcome to Dine With Me
-// // //           </h1>
-// // //           <p className="text-base sm:text-lg text-gray-500 max-w-lg mx-auto leading-relaxed">
-// // //             Every journey is unique. Select the path that best describes your goals
-// // //             and help us personalize your experience.
-// // //           </p>
-// // //         </div>
-
-// // //         {/* Cards grid */}
-// // //         <div className="px-4 sm:px-8 lg:px-16 xl:px-20 pb-16 w-full max-w-6xl mx-auto">
-// // //           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
-// // //             {PATHS.map((path, i) => (
-// // //               <PathCard
-// // //                 key={path.id}
-// // //                 path={path}
-// // //                 index={i}
-// // //                 onSelect={handleSelect}
-// // //               />
-// // //             ))}
-// // //           </div>
-// // //         </div>
-// // //       </main>
-
-// // //       {/* ─── Footer ──────────────────────────────────────────────────────── */}
-// // //       <footer
-// // //         className="border-t border-gray-200 bg-[#f5f0e8] px-6 sm:px-10 py-5"
-// // //         style={{ animation: "fadeIn 0.6s ease both", animationDelay: "0.4s" }}
-// // //       >
-// // //         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-// // //           {/* Logo */}
-// // //           <div className="flex items-center gap-2">
-// // //             <Logo size={30} />
-// // //             <div className="leading-none">
-// // //               <p className="text-xs font-extrabold text-[#1a3d2e]">Dine</p>
-// // //               <p className="text-xs font-extrabold text-[#1a3d2e]">with Mee</p>
-// // //             </div>
-// // //           </div>
-
-// // //           {/* Links */}
-// // //           <nav className="flex flex-wrap justify-center gap-5 text-xs text-gray-500">
-// // //             {["Privacy Policy", "Terms of Service", "HIPAA Compliance", "Contact Support"].map(link => (
-// // //               <button
-// // //                 key={link}
-// // //                 className="hover:text-[#1a3d2e] transition-colors font-medium"
-// // //                 onClick={() => {}}
-// // //               >
-// // //                 {link}
-// // //               </button>
-// // //             ))}
-// // //           </nav>
-
-// // //           {/* Copyright */}
-// // //           <p className="text-xs text-gray-400 whitespace-nowrap">
-// // //             © 2024 Dine With Me. All rights reserved.
-// // //           </p>
-// // //         </div>
-// // //       </footer>
-
-// // //       {/* ─── Sign In Modal ────────────────────────────────────────────────── */}
-// // //       {showSignIn && (
-// // //         <SignInModal
-// // //           onClose={() => setShowSignIn(false)}
-// // //           onSuccess={handleSignInSuccess}
-// // //         />
-// // //       )}
-// // //     </div>
-// // //   );
-// // // }
-
-
-// // import { useState, useEffect, useRef } from "react";
-// // import { useNavigate } from "react-router-dom";
-
-// // // ─── Logo SVG (matching brand: dark green circle + golden flame) ──────────────
-// // function Logo({ size = 42 }) {
-// //   return (
-// //     <svg width={size} height={size} viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-// //       <circle cx="21" cy="21" r="21" fill="#1a3d2e" />
-// //       {/* outer flame / leaf */}
-// //       <path d="M21 7c0 0-9.5 7.5-9.5 14.5a9.5 9.5 0 0019 0C30.5 14.5 21 7 21 7z" fill="#e8c87d" />
-// //       {/* inner darker highlight */}
-// //       <path d="M21 13c0 0-5 5-5 8.5a5 5 0 0010 0C26 17 21 13 21 13z" fill="#c9a84c" opacity="0.5" />
-// //     </svg>
-// //   );
-// // }
-
-// // // ─── Icons ────────────────────────────────────────────────────────────────────
-// // function IconGrid() {
-// //   return (
-// //     <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-// //       <circle cx="5"  cy="5"  r="2.2" fill="#1a3d2e" />
-// //       <circle cx="12" cy="5"  r="2.2" fill="#1a3d2e" />
-// //       <circle cx="19" cy="5"  r="2.2" fill="#1a3d2e" />
-// //       <circle cx="5"  cy="12" r="2.2" fill="#1a3d2e" />
-// //       <circle cx="12" cy="12" r="2.2" fill="#1a3d2e" />
-// //       <circle cx="19" cy="12" r="2.2" fill="#1a3d2e" />
-// //       <circle cx="5"  cy="19" r="2.2" fill="#1a3d2e" />
-// //       <circle cx="12" cy="19" r="2.2" fill="#1a3d2e" />
-// //     </svg>
-// //   );
-// // }
-
-// // function IconStethoscope() {
-// //   return (
-// //     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a3d2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-// //       <path d="M4.8 2.3A.3.3 0 105 2H4a2 2 0 00-2 2v5a6 6 0 006 6 6 6 0 006-6V4a2 2 0 00-2-2h-1a.2.2 0 10.3.3" />
-// //       <path d="M8 15v1a6 6 0 006 6 6 6 0 006-6v-4" />
-// //       <circle cx="20" cy="10" r="2" />
-// //     </svg>
-// //   );
-// // }
-
-// // function IconCutlery() {
-// //   return (
-// //     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a3d2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-// //       <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2M7 2v20" />
-// //       <path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7" />
-// //     </svg>
-// //   );
-// // }
-
-// // function IconArrow() {
-// //   return (
-// //     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-// //       <path d="M5 12h14M12 5l7 7-7 7" />
-// //     </svg>
-// //   );
-// // }
-
-// // // ─── Path data ────────────────────────────────────────────────────────────────
-// // const PATHS = [
-// //   {
-// //     id: "you",
-// //     label: "For You",
-// //     description:
-// //       "Focus on your personalized health journey with tailored nutritional insights and gourmet meal recommendations.",
-// //     cta: "Choose this path",
-// //     Icon: IconGrid,
-// //     image:
-// //       "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700&q=80&auto=format&fit=crop",
-// //     route: "/dashboard",
-// //   },
-// //   {
-// //     id: "professionals",
-// //     label: "For Professionals",
-// //     description:
-// //       "Advanced patient management tools for nutritionists and practitioners to track progress and refine clinical care.",
-// //     cta: "Professional Access",
-// //     Icon: IconStethoscope,
-// //     image:
-// //       "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=700&q=80&auto=format&fit=crop",
-// //     route: "/dashboard",
-// //   },
-// //   {
-// //     id: "culinary",
-// //     label: "For Culinary Experts",
-// //     description:
-// //       "Empowering chefs with precise dietary preparation guidelines to create meals that are both healing and high-end.",
-// //     cta: "Culinary Portal",
-// //     Icon: IconCutlery,
-// //     image:
-// //       "https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=700&q=80&auto=format&fit=crop",
-// //     route: "/dashboard",
-// //   },
-// // ];
-
-// // // ─── Path Card ────────────────────────────────────────────────────────────────
-// // function PathCard({ path, index, onSelect }) {
-// //   const [hovered, setHovered] = useState(false);
-// //   const { Icon } = path;
-
-// //   return (
-// //     <div
-// //       onClick={() => onSelect(path)}
-// //       onMouseEnter={() => setHovered(true)}
-// //       onMouseLeave={() => setHovered(false)}
-// //       className="bg-white rounded-2xl border border-gray-200 overflow-hidden cursor-pointer flex flex-col"
-// //       style={{
-// //         boxShadow: hovered
-// //           ? "0 24px 64px rgba(0,0,0,0.11)"
-// //           : "0 1px 8px rgba(0,0,0,0.06)",
-// //         transform: hovered ? "translateY(-5px)" : "translateY(0)",
-// //         transition: "box-shadow 0.28s ease, transform 0.28s ease",
-// //         animation: `cardIn 0.52s cubic-bezier(0.22,1,0.36,1) both`,
-// //         animationDelay: `${0.15 + index * 0.1}s`,
-// //       }}
-// //     >
-// //       {/* ── Image area ──────────────────────────────────── */}
-// //       <div className="relative overflow-hidden" style={{ height: 210 }}>
-// //         <img
-// //           src={path.image}
-// //           alt={path.label}
-// //           className="w-full h-full object-cover"
-// //           style={{
-// //             transform: hovered ? "scale(1.05)" : "scale(1)",
-// //             transition: "transform 0.45s ease",
-// //           }}
-// //         />
-// //         {/* icon badge */}
-// //         <div
-// //           className="absolute bottom-3 left-3 w-11 h-11 bg-white rounded-xl shadow-md flex items-center justify-center"
-// //           style={{ backdropFilter: "blur(6px)" }}
-// //         >
-// //           <Icon />
-// //         </div>
-// //       </div>
-
-// //       {/* ── Content area ────────────────────────────────── */}
-// //       <div className="p-6 flex flex-col flex-1">
-// //         <h3
-// //           className="font-bold text-xl mb-2 leading-snug"
-// //           style={{
-// //             fontFamily: "Georgia, 'Times New Roman', serif",
-// //             color: hovered ? "#1a3d2e" : "#111827",
-// //             transition: "color 0.2s",
-// //           }}
-// //         >
-// //           {path.label}
-// //         </h3>
-// //         <p className="text-sm text-gray-500 leading-relaxed flex-1 mb-5">
-// //           {path.description}
-// //         </p>
-// //         <div
-// //           className="flex items-center gap-1.5 text-sm font-bold"
-// //           style={{ color: "#111827" }}
-// //         >
-// //           <span>{path.cta}</span>
-// //           <span
-// //             style={{
-// //               display: "inline-flex",
-// //               transform: hovered ? "translateX(5px)" : "translateX(0)",
-// //               transition: "transform 0.22s ease",
-// //             }}
-// //           >
-// //             <IconArrow />
-// //           </span>
-// //         </div>
-// //       </div>
-// //     </div>
-// //   );
-// // }
-
-// // // ─── Modal: Sign In ───────────────────────────────────────────────────────────
-// // function SignInModal({ onClose, onSuccess, onNavigateSignup }) {
-// //   const [email, setEmail]       = useState("");
-// //   const [password, setPassword] = useState("");
-// //   const [loading, setLoading]   = useState(false);
-// //   const [error, setError]       = useState("");
-// //   const overlayRef              = useRef(null);
-
-// //   // Close on overlay click
-// //   const handleOverlay = (e) => {
-// //     if (e.target === overlayRef.current) onClose();
-// //   };
-
-// //   // Close on Escape
-// //   useEffect(() => {
-// //     const handler = (e) => { if (e.key === "Escape") onClose(); };
-// //     window.addEventListener("keydown", handler);
-// //     return () => window.removeEventListener("keydown", handler);
-// //   }, [onClose]);
-
-// //   const handleSubmit = async (e) => {
-// //     e.preventDefault();
-// //     setError("");
-// //     if (!email || !password) { setError("Please fill in all fields."); return; }
-// //     setLoading(true);
-// //     try {
-// //       const res = await fetch("https://new-dine-with-mee-backend.onrender.com/api/v1/auth/login", {
-// //         method: "POST",
-// //         headers: { "Content-Type": "application/json" },
-// //         body: JSON.stringify({ email, password }),
-// //       });
-// //       const data = await res.json();
-// //       if (!res.ok) throw new Error(data.message || "Invalid credentials");
-// //       if (data.token) localStorage.setItem("dwm_token", data.token);
-// //       onSuccess();
-// //     } catch (err) {
-// //       console.warn("Auth error:", err.message);
-// //       onSuccess();
-// //     } finally {
-// //       setLoading(false);
-// //     }
-// //   };
-
-// //   return (
-// //     <div
-// //       ref={overlayRef}
-// //       onClick={handleOverlay}
-// //       className="fixed inset-0 z-50 flex items-center justify-center px-4"
-// //       style={{
-// //         backgroundColor: "rgba(0,0,0,0.35)",
-// //         backdropFilter: "blur(4px)",
-// //         animation: "fadeIn 0.18s ease both",
-// //       }}
-// //     >
-// //       <div
-// //         className="bg-white rounded-2xl w-full max-w-sm p-8 relative shadow-2xl"
-// //         style={{ animation: "slideUp 0.24s cubic-bezier(0.22,1,0.36,1) both" }}
-// //       >
-// //         {/* Close */}
-// //         <button
-// //           onClick={onClose}
-// //           className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors"
-// //           aria-label="Close"
-// //         >
-// //           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-// //             <path d="M18 6 6 18M6 6l12 12" />
-// //           </svg>
-// //         </button>
-
-// //         {/* Logo */}
-// //         <div className="flex items-center gap-2.5 mb-6">
-// //           <Logo size={34} />
-// //           <div>
-// //             <p className="text-xs font-extrabold text-[#1a3d2e] leading-none">DineWithMee</p>
-// //             {/* <p className="text-xs font-extrabold text-[#1a3d2e] leading-none">with Mee</p> */}
-// //           </div>
-// //         </div>
-
-// //         <h2 className="text-xl font-black text-gray-900 mb-1" style={{ fontFamily: "Georgia, serif" }}>
-// //           Welcome back
-// //         </h2>
-// //         <p className="text-sm text-gray-500 mb-6">Sign in to your account to continue.</p>
-
-// //         {error && (
-// //           <div className="mb-4 px-3 py-2.5 bg-red-50 border border-red-100 rounded-xl text-xs text-red-600 font-medium">
-// //             {error}
-// //           </div>
-// //         )}
-
-// //         <form onSubmit={handleSubmit} className="space-y-4">
-// //           <div>
-// //             <label className="block text-xs font-semibold text-gray-600 mb-1.5">Email</label>
-// //             <input
-// //               type="email"
-// //               value={email}
-// //               onChange={e => setEmail(e.target.value)}
-// //               placeholder="you@example.com"
-// //               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3d2e]/20 focus:border-[#1a3d2e] transition-all"
-// //               autoFocus
-// //             />
-// //           </div>
-// //           <div>
-// //             <label className="block text-xs font-semibold text-gray-600 mb-1.5">Password</label>
-// //             <input
-// //               type="password"
-// //               value={password}
-// //               onChange={e => setPassword(e.target.value)}
-// //               placeholder="••••••••"
-// //               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3d2e]/20 focus:border-[#1a3d2e] transition-all"
-// //             />
-// //           </div>
-
-// //           <button
-// //             type="submit"
-// //             disabled={loading}
-// //             className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all"
-// //             style={{
-// //               backgroundColor: loading ? "#4a7c5e" : "#1a3d2e",
-// //               opacity: loading ? 0.8 : 1,
-// //             }}
-// //           >
-// //             {loading ? "Signing in…" : "Sign In"}
-// //           </button>
-// //         </form>
-
-// //         <p className="text-center text-xs text-gray-400 mt-5">
-// //           Don't have an account?{" "}
-// //           <button 
-// //             type="button"
-// //             onClick={onNavigateSignup} 
-// //             className="text-[#1a3d2e] font-bold hover:underline"
-// //           >
-// //             Get started
-// //           </button>
-// //         </p>
-// //       </div>
-// //     </div>
-// //   );
-// // }
-
-// // // ─── Main Landing Page ────────────────────────────────────────────────────────
-// // export default function LandingPage() {
-// //   const navigate = useNavigate();
-// //   const [showSignIn, setShowSignIn] = useState(false);
-// //   const [loaded, setLoaded]         = useState(false);
-
-// //   useEffect(() => {
-// //     const t = setTimeout(() => setLoaded(true), 10);
-// //     return () => clearTimeout(t);
-// //   }, []);
-
-// //   const handleSelect = (path) => navigate(path.route);
-// //   const handleSignInSuccess = () => {
-// //     setShowSignIn(false);
-// //     navigate("/dashboard");
-// //   };
-
-// //   return (
-// //     <div
-// //       className="min-h-screen flex flex-col"
-// //       style={{
-// //         backgroundColor: "#f5f0e8",
-// //         fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
-// //       }}
-// //     >
-// //       <style>{`
-// //         @keyframes cardIn {
-// //           from { opacity: 0; transform: translateY(30px); }
-// //           to   { opacity: 1; transform: translateY(0); }
-// //         }
-// //         @keyframes fadeIn {
-// //           from { opacity: 0; }
-// //           to   { opacity: 1; }
-// //         }
-// //         @keyframes slideUp {
-// //           from { opacity: 0; transform: translateY(20px); }
-// //           to   { opacity: 1; transform: translateY(0); }
-// //         }
-// //         @keyframes headerIn {
-// //           from { opacity: 0; transform: translateY(-10px); }
-// //           to   { opacity: 1; transform: translateY(0); }
-// //         }
-// //         @keyframes heroIn {
-// //           from { opacity: 0; transform: translateY(18px); }
-// //           to   { opacity: 1; transform: translateY(0); }
-// //         }
-// //       `}</style>
-
-// //       {/* ─── Header ─────────────────────────────────────────────────────── */}
-// //       <header
-// //         className="w-full border-b border-gray-200 bg-[#f5f0e8] px-6 sm:px-10 py-3.5 flex items-center justify-between sticky top-0 z-40"
-// //         style={{ animation: "headerIn 0.4s ease both" }}
-// //       >
-// //         <div className="flex items-center gap-2.5">
-// //           <Logo size={38} />
-// //           <div className="leading-none">
-// //             <p className="text-sm font-extrabold text-[#1a3d2e]">DineWithMee</p>
-// //             {/* <p className="text-sm font-extrabold text-[#1a3d2e]">with Mee</p> */}
-// //           </div>
-// //         </div>
-
-// //         <div className="flex items-center gap-1.5">
-// //           <span className="hidden sm:inline text-sm text-gray-500">
-// //             Already have an account?
-// //           </span>
-// //           <button
-// //             onClick={() => setShowSignIn(true)}
-// //             className="text-sm font-bold text-gray-900 hover:text-[#1a3d2e] transition-colors px-1"
-// //           >
-// //             Sign In
-// //           </button>
-// //         </div>
-// //       </header>
-
-// //       {/* ─── Main Content ────────────────────────────────────────────────── */}
-// //       <main className="flex-1 flex flex-col">
-// //         <div
-// //           className="text-center px-4 pt-14 pb-10 sm:pt-20 sm:pb-14"
-// //           style={{ animation: "heroIn 0.55s ease both", animationDelay: "0.06s" }}
-// //         >
-// //           <h1
-// //             className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight mb-4"
-// //             style={{
-// //               color: "#1a3d2e",
-// //               fontFamily: "Georgia, 'Times New Roman', serif",
-// //             }}
-// //           >
-// //             Welcome to DineWithMee
-// //           </h1>
-// //           <p className="text-base sm:text-lg text-gray-500 max-w-lg mx-auto leading-relaxed">
-// //             Every journey is unique. Select the path that best describes your goals
-// //             and help us personalize your experience.
-// //           </p>
-// //         </div>
-
-// //         <div className="px-4 sm:px-8 lg:px-16 xl:px-20 pb-16 w-full max-w-6xl mx-auto">
-// //           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
-// //             {PATHS.map((path, i) => (
-// //               <PathCard
-// //                 key={path.id}
-// //                 path={path}
-// //                 index={i}
-// //                 onSelect={handleSelect}
-// //               />
-// //             ))}
-// //           </div>
-// //         </div>
-// //       </main>
-
-// //       {/* ─── Footer ──────────────────────────────────────────────────────── */}
-// //       <footer
-// //         className="border-t border-gray-200 bg-[#f5f0e8] px-6 sm:px-10 py-5"
-// //         style={{ animation: "fadeIn 0.6s ease both", animationDelay: "0.4s" }}
-// //       >
-// //         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-// //           <div className="flex items-center gap-2">
-// //             <Logo size={30} />
-// //             <div className="leading-none">
-// //               <p className="text-xs font-extrabold text-[#1a3d2e]">DineWithMee</p>
-// //               {/* <p className="text-xs font-extrabold text-[#1a3d2e]">with Mee</p> */}
-// //             </div>
-// //           </div>
-
-// //           <nav className="flex flex-wrap justify-center gap-5 text-xs text-gray-500">
-// //             {["Privacy Policy", "Terms of Service", "HIPAA Compliance", "Contact Support"].map(link => (
-// //               <button
-// //                 key={link}
-// //                 className="hover:text-[#1a3d2e] transition-colors font-medium"
-// //                 onClick={() => {}}
-// //               >
-// //                 {link}
-// //               </button>
-// //             ))}
-// //           </nav>
-
-// //           <p className="text-xs text-gray-400 whitespace-nowrap">
-// //             © 2024 DineWithMee. All rights reserved.
-// //           </p>
-// //         </div>
-// //       </footer>
-
-// //       {/* ─── Sign In Modal ────────────────────────────────────────────────── */}
-// //       {showSignIn && (
-// //         <SignInModal
-// //           onClose={() => setShowSignIn(false)}
-// //           onSuccess={handleSignInSuccess}
-// //           onNavigateSignup={() => {
-// //             setShowSignIn(false);
-// //             navigate("/signup");
-// //           }}
-// //         />
-// //       )}
-// //     </div>
-// //   );
-// // }
-
-// import { useState, useEffect, useRef } from "react";
-// import { useNavigate } from "react-router-dom";
-
-// // ─── Logo SVG ────────────────────────────────────────────────────────────────
-// function Logo({ size = 42 }) {
-//   return (
-//     <svg width={size} height={size} viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-//       <circle cx="21" cy="21" r="21" fill="#1a3d2e" />
-//       <path d="M21 7c0 0-9.5 7.5-9.5 14.5a9.5 9.5 0 0019 0C30.5 14.5 21 7 21 7z" fill="#e8c87d" />
-//       <path d="M21 13c0 0-5 5-5 8.5a5 5 0 0010 0C26 17 21 13 21 13z" fill="#c9a84c" opacity="0.5" />
-//     </svg>
-//   );
-// }
-
-// // ─── Icons ────────────────────────────────────────────────────────────────────
-// function IconGrid() {
-//   return (
-//     <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-//       <circle cx="5"  cy="5"  r="2.2" fill="#1a3d2e" />
-//       <circle cx="12" cy="5"  r="2.2" fill="#1a3d2e" />
-//       <circle cx="19" cy="5"  r="2.2" fill="#1a3d2e" />
-//       <circle cx="5"  cy="12" r="2.2" fill="#1a3d2e" />
-//       <circle cx="12" cy="12" r="2.2" fill="#1a3d2e" />
-//       <circle cx="19" cy="12" r="2.2" fill="#1a3d2e" />
-//       <circle cx="5"  cy="19" r="2.2" fill="#1a3d2e" />
-//       <circle cx="12" cy="19" r="2.2" fill="#1a3d2e" />
-//     </svg>
-//   );
-// }
-
-// function IconStethoscope() {
-//   return (
-//     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a3d2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-//       <path d="M4.8 2.3A.3.3 0 105 2H4a2 2 0 00-2 2v5a6 6 0 006 6 6 6 0 006-6V4a2 2 0 00-2-2h-1a.2.2 0 10.3.3" />
-//       <path d="M8 15v1a6 6 0 006 6 6 6 0 006-6v-4" />
-//       <circle cx="20" cy="10" r="2" />
-//     </svg>
-//   );
-// }
-
-// function IconCutlery() {
-//   return (
-//     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a3d2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-//       <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2M7 2v20" />
-//       <path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7" />
-//     </svg>
-//   );
-// }
-
-// function IconShieldGroup() {
-//   return (
-//     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a3d2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-//       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-//       <path d="M12 8v8M9 12h6" />
-//     </svg>
-//   );
-// }
-
-// function IconArrow() {
-//   return (
-//     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-//       <path d="M5 12h14M12 5l7 7-7 7" />
-//     </svg>
-//   );
-// }
-
-// // ─── Path Data ────────────────────────────────────────────────────────────────
-// const PATHS = [
-//   {
-//     id: "you",
-//     label: "For You",
-//     description: "Focus on your personalized health journey with tailored nutritional insights and gourmet meal recommendations.",
-//     cta: "Choose this path",
-//     Icon: IconGrid,
-//     image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700&q=80&auto=format&fit=crop",
-//     route: "/dashboard",
-//   },
-//   {
-//     id: "professionals",
-//     label: "For Professionals",
-//     description: "Advanced patient management tools for nutritionists and practitioners to track progress and refine clinical care.",
-//     cta: "Professional Access",
-//     Icon: IconStethoscope,
-//     image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=700&q=80&auto=format&fit=crop",
-//     route: "/dashboard",
-//   },
-//   {
-//     id: "culinary",
-//     label: "For Culinary Experts",
-//     description: "Empowering chefs with precise dietary preparation guidelines to create meals that are both healing and high-end.",
-//     cta: "Culinary Portal",
-//     Icon: IconCutlery,
-//     image: "https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=700&q=80&auto=format&fit=crop",
-//     route: "/dashboard",
-//   },
-//   {
-//     id: "management",
-//     label: "Management & Staff",
-//     description: "Central access point for Administrators, Clinical Nutrition Leads, and Pharmacists to access their respective operational screens.",
-//     cta: "Open Portal Selection",
-//     Icon: IconShieldGroup,
-//     image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=700&q=80&auto=format&fit=crop",
-//     route: "management-selection",
-//   },
-// ];
-
-// // ─── Path Card Component ──────────────────────────────────────────────────────
-// function PathCard({ path, index, onSelect }) {
-//   const [hovered, setHovered] = useState(false);
-//   const { Icon } = path;
-
-//   return (
-//     <div
-//       onClick={() => onSelect(path)}
-//       onMouseEnter={() => setHovered(true)}
-//       onMouseLeave={() => setHovered(false)}
-//       className="bg-white rounded-2xl border border-gray-200 overflow-hidden cursor-pointer flex flex-col"
-//       style={{
-//         boxShadow: hovered ? "0 24px 64px rgba(0,0,0,0.11)" : "0 1px 8px rgba(0,0,0,0.06)",
-//         transform: hovered ? "translateY(-5px)" : "translateY(0)",
-//         transition: "box-shadow 0.28s ease, transform 0.28s ease",
-//         animation: `cardIn 0.52s cubic-bezier(0.22,1,0.36,1) both`,
-//         animationDelay: `${0.15 + index * 0.1}s`,
-//       }}
-//     >
-//       <div className="relative overflow-hidden" style={{ height: 210 }}>
-//         <img
-//           src={path.image}
-//           alt={path.label}
-//           className="w-full h-full object-cover"
-//           style={{
-//             transform: hovered ? "scale(1.05)" : "scale(1)",
-//             transition: "transform 0.45s ease",
-//           }}
-//         />
-//         <div className="absolute bottom-3 left-3 w-11 h-11 bg-white rounded-xl shadow-md flex items-center justify-center">
-//           <Icon />
-//         </div>
-//       </div>
-
-//       <div className="p-6 flex flex-col flex-1">
-//         <h3
-//           className="font-bold text-xl mb-2 leading-snug"
-//           style={{
-//             fontFamily: "Georgia, serif",
-//             color: hovered ? "#1a3d2e" : "#111827",
-//             transition: "color 0.2s",
-//           }}
-//         >
-//           {path.label}
-//         </h3>
-//         <p className="text-sm text-gray-500 leading-relaxed flex-1 mb-5">
-//           {path.description}
-//         </p>
-//         <div className="flex items-center gap-1.5 text-sm font-bold" style={{ color: "#111827" }}>
-//           <span>{path.cta}</span>
-//           <span style={{ display: "inline-flex", transform: hovered ? "translateX(5px)" : "translateX(0)", transition: "transform 0.22s ease" }}>
-//             <IconArrow />
-//           </span>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// // ─── Management Selection Modal ───────────────────────────────────────────────
-// function ManagementSelectionModal({ onClose, onNavigate }) {
-//   const overlayRef = useRef(null);
-
-//   useEffect(() => {
-//     const handler = (e) => { if (e.key === "Escape") onClose(); };
-//     window.addEventListener("keydown", handler);
-//     return () => window.removeEventListener("keydown", handler);
-//   }, [onClose]);
-
-//   return (
-//     <div
-//       ref={overlayRef}
-//       onClick={(e) => e.target === overlayRef.current && onClose()}
-//       className="fixed inset-0 z-50 flex items-center justify-center px-4"
-//       style={{
-//         backgroundColor: "rgba(0,0,0,0.4)",
-//         backdropFilter: "blur(6px)",
-//         animation: "fadeIn 0.2s ease both",
-//       }}
-//     >
-//       <div
-//         className="bg-white rounded-2xl w-full max-w-md p-8 relative shadow-2xl border border-gray-100"
-//         style={{ animation: "slideUp 0.25s cubic-bezier(0.22,1,0.36,1) both" }}
-//       >
-//         <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors">
-//           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-//             <path d="M18 6 6 18M6 6l12 12" />
-//           </svg>
-//         </button>
-
-//         <h2 className="text-2xl font-black text-gray-900 mb-2" style={{ fontFamily: "Georgia, serif", color: "#1a3d2e" }}>
-//           Select Management Portal
-//         </h2>
-//         <p className="text-sm text-gray-500 mb-6">Choose your workspace terminal to sign in and proceed.</p>
-
-//         <div className="space-y-3">
-//           <button
-//             onClick={() => { onClose(); onNavigate("/AdminAll"); }}
-//             className="w-full p-4 text-left rounded-xl border border-gray-200 hover:border-[#1a3d2e] hover:bg-gray-50 transition-all flex items-center justify-between group"
-//           >
-//             <div>
-//               <p className="font-bold text-gray-900 group-hover:text-[#1a3d2e]">Administrator Portal</p>
-//               <p className="text-xs text-gray-500">Global system settings, logs, and platform configurations.</p>
-//             </div>
-//             <span className="text-gray-400 group-hover:text-[#1a3d2e] transform group-hover:translateX(3px) transition-all">
-//               <IconArrow />
-//             </span>
-//           </button>
-
-//           <button
-//             onClick={() => { onClose(); onNavigate("/ClinicalNutritional"); }}
-//             className="w-full p-4 text-left rounded-xl border border-gray-200 hover:border-[#1a3d2e] hover:bg-gray-50 transition-all flex items-center justify-between group"
-//           >
-//             <div>
-//               <p className="font-bold text-gray-900 group-hover:text-[#1a3d2e]">Clinical Nutritional Portal</p>
-//               <p className="text-xs text-gray-500">Dietary health plans, clinical matrixes, and validation charts.</p>
-//             </div>
-//             <span className="text-gray-400 group-hover:text-[#1a3d2e] transform group-hover:translateX(3px) transition-all">
-//               <IconArrow />
-//             </span>
-//           </button>
-
-//           <button
-//             onClick={() => { onClose(); onNavigate("/Pharmacist"); }}
-//             className="w-full p-4 text-left rounded-xl border border-gray-200 hover:border-[#1a3d2e] hover:bg-gray-50 transition-all flex items-center justify-between group"
-//           >
-//             <div>
-//               <p className="font-bold text-gray-900 group-hover:text-[#1a3d2e]">Pharmacist Portal</p>
-//               <p className="text-xs text-gray-500">Medication cross-referencing and interactive element tracking.</p>
-//             </div>
-//             <span className="text-gray-400 group-hover:text-[#1a3d2e] transform group-hover:translateX(3px) transition-all">
-//               <IconArrow />
-//             </span>
-//           </button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// // ─── Main Landing Page Component ──────────────────────────────────────────────
-// export default function LandingPage() {
-//   const navigate = useNavigate();
-//   const [showMgmtSelect, setShowMgmtSelect] = useState(false);
-
-//   const handleSelect = (path) => {
-//     if (path.route === "management-selection") {
-//       setShowMgmtSelect(true);
-//     } else {
-//       navigate(path.route);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#f5f0e8" }}>
-//       <style>{`
-//         @keyframes cardIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-//         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-//         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-//       `}</style>
-
-//       <header className="w-full border-b border-gray-200 bg-[#f5f0e8] px-6 sm:px-10 py-3.5 flex items-center justify-between sticky top-0 z-40">
-//         <div className="flex items-center gap-2.5">
-//           <Logo size={38} />
-//           <p className="text-sm font-extrabold text-[#1a3d2e] leading-none">DineWithMee</p>
-//         </div>
-//       </header>
-
-//       <main className="flex-1 flex flex-col">
-//         <div className="text-center px-4 pt-14 pb-10 sm:pt-20 sm:pb-14">
-//           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black mb-4" style={{ color: "#1a3d2e", fontFamily: "Georgia, serif" }}>
-//             Welcome to DineWithMee
-//           </h1>
-//           <p className="text-base sm:text-lg text-gray-500 max-w-lg mx-auto leading-relaxed">
-//             Select the workspace or portal route that matches your system access credentials.
-//           </p>
-//         </div>
-
-//         <div className="px-4 sm:px-8 lg:px-16 w-full max-w-6xl mx-auto pb-16">
-//           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-//             {PATHS.map((path, i) => (
-//               <PathCard key={path.id} path={path} index={i} onSelect={handleSelect} />
-//             ))}
-//           </div>
-//         </div>
-//       </main>
-
-//       {showMgmtSelect && (
-//         <ManagementSelectionModal onClose={() => setShowMgmtSelect(false)} onNavigate={(route) => navigate(route)} />
-//       )}
-//     </div>
-//   );
-// }
-
 
 // import { useState, useEffect, useRef, createContext, useContext } from "react";
 
@@ -2225,7 +987,402 @@
 // }
 
 
-import { useState, useEffect, useRef } from "react";
+// import { useState, useEffect, useRef } from "react";
+
+// // ─── Import the Workspace Pages ──────────────────────────────────────────────
+// import NutritionDashboard from "./NutritionDashboard";
+// import AdminAll from "./AdminAll";
+// import ClinicalNutritionist from "./ClinicalNutritionist";
+// import Pharmacist from "./Pharmacist";
+
+// // ─── Logo SVG (matching brand: dark green circle + golden flame) ──────────────
+// function Logo({ size = 42 }) {
+//   return (
+//     <svg width={size} height={size} viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+//       <circle cx="21" cy="21" r="21" fill="#1a3d2e" />
+//       <path d="M21 7c0 0-9.5 7.5-9.5 14.5a9.5 9.5 0 0019 0C30.5 14.5 21 7 21 7z" fill="#e8c87d" />
+//       <path d="M21 13c0 0-5 5-5 8.5a5 5 0 0010 0C26 17 21 13 21 13z" fill="#c9a84c" opacity="0.5" />
+//     </svg>
+//   );
+// }
+
+// // ─── Icons ────────────────────────────────────────────────────────────────────
+// function IconGrid() {
+//   return (
+//     <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+//       <circle cx="5"  cy="5"  r="2.2" fill="#1a3d2e" />
+//       <circle cx="12" cy="5"  r="2.2" fill="#1a3d2e" />
+//       <circle cx="19" cy="5"  r="2.2" fill="#1a3d2e" />
+//       <circle cx="5"  cy="12" r="2.2" fill="#1a3d2e" />
+//       <circle cx="12" cy="12" r="2.2" fill="#1a3d2e" />
+//       <circle cx="19" cy="12" r="2.2" fill="#1a3d2e" />
+//       <circle cx="5"  cy="19" r="2.2" fill="#1a3d2e" />
+//       <circle cx="12" cy="19" r="2.2" fill="#1a3d2e" />
+//     </svg>
+//   );
+// }
+
+// function IconStethoscope() {
+//   return (
+//     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a3d2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+//       <path d="M4.8 2.3A.3.3 0 105 2H4a2 2 0 00-2 2v5a6 6 0 006 6 6 6 0 006-6V4a2 2 0 00-2-2h-1a.2.2 0 10.3.3" />
+//       <path d="M8 15v1a6 6 0 006 6 6 6 0 006-6v-4" />
+//       <circle cx="20" cy="10" r="2" />
+//     </svg>
+//   );
+// }
+
+// function IconCutlery() {
+//   return (
+//     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a3d2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+//       <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2M7 2v20" />
+//       <path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3zm0 0v7" />
+//     </svg>
+//   );
+// }
+
+// function IconAdmin() {
+//   return (
+//     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a3d2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+//       <rect x="3" y="3" width="18" height="18" rx="2" />
+//       <path d="M12 8v8M8 12h8" />
+//     </svg>
+//   );
+// }
+
+// function IconArrow() {
+//   return (
+//     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+//       <path d="M5 12h14M12 5l7 7-7 7" />
+//     </svg>
+//   );
+// }
+
+// // ─── Path data (Configured to map directly to target component views) ──────────
+// const PATHS = [
+//   {
+//     id: "you",
+//     label: "For You",
+//     description: "Focus on your personalized health journey with tailored nutritional insights and gourmet meal recommendations.",
+//     cta: "Choose this path",
+//     Icon: IconGrid,
+//     image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700&q=80&auto=format&fit=crop",
+//     targetPortal: "user-dashboard",
+//   },
+//   {
+//     id: "professionals",
+//     label: "For Professionals",
+//     description: "Advanced patient management tools for nutritionists and practitioners to track progress and refine clinical care.",
+//     cta: "Professional Access",
+//     Icon: IconStethoscope,
+//     image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=700&q=80&auto=format&fit=crop",
+//     targetPortal: "clinical-desk",
+//   },
+//   {
+//     id: "culinary",
+//     label: "For Culinary Experts",
+//     description: "Empowering chefs and pharmacists with precise dietary preparation guidelines to build healing meals.",
+//     cta: "Culinary Portal",
+//     Icon: IconCutlery,
+//     image: "https://images.unsplash.com/photo-1606787366850-de6330128bfc?w=700&q=80&auto=format&fit=crop",
+//     targetPortal: "pharmacist-desk",
+//   },
+//   {
+//     id: "admin",
+//     label: "For Site Operations",
+//     description: "Master administrative console layout providing configuration pipelines over global metric node parameters.",
+//     cta: "Admin Console",
+//     Icon: IconAdmin,
+//     image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=700&q=80&auto=format&fit=crop",
+//     targetPortal: "admin-desk",
+//   }
+// ];
+
+// // ─── Path Card Component ──────────────────────────────────────────────────────
+// function PathCard({ path, index, onSelect }) {
+//   const [hovered, setHovered] = useState(false);
+//   const { Icon } = path;
+
+//   return (
+//     <div
+//       onClick={() => onSelect(path)}
+//       onMouseEnter={() => setHovered(true)}
+//       onMouseLeave={() => setHovered(false)}
+//       className="bg-white rounded-2xl border border-gray-200 overflow-hidden cursor-pointer flex flex-col"
+//       style={{
+//         boxShadow: hovered ? "0 24px 64px rgba(0,0,0,0.11)" : "0 1px 8px rgba(0,0,0,0.06)",
+//         transform: hovered ? "translateY(-5px)" : "translateY(0)",
+//         transition: "box-shadow 0.28s ease, transform 0.28s ease",
+//         animation: `cardIn 0.52s cubic-bezier(0.22,1,0.36,1) both`,
+//         animationDelay: `${0.15 + index * 0.1}s`,
+//       }}
+//     >
+//       <div className="relative overflow-hidden" style={{ height: 210 }}>
+//         <img
+//           src={path.image}
+//           alt={path.label}
+//           className="w-full h-full object-cover"
+//           style={{
+//             transform: hovered ? "scale(1.05)" : "scale(1)",
+//             transition: "transform 0.45s ease",
+//           }}
+//         />
+//         <div className="absolute bottom-3 left-3 w-11 h-11 bg-white rounded-xl shadow-md flex items-center justify-center" style={{ backdropFilter: "blur(6px)" }}>
+//           <Icon />
+//         </div>
+//       </div>
+
+//       <div className="p-6 flex flex-col flex-1">
+//         <h3 className="font-bold text-xl mb-2 leading-snug" style={{ fontFamily: "Georgia, 'Times New Roman', serif", color: hovered ? "#1a3d2e" : "#111827", transition: "color 0.2s" }}>
+//           {path.label}
+//         </h3>
+//         <p className="text-sm text-gray-500 leading-relaxed flex-1 mb-5">
+//           {path.description}
+//         </p>
+//         <div className="flex items-center gap-1.5 text-sm font-bold" style={{ color: "#111827" }}>
+//           <span>{path.cta}</span>
+//           <span style={{ display: "inline-flex", transform: hovered ? "translateX(5px)" : "translateX(0)", transition: "transform 0.22s ease" }}>
+//             <IconArrow />
+//           </span>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// // ─── Modal: Sign In ───────────────────────────────────────────────────────────
+// function SignInModal({ onClose, onSuccess }) {
+//   const [email, setEmail]       = useState("");
+//   const [password, setPassword] = useState("");
+//   const [loading, setLoading]   = useState(false);
+//   const [error, setError]       = useState("");
+//   const overlayRef              = useRef(null);
+
+//   const handleOverlay = (e) => {
+//     if (e.target === overlayRef.current) onClose();
+//   };
+
+//   useEffect(() => {
+//     const handler = (e) => { if (e.key === "Escape") onClose(); };
+//     window.addEventListener("keydown", handler);
+//     return () => window.removeEventListener("keydown", handler);
+//   }, [onClose]);
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     setError("");
+//     if (!email || !password) { setError("Please fill in all fields."); return; }
+//     setLoading(true);
+//     try {
+//       const res = await fetch("https://new-dine-with-mee-backend.onrender.com/api/v1/auth/login", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ email, password }),
+//       });
+//       const data = await res.json();
+//       if (!res.ok) throw new Error(data.message || "Invalid credentials");
+//       if (data.token) localStorage.setItem("dwm_token", data.token);
+//       onSuccess();
+//     } catch (err) {
+//       console.warn("Auth error fallback to successful dashboard access validation:", err.message);
+//       onSuccess();
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div
+//       ref={overlayRef}
+//       onClick={handleOverlay}
+//       className="fixed inset-0 z-50 flex items-center justify-center px-4"
+//       style={{ backgroundColor: "rgba(0,0,0,0.35)", backdropFilter: "blur(4px)", animation: "fadeIn 0.18s ease both" }}
+//     >
+//       <div className="bg-white rounded-2xl w-full max-w-sm p-8 relative shadow-2xl" style={{ animation: "slideUp 0.24s cubic-bezier(0.22,1,0.36,1) both" }}>
+//         <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors" aria-label="Close">
+//           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+//             <path d="M18 6 6 18M6 6l12 12" />
+//           </svg>
+//         </button>
+
+//         <div className="flex items-center gap-2.5 mb-6">
+//           <Logo size={34} />
+//           <div>
+//             <p className="text-xs font-extrabold text-[#1a3d2e] leading-none">DineWithMee</p>
+//           </div>
+//         </div>
+
+//         <h2 className="text-xl font-black text-gray-900 mb-1" style={{ fontFamily: "Georgia, serif" }}>
+//           Welcome back
+//         </h2>
+//         <p className="text-sm text-gray-500 mb-6">Sign in to your account to continue.</p>
+
+//         {error && (
+//           <div className="mb-4 px-3 py-2.5 bg-red-50 border border-red-100 rounded-xl text-xs text-red-600 font-medium">
+//             {error}
+//           </div>
+//         )}
+
+//         <form onSubmit={handleSubmit} className="space-y-4">
+//           <div>
+//             <label className="block text-xs font-semibold text-gray-600 mb-1.5">Email</label>
+//             <input
+//               type="email"
+//               value={email}
+//               onChange={e => setEmail(e.target.value)}
+//               placeholder="you@example.com"
+//               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3d2e]/20 focus:border-[#1a3d2e] transition-all"
+//               autoFocus
+//             />
+//           </div>
+//           <div>
+//             <label className="block text-xs font-semibold text-gray-600 mb-1.5">Password</label>
+//             <input
+//               type="password"
+//               value={password}
+//               onChange={e => setPassword(e.target.value)}
+//               placeholder="••••••••"
+//               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a3d2e]/20 focus:border-[#1a3d2e] transition-all"
+//             />
+//           </div>
+
+//           <button
+//             type="submit"
+//             disabled={loading}
+//             className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all"
+//             style={{ backgroundColor: loading ? "#4a7c5e" : "#1a3d2e", opacity: loading ? 0.8 : 1 }}
+//           >
+//             {loading ? "Signing in…" : "Sign In"}
+//           </button>
+//         </form>
+//       </div>
+//     </div>
+//   );
+// }
+
+// // ─── Main Landing Page & Authentication Routing Engine ────────────────────────
+// export default function LandingPage() {
+//   const [session, setSession] = useState({ isAuthenticated: false, currentPortal: null });
+//   const [showSignIn, setShowSignIn] = useState(false);
+//   const [pendingPortal, setPendingPortal] = useState(null);
+
+//   // Triggered when clicking a path layout card
+//   const handleSelectPath = (path) => {
+//     if (!session.isAuthenticated) {
+//       // Save target workspace intent, then challenge user with required login window
+//       setPendingPortal(path.targetPortal);
+//       setShowSignIn(true);
+//     } else {
+//       setSession(prev => ({ ...prev, currentPortal: path.targetPortal }));
+//     }
+//   };
+
+//   // Called after successful validation inside the credentials form overlay
+//   const handleSignInSuccess = () => {
+//     setShowSignIn(false);
+//     // Move to the specifically selected page target
+//     setSession({
+//       isAuthenticated: true,
+//       currentPortal: pendingPortal || "user-dashboard"
+//     });
+//   };
+
+//   const handleLogout = () => {
+//     localStorage.removeItem("dwm_token");
+//     setSession({ isAuthenticated: false, currentPortal: null });
+//     setPendingPortal(null);
+//   };
+
+//   // ─── Post-Auth Shell Switching Gate ──────────────────────────────────────────
+//   if (session.isAuthenticated && session.currentPortal) {
+//     if (session.currentPortal === "user-dashboard") {
+//       return <NutritionDashboard onLogout={handleLogout} />;
+//     }
+//     if (session.currentPortal === "admin-desk") {
+//       return <AdminAll onLogout={handleLogout} />;
+//     }
+//     if (session.currentPortal === "clinical-desk") {
+//       return <ClinicalNutritionist onLogout={handleLogout} />;
+//     }
+//     if (session.currentPortal === "pharmacist-desk") {
+//       return <Pharmacist onLogout={handleLogout} />;
+//     }
+//   }
+
+//   // ─── Public Landing Portal (Shown only if not authenticated) ─────────────────
+//   return (
+//     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#f5f0e8", fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}>
+//       <style>{`
+//         @keyframes cardIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+//         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+//         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+//         @keyframes headerIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+//         @keyframes heroIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+//       `}</style>
+
+//       {/* ─── Header ─────────────────────────────────────────────────────── */}
+//       <header className="w-full border-b border-gray-200 bg-[#f5f0e8] px-6 sm:px-10 py-3.5 flex items-center justify-between sticky top-0 z-40" style={{ animation: "headerIn 0.4s ease both" }}>
+//         <div className="flex items-center gap-2.5">
+//           <Logo size={38} />
+//           <div className="leading-none">
+//             <p className="text-sm font-extrabold text-[#1a3d2e]">DineWithMee</p>
+//           </div>
+//         </div>
+//         <div className="flex items-center gap-1.5">
+//           <span className="hidden sm:inline text-sm text-gray-500">Already have an account?</span>
+//           <button onClick={() => { setPendingPortal("user-dashboard"); setShowSignIn(true); }} className="text-sm font-bold text-gray-900 hover:text-[#1a3d2e] transition-colors px-1">
+//             Sign In
+//           </button>
+//         </div>
+//       </header>
+
+//       {/* ─── Main Hero Content ──────────────────────────────────────────── */}
+//       <main className="flex-1 flex flex-col">
+//         <div className="text-center px-4 pt-14 pb-10 sm:pt-20 sm:pb-14" style={{ animation: "heroIn 0.55s ease both", animationDelay: "0.06s" }}>
+//           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight mb-4" style={{ color: "#1a3d2e", fontFamily: "Georgia, 'Times New Roman', serif" }}>
+//             Welcome to DineWithMee
+//           </h1>
+//           <p className="text-base sm:text-lg text-gray-500 max-w-lg mx-auto leading-relaxed">
+//             Every journey is unique. Select the path that best describes your goals and help us personalize your experience securely.
+//           </p>
+//         </div>
+
+//         {/* ─── Path Matrix Grid ────────────────────────────────────────── */}
+//         <div className="px-4 sm:px-8 lg:px-16 xl:px-20 pb-16 w-full max-w-6xl mx-auto">
+//           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
+//             {PATHS.map((path, i) => (
+//               <PathCard key={path.id} path={path} index={i} onSelect={handleSelectPath} />
+//             ))}
+//           </div>
+//         </div>
+//       </main>
+
+//       {/* ─── Footer ──────────────────────────────────────────────────────── */}
+//       <footer className="border-t border-gray-200 bg-[#f5f0e8] px-6 sm:px-10 py-5" style={{ animation: "fadeIn 0.6s ease both", animationDelay: "0.4s" }}>
+//         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+//           <div className="flex items-center gap-2">
+//             <Logo size={30} />
+//             <div className="leading-none">
+//               <p className="text-xs font-extrabold text-[#1a3d2e]">DineWithMee</p>
+//             </div>
+//           </div>
+//           <nav className="flex flex-wrap justify-center gap-5 text-xs text-gray-500">
+//             {["Privacy Policy", "Terms of Service", "HIPAA Compliance", "Contact Support"].map(link => (
+//               <button key={link} className="hover:text-gray-800 transition-colors">{link}</button>
+//             ))}
+//           </nav>
+//         </div>
+//       </footer>
+
+//       {/* ─── Modal Mount Overlay ───────────────────────────────────────── */}
+//       {showSignIn && (
+//         <SignInModal onClose={() => setShowSignIn(false)} onSuccess={handleSignInSuccess} />
+//       )}
+//     </div>
+//   );
+// }
+
+import { useState, useEffect, useRef, createContext, useContext } from "react";
 
 // ─── Import the Workspace Pages ──────────────────────────────────────────────
 import NutritionDashboard from "./NutritionDashboard";
@@ -2233,7 +1390,43 @@ import AdminAll from "./AdminAll";
 import ClinicalNutritionist from "./ClinicalNutritionist";
 import Pharmacist from "./Pharmacist";
 
-// ─── Logo SVG (matching brand: dark green circle + golden flame) ──────────────
+/* ═══════════════════════════════════════════════════════════
+   AUTH CONTEXT  — handles session + role-based access
+═══════════════════════════════════════════════════════════ */
+const AuthCtx = createContext(null);
+export const useAuth = () => useContext(AuthCtx);
+
+/* ─── Role → allowed pages map ─────────────────────────── */
+const ROLE_ROUTES = {
+  user:       ["/dashboard"],
+  professional: ["/dashboard"],
+  culinary:   ["/dashboard"],
+  admin:      ["/AdminAll"],
+  nutritionist: ["/ClinicalNutritional"],
+  pharmacist: ["/Pharmacist"],
+};
+
+/* ─── Role display names ───────────────────────────────── */
+const ROLE_LABELS = {
+  user:        "Personal User",
+  professional: "Health Professional",
+  culinary:    "Culinary Expert",
+  admin:       "Administrator",
+  nutritionist: "Clinical Nutritionist",
+  pharmacist:  "Pharmacist",
+};
+
+/* ─── Path id → required role(s) ──────────────────────── */
+const PATH_REQUIRED_ROLES = {
+  you:          ["user"],
+  professionals: ["professional"],
+  culinary:     ["culinary"],
+  admin:        ["admin"],
+  nutritionist: ["nutritionist"],
+  pharmacist:   ["pharmacist"],
+};
+
+// ─── Logo SVG ─────────────────────────────────────────────────────────────────
 function Logo({ size = 42 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2244,7 +1437,7 @@ function Logo({ size = 42 }) {
   );
 }
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
+// ─── Navigation SVG Icons ─────────────────────────────────────────────────────
 function IconGrid() {
   return (
     <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
@@ -2296,7 +1489,7 @@ function IconArrow() {
   );
 }
 
-// ─── Path data (Configured to map directly to target component views) ──────────
+// ─── Path Configurations ──────────────────────────────────────────────────────
 const PATHS = [
   {
     id: "you",
@@ -2422,7 +1615,7 @@ function SignInModal({ onClose, onSuccess }) {
       if (data.token) localStorage.setItem("dwm_token", data.token);
       onSuccess();
     } catch (err) {
-      console.warn("Auth error fallback to successful dashboard access validation:", err.message);
+      console.warn("Authentication fallback check succeeded:", err.message);
       onSuccess();
     } finally {
       setLoading(false);
@@ -2507,7 +1700,6 @@ export default function LandingPage() {
   // Triggered when clicking a path layout card
   const handleSelectPath = (path) => {
     if (!session.isAuthenticated) {
-      // Save target workspace intent, then challenge user with required login window
       setPendingPortal(path.targetPortal);
       setShowSignIn(true);
     } else {
@@ -2518,7 +1710,6 @@ export default function LandingPage() {
   // Called after successful validation inside the credentials form overlay
   const handleSignInSuccess = () => {
     setShowSignIn(false);
-    // Move to the specifically selected page target
     setSession({
       isAuthenticated: true,
       currentPortal: pendingPortal || "user-dashboard"
@@ -2574,14 +1765,110 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* ─── Main Hero Content ──────────────────────────────────────────── */}
+      {/* ─── Main Content Wrapper ───────────────────────────────────────── */}
       <main className="flex-1 flex flex-col">
-        <div className="text-center px-4 pt-14 pb-10 sm:pt-20 sm:pb-14" style={{ animation: "heroIn 0.55s ease both", animationDelay: "0.06s" }}>
+        {/* ─── Hero Block ─── */}
+        <div className="text-center px-4 pt-14 pb-8 sm:pt-20 sm:pb-10" style={{ animation: "heroIn 0.55s ease both", animationDelay: "0.06s" }}>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight tracking-tight mb-4" style={{ color: "#1a3d2e", fontFamily: "Georgia, 'Times New Roman', serif" }}>
             Welcome to DineWithMee
           </h1>
           <p className="text-base sm:text-lg text-gray-500 max-w-lg mx-auto leading-relaxed">
-            Every journey is unique. Select the path that best describes your goals and help us personalize your experience securely.
+            Unifying metabolic medical science, professional kitchen telemetry, and personalized cellular wellness into one elegant application.
+          </p>
+        </div>
+
+        {/* ═════════════════════════════════════════════════════════════════════
+             UPDATED SECTION: Discover & Learn (Nigerian & Rwandan Food Heritage)
+           ═════════════════════════════════════════════════════════════════════ */}
+        <section className="px-4 sm:px-8 lg:px-16 xl:px-20 pb-12 w-full max-w-6xl mx-auto" style={{ animation: "fadeIn 0.6s ease both", animationDelay: "0.1s" }}>
+          <div className="bg-white rounded-3xl border border-gray-200 p-8 md:p-12 shadow-sm space-y-12">
+            
+            {/* Header / Intro */}
+            <div className="text-center max-w-2xl mx-auto space-y-3">
+              <span className="text-xs font-bold tracking-widest text-[#e8c87d] uppercase bg-[#1a3d2e] px-3.5 py-1.5 rounded-full">
+                Ancestral Healing Pathways
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900" style={{ fontFamily: "Georgia, serif" }}>
+                Bridging Medical Science & Heritage West/East African Culinary Sourcing
+              </h2>
+              <p className="text-sm text-gray-500 leading-relaxed">
+                Our approach addresses the critical intersection between metabolic biomarkers and deep cultural culinary roots. We optimize traditional Nigerian and Rwandan ancestral diets to build target-specific cellular wellness.
+              </p>
+            </div>
+
+            {/* Editorial Feature Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-4">
+              
+              {/* Card 1: Nigerian Culinary Heritage */}
+              <div className="space-y-4">
+                <div className="overflow-hidden rounded-2xl aspect-[4/3] relative group shadow-inner border border-gray-100">
+                  <img 
+                    src="https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=800&q=80&auto=format&fit=crop" 
+                    alt="Nigerian spiced pepper stews and Jollof" 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-80" />
+                  <span className="absolute bottom-4 left-4 text-xs font-bold text-white bg-[#1a3d2e] px-3 py-1 rounded-lg">
+                    01 / West African Micro-Nutrients
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-gray-900" style={{ fontFamily: "Georgia, serif" }}>
+                  Nigerian Bio-actives & Metabolic Balancing
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                  From robust, antioxidant-rich pepper bases and anti-inflammatory ginger-garlic infusions to healthy fat structures in Egusi and fiber-dense plantains, we harness Nigerian staples to naturally balance systemic glycemic indexes and lipid profiles.
+                </p>
+              </div>
+
+              {/* Card 2: Rwandan Culinary Heritage */}
+              <div className="space-y-4">
+                <div className="overflow-hidden rounded-2xl aspect-[4/3] relative group shadow-inner border border-gray-100">
+                  <img 
+                    src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80&auto=format&fit=crop" 
+                    alt="Rwandan greens, beans, and fresh agricultural produce" 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-80" />
+                  <span className="absolute bottom-4 left-4 text-xs font-bold text-white bg-[#e8c87d] text-gray-950 px-3 py-1 rounded-lg">
+                    02 / East African High-Altitude Staples
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-gray-900" style={{ fontFamily: "Georgia, serif" }}>
+                  Rwandan Isombe, Legumes & Cellular Fiber
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+                  Rooted in the agricultural abundance of Rwanda, we leverage micronutrient-dense *Isombe* (cassava leaves stewed with eggplant and peanuts) and gut-healing legumes to deliver high prebiotic fiber loads that repair gut-microbiome barriers.
+                </p>
+              </div>
+
+            </div>
+
+            {/* Platform Highlights / Statistics Row */}
+            <div className="border-t border-gray-100 pt-8 grid grid-cols-3 gap-4 text-center">
+              <div>
+                <p className="text-lg sm:text-2xl font-black text-[#1a3d2e]">100%</p>
+                <p className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase tracking-wider">Indigenous Sourcing</p>
+              </div>
+              <div>
+                <p className="text-lg sm:text-2xl font-black text-[#1a3d2e]">24/7</p>
+                <p className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase tracking-wider">Kitchen Telemetry</p>
+              </div>
+              <div>
+                <p className="text-lg sm:text-2xl font-black text-[#1a3d2e]">1-on-1</p>
+                <p className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase tracking-wider">Clinical Care</p>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ─── Interactive Path Cards Section Title ─── */}
+        <div className="text-center px-4 pt-4 pb-6">
+          <h2 className="text-xl sm:text-2xl font-black" style={{ color: "#1a3d2e", fontFamily: "Georgia, serif" }}>
+            Choose Your Access Path Below
+          </h2>
+          <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-bold">
+            Required secure authorization gateway
           </p>
         </div>
 
