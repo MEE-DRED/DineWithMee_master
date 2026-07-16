@@ -1481,11 +1481,181 @@ function IconAdmin() {
   );
 }
 
+function IconBook() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a3d2e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+      <path d="M9 7h7M9 11h7" />
+    </svg>
+  );
+}
+
 function IconArrow() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M5 12h14M12 5l7 7-7 7" />
     </svg>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FOOD MOTIF ICONS — Nigerian & Rwandan staples
+   Hand-drawn flat glyphs used in the "Simmering Pot" signature
+   element and as floating ambient garnish around the page.
+═══════════════════════════════════════════════════════════ */
+function FoodIcon({ children, size = 30, viewBox = "0 0 32 32" }) {
+  return (
+    <svg width={size} height={size} viewBox={viewBox} xmlns="http://www.w3.org/2000/svg">
+      {children}
+    </svg>
+  );
+}
+// Nigeria — Jollof rice bowl
+function IconJollof({ size }) {
+  return (
+    <FoodIcon size={size}>
+      <ellipse cx="16" cy="21" rx="12" ry="6" fill="#c1440e" />
+      <ellipse cx="16" cy="19" rx="12" ry="6" fill="#e8602c" />
+      <circle cx="11" cy="17.5" r="1.3" fill="#8a2e0a" />
+      <circle cx="16.5" cy="16" r="1.3" fill="#8a2e0a" />
+      <circle cx="21" cy="17.8" r="1.3" fill="#8a2e0a" />
+      <circle cx="14" cy="19.5" r="1.1" fill="#f2b134" />
+      <path d="M4 19a12 5 0 0024 0v3a12 6 0 01-24 0z" fill="#a83913" />
+    </FoodIcon>
+  );
+}
+// Nigeria — Suya skewer
+function IconSuya({ size }) {
+  return (
+    <FoodIcon size={size}>
+      <line x1="4" y1="27" x2="27" y2="4" stroke="#7a4a1e" strokeWidth="1.6" strokeLinecap="round" />
+      <rect x="9" y="15.5" width="5.2" height="5.2" rx="1.2" transform="rotate(45 11.6 18.1)" fill="#8a3b1e" />
+      <rect x="14" y="10.5" width="5.2" height="5.2" rx="1.2" transform="rotate(45 16.6 13.1)" fill="#a8481f" />
+      <rect x="19" y="5.5" width="5.2" height="5.2" rx="1.2" transform="rotate(45 21.6 8.1)" fill="#8a3b1e" />
+      <circle cx="12" cy="16.5" r="0.6" fill="#e8c87d" />
+      <circle cx="17" cy="11.5" r="0.6" fill="#e8c87d" />
+    </FoodIcon>
+  );
+}
+// Nigeria — Plantain
+function IconPlantain({ size }) {
+  return (
+    <FoodIcon size={size}>
+      <path d="M7 25c0-10 5-18 15-19-1 12-6 18-15 19z" fill="#e8c87d" />
+      <path d="M7 25c0-10 5-18 15-19" fill="none" stroke="#c9a84c" strokeWidth="1.3" />
+      <path d="M8 24.5c1-8 5-14 12-17" fill="none" stroke="#f5deA0" strokeWidth="1" opacity="0.7" />
+    </FoodIcon>
+  );
+}
+// Nigeria — Scotch bonnet pepper
+function IconPepper({ size }) {
+  return (
+    <FoodIcon size={size}>
+      <path d="M16 10c-1 3-6 4-6 9a6 6 0 0012 0c0-5-5-6-6-9z" fill="#c0392b" />
+      <path d="M15.3 9.5c-.6-1.6-.2-3 1.2-4" stroke="#3d6b3a" strokeWidth="1.6" fill="none" strokeLinecap="round" />
+      <ellipse cx="13.5" cy="15" rx="1.4" ry="2.2" fill="#e0685a" opacity="0.6" />
+    </FoodIcon>
+  );
+}
+// Rwanda — Isombe (cassava leaf stew)
+function IconIsombe({ size }) {
+  return (
+    <FoodIcon size={size}>
+      <circle cx="16" cy="17" r="10" fill="#4a7c3f" />
+      <path d="M16 8c2.5 3 2.5 6 0 9-2.5-3-2.5-6 0-9z" fill="#6fa85c" />
+      <path d="M9 14c3 1.5 4.5 3.5 4.5 6.5-3-.5-5-2.5-4.5-6.5z" fill="#6fa85c" />
+      <path d="M23 14c-3 1.5-4.5 3.5-4.5 6.5 3-.5 5-2.5 4.5-6.5z" fill="#6fa85c" />
+      <circle cx="12" cy="21" r="1" fill="#e8c87d" />
+      <circle cx="19" cy="22" r="1" fill="#e8c87d" />
+    </FoodIcon>
+  );
+}
+// Rwanda — Ubugali (cassava/maize dough)
+function IconUbugali({ size }) {
+  return (
+    <FoodIcon size={size}>
+      <ellipse cx="16" cy="24" rx="11" ry="3" fill="#d8cba0" opacity="0.5" />
+      <path d="M8 22a8 8 0 0116 0c0 1.5-3.6 3-8 3s-8-1.5-8-3z" fill="#f0e6c8" />
+      <ellipse cx="16" cy="16" rx="8" ry="7" fill="#f7efd9" />
+    </FoodIcon>
+  );
+}
+// Rwanda — Brochette skewer
+function IconBrochette({ size }) {
+  return (
+    <FoodIcon size={size}>
+      <line x1="5" y1="16" x2="27" y2="16" stroke="#7a4a1e" strokeWidth="1.6" strokeLinecap="round" />
+      <rect x="8" y="12" width="6" height="8" rx="1.4" fill="#8a3b1e" />
+      <rect x="16" y="12" width="6" height="8" rx="1.4" fill="#5c7a3a" />
+      <rect x="24" y="12.5" width="4" height="7" rx="1.2" fill="#a8481f" />
+    </FoodIcon>
+  );
+}
+// Rwanda — Ibihaza (pumpkin/squash)
+function IconPumpkin({ size }) {
+  return (
+    <FoodIcon size={size}>
+      <path d="M6 3v3M4 4l1.6 2M8 4l-1.6 2" stroke="#4a7c3f" strokeWidth="1.4" strokeLinecap="round" transform="translate(10 -1)" />
+      <path d="M16 9c5.5 0 9 4 9 9s-3.8 8-9 8-9-3.4-9-8 3.5-9 9-9z" fill="#e08a2c" />
+      <path d="M16 9v17M11.5 10.5c-1 4-1 11 0 15M20.5 10.5c1 4 1 11 0 15" stroke="#c26f1a" strokeWidth="1" fill="none" opacity="0.6" />
+    </FoodIcon>
+  );
+}
+// Signature centerpiece — simmering pot with rising steam, orbited by the
+// eight food glyphs above. Symbolises "two heritages, one table".
+function SimmeringPotEmblem() {
+  const orbit = [
+    { Icon: IconJollof,    r: 92, start: 0   },
+    { Icon: IconIsombe,    r: 92, start: 45  },
+    { Icon: IconSuya,      r: 92, start: 90  },
+    { Icon: IconUbugali,   r: 92, start: 135 },
+    { Icon: IconPlantain,  r: 92, start: 180 },
+    { Icon: IconBrochette, r: 92, start: 225 },
+    { Icon: IconPepper,    r: 92, start: 270 },
+    { Icon: IconPumpkin,   r: 92, start: 315 },
+  ];
+  return (
+    <div className="relative mx-auto" style={{ width: 260, height: 260 }} aria-hidden="true">
+      {/* orbiting ring of food glyphs */}
+      {orbit.map(({ Icon, start }, i) => (
+        <div
+          key={i}
+          className="absolute inset-0"
+          style={{ animation: `orbitSpin 26s linear infinite`, animationDelay: `${-(start / 360) * 26}s` }}
+        >
+          <div
+            className="absolute"
+            style={{
+              top: "50%", left: "50%", width: 36, height: 36, marginTop: -18, marginLeft: -18,
+              transform: `rotate(${start}deg) translate(112px) rotate(${-start}deg)`,
+            }}
+          >
+            <div style={{ animation: `bob 3.4s ease-in-out infinite`, animationDelay: `${i * 0.22}s` }}
+              className="w-full h-full rounded-full bg-white shadow-md border border-gray-100 flex items-center justify-center">
+              <Icon size={20} />
+            </div>
+          </div>
+        </div>
+      ))}
+      {/* steam wisps */}
+      <svg className="absolute" style={{ top: -34, left: "50%", transform: "translateX(-50%)" }} width="70" height="60" viewBox="0 0 70 60">
+        <path className="steam-wisp" d="M18 55C10 45 24 38 16 28C10 20 20 12 16 4" fill="none" stroke="#c9c2b2" strokeWidth="3" strokeLinecap="round" style={{ animationDelay: "0s" }} />
+        <path className="steam-wisp" d="M35 55C27 44 41 37 33 27C27 19 37 11 33 3" fill="none" stroke="#c9c2b2" strokeWidth="3" strokeLinecap="round" style={{ animationDelay: "0.6s" }} />
+        <path className="steam-wisp" d="M52 55C44 45 58 38 50 28C44 20 54 12 50 4" fill="none" stroke="#c9c2b2" strokeWidth="3" strokeLinecap="round" style={{ animationDelay: "1.2s" }} />
+      </svg>
+      {/* the pot itself */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <svg width="118" height="100" viewBox="0 0 118 100">
+          <ellipse cx="59" cy="34" rx="46" ry="9" fill="#e8c87d" />
+          <path d="M13 34h92l-8 44a10 10 0 01-10 8H31a10 10 0 01-10-8z" fill="#1a3d2e" />
+          <path d="M13 34h92" stroke="#123024" strokeWidth="3" />
+          <rect x="0" y="29" width="20" height="9" rx="4.5" fill="#1a3d2e" />
+          <rect x="98" y="29" width="20" height="9" rx="4.5" fill="#1a3d2e" />
+          <ellipse cx="59" cy="34" rx="38" ry="6" fill="#f2dca0" />
+        </svg>
+      </div>
+    </div>
   );
 }
 
@@ -1526,6 +1696,15 @@ const PATHS = [
     Icon: IconAdmin,
     image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=700&q=80&auto=format&fit=crop",
     targetPortal: "admin-desk",
+  },
+  {
+    id: "education",
+    label: "Educational Tips",
+    description: "Bite-sized, evidence-based nutrition tips and food-as-medicine guides — no sign-in required, browse anytime.",
+    cta: "Explore tips",
+    Icon: IconBook,
+    image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=700&q=80&auto=format&fit=crop",
+    targetPortal: "education-tips",
   }
 ];
 
@@ -1691,14 +1870,71 @@ function SignInModal({ onClose, onSuccess }) {
   );
 }
 
+// ─── Navbar section registry ───────────────────────────────────────────────────
+const NAV_LINKS = [
+  { id: "about",       label: "About Us" },
+  { id: "mission",     label: "Mission" },
+  { id: "vision",      label: "Vision" },
+  { id: "what-we-do",  label: "What We Do" },
+];
+
 // ─── Main Landing Page & Authentication Routing Engine ────────────────────────
 export default function LandingPage() {
   const [session, setSession] = useState({ isAuthenticated: false, currentPortal: null });
   const [showSignIn, setShowSignIn] = useState(false);
   const [pendingPortal, setPendingPortal] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("about");
+  const [pathsMenuOpen, setPathsMenuOpen] = useState(false);
+  const pathsMenuRef = useRef(null);
+
+  // Close the Paths dropdown on outside click or Escape
+  useEffect(() => {
+    if (!pathsMenuOpen) return;
+    const handleClick = (e) => {
+      if (pathsMenuRef.current && !pathsMenuRef.current.contains(e.target)) setPathsMenuOpen(false);
+    };
+    const handleKey = (e) => { if (e.key === "Escape") setPathsMenuOpen(false); };
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [pathsMenuOpen]);
+
+  // Smooth-scrolls to a section by id, accounting for the sticky header height
+  const scrollToSection = (id) => {
+    setMenuOpen(false);
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  // Lightweight scroll-spy so the navbar highlights the section in view
+  useEffect(() => {
+    const ids = NAV_LINKS.map(l => l.id);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) setActiveSection(entry.target.id);
+        });
+      },
+      { rootMargin: "-45% 0px -50% 0px", threshold: 0 }
+    );
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, []);
 
   // Triggered when clicking a path layout card
   const handleSelectPath = (path) => {
+    // Educational Tips is open access — no auth gate, just scroll to the section
+    if (path.targetPortal === "education-tips") {
+      scrollToSection("edu-tips");
+      return;
+    }
     if (!session.isAuthenticated) {
       setPendingPortal(path.targetPortal);
       setShowSignIn(true);
@@ -1747,22 +1983,153 @@ export default function LandingPage() {
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes headerIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes heroIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes orbitSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        @keyframes drift { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-14px) rotate(6deg); } }
+        @keyframes driftSlow { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-10px) rotate(-5deg); } }
+        @keyframes steamRise {
+          0%   { opacity: 0;   stroke-dashoffset: 90; }
+          20%  { opacity: 0.9; }
+          80%  { opacity: 0.4; }
+          100% { opacity: 0;   stroke-dashoffset: 0; }
+        }
+        .steam-wisp { stroke-dasharray: 90; stroke-dashoffset: 90; animation: steamRise 3.2s ease-in-out infinite; }
+        .food-float-a { animation: drift 5.5s ease-in-out infinite; }
+        .food-float-b { animation: driftSlow 6.5s ease-in-out infinite; }
+        .nav-underline { position: relative; }
+        .nav-underline::after {
+          content: ""; position: absolute; left: 0; bottom: -4px; height: 2px; width: 100%;
+          background: #e8c87d; transform: scaleX(0); transform-origin: left; transition: transform 0.25s ease;
+        }
+        .nav-underline.active::after, .nav-underline:hover::after { transform: scaleX(1); }
+        section[id] { scroll-margin-top: 84px; }
+        @media (prefers-reduced-motion: reduce) {
+          .steam-wisp, .food-float-a, .food-float-b, [style*="animation"] { animation: none !important; }
+        }
       `}</style>
 
-      {/* ─── Header ─────────────────────────────────────────────────────── */}
-      <header className="w-full border-b border-gray-200 bg-[#f5f0e8] px-6 sm:px-10 py-3.5 flex items-center justify-between sticky top-0 z-40" style={{ animation: "headerIn 0.4s ease both" }}>
-        <div className="flex items-center gap-2.5">
+      {/* ─── Header / Navbar ────────────────────────────────────────────── */}
+      <header className="w-full border-b border-gray-200 bg-[#f5f0e8]/95 px-6 sm:px-10 py-3.5 flex items-center justify-between sticky top-0 z-40 backdrop-blur relative" style={{ animation: "headerIn 0.4s ease both" }}>
+        <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="flex items-center gap-2.5">
           <Logo size={38} />
-          <div className="leading-none">
+          <div className="leading-none text-left">
             <p className="text-sm font-extrabold text-[#1a3d2e]">DineWithMee</p>
           </div>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="hidden sm:inline text-sm text-gray-500">Already have an account?</span>
-          <button onClick={() => { setPendingPortal("user-dashboard"); setShowSignIn(true); }} className="text-sm font-bold text-gray-900 hover:text-[#1a3d2e] transition-colors px-1">
-            Sign In
+        </button>
+
+        {/* Desktop nav links */}
+        <nav className="hidden lg:flex items-center gap-7">
+          {NAV_LINKS.map(link => (
+            <button
+              key={link.id}
+              onClick={() => scrollToSection(link.id)}
+              className={`nav-underline text-sm font-semibold transition-colors ${activeSection === link.id ? "text-[#1a3d2e] active" : "text-gray-500 hover:text-[#1a3d2e]"}`}
+            >
+              {link.label}
+            </button>
+          ))}
+
+          {/* Explore Paths dropdown — houses every access-path card */}
+          <div className="relative" ref={pathsMenuRef}>
+            <button
+              onClick={() => setPathsMenuOpen(v => !v)}
+              className={`flex items-center gap-1.5 text-sm font-semibold transition-colors ${pathsMenuOpen ? "text-[#1a3d2e]" : "text-gray-500 hover:text-[#1a3d2e]"}`}
+              aria-haspopup="true"
+              aria-expanded={pathsMenuOpen}
+            >
+              Explore Paths
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"
+                style={{ transform: pathsMenuOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s ease" }}>
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+
+            {pathsMenuOpen && (
+              <div className="absolute right-0 top-full mt-3 w-80 bg-white rounded-2xl border border-gray-200 shadow-xl p-2 z-50" style={{ animation: "slideUp 0.18s ease both" }}>
+                {PATHS.map(path => (
+                  <button
+                    key={path.id}
+                    onClick={() => { handleSelectPath(path); setPathsMenuOpen(false); }}
+                    className="w-full flex items-center gap-3 text-left px-3 py-2.5 rounded-xl hover:bg-[#f5f0e8] transition-colors"
+                  >
+                    <div className="w-9 h-9 rounded-lg bg-[#f5f0e8] flex items-center justify-center flex-shrink-0">
+                      <path.Icon size={18} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-gray-900 truncate">{path.label}</p>
+                      <p className="text-xs text-gray-400 truncate">{path.cta}</p>
+                    </div>
+                  </button>
+                ))}
+                <button
+                  onClick={() => { scrollToSection("get-started"); setPathsMenuOpen(false); }}
+                  className="w-full text-center mt-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider text-[#1a3d2e] hover:bg-[#f5f0e8] transition-colors"
+                >
+                  View all paths ↓
+                </button>
+              </div>
+            )}
+          </div>
+        </nav>
+
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-1.5">
+            <span className="hidden md:inline text-sm text-gray-500">Already have an account?</span>
+            <button onClick={() => { setPendingPortal("user-dashboard"); setShowSignIn(true); }} className="text-sm font-bold text-gray-900 hover:text-[#1a3d2e] transition-colors px-1">
+              Sign In
+            </button>
+          </div>
+          {/* Mobile menu toggle */}
+          <button
+            onClick={() => setMenuOpen(v => !v)}
+            className="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-[#1a3d2e]"
+            aria-label="Toggle menu"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+              {menuOpen ? <path d="M18 6 6 18M6 6l12 12" /> : <path d="M3 6h18M3 12h18M3 18h18" />}
+            </svg>
           </button>
         </div>
+
+        {/* Mobile dropdown */}
+        {menuOpen && (
+          <div className="absolute top-full left-0 right-0 bg-[#f5f0e8] border-b border-gray-200 lg:hidden shadow-lg max-h-[80vh] overflow-y-auto" style={{ animation: "slideUp 0.2s ease both" }}>
+            <div className="flex flex-col px-6 py-3">
+              {NAV_LINKS.map(link => (
+                <button
+                  key={link.id}
+                  onClick={() => scrollToSection(link.id)}
+                  className={`text-left py-2.5 text-sm font-semibold border-b border-gray-100 ${activeSection === link.id ? "text-[#1a3d2e]" : "text-gray-600"}`}
+                >
+                  {link.label}
+                </button>
+              ))}
+
+              {/* Explore Paths — collapsed list of every access-path card */}
+              <p className="pt-3 pb-1 text-xs font-bold uppercase tracking-widest text-gray-400">Explore Paths</p>
+              {PATHS.map(path => (
+                <button
+                  key={path.id}
+                  onClick={() => { handleSelectPath(path); setMenuOpen(false); }}
+                  className="flex items-center gap-3 text-left py-2.5 border-b border-gray-100 last:border-0"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center flex-shrink-0">
+                    <path.Icon size={16} />
+                  </div>
+                  <span className="text-sm font-semibold text-gray-700">{path.label}</span>
+                </button>
+              ))}
+
+              <button
+                onClick={() => { setPendingPortal("user-dashboard"); setShowSignIn(true); setMenuOpen(false); }}
+                className="mt-3 mb-1 py-2.5 rounded-xl text-sm font-bold text-white text-center"
+                style={{ backgroundColor: "#1a3d2e" }}
+              >
+                Sign In
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ─── Main Content Wrapper ───────────────────────────────────────── */}
@@ -1775,7 +2142,109 @@ export default function LandingPage() {
           <p className="text-base sm:text-lg text-gray-500 max-w-lg mx-auto leading-relaxed">
             Unifying metabolic medical science, professional kitchen telemetry, and personalized cellular wellness into one elegant application.
           </p>
+          <button onClick={() => scrollToSection("about")} className="mt-7 text-xs font-bold uppercase tracking-widest text-[#1a3d2e]/70 hover:text-[#1a3d2e] transition-colors inline-flex flex-col items-center gap-1">
+            <span>Discover our story</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" style={{ animation: "bob 1.8s ease-in-out infinite" }}>
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
         </div>
+
+        {/* ─── Signature: Simmering Pot Emblem — Nigeria meets Rwanda ─── */}
+        <div className="px-4 pb-4 pt-2" style={{ animation: "fadeIn 0.7s ease both", animationDelay: "0.15s" }}>
+          <SimmeringPotEmblem />
+          <p className="text-center text-xs font-bold uppercase tracking-[0.2em] text-[#1a3d2e]/60 mt-1">
+            Two Culinary Heritages · One Table
+          </p>
+        </div>
+
+        {/* ═════════════════════════════════════════════════════════════════════
+             ABOUT US
+           ═════════════════════════════════════════════════════════════════════ */}
+        <section id="about" className="px-4 sm:px-8 lg:px-16 xl:px-20 py-14 w-full max-w-5xl mx-auto" style={{ animation: "fadeIn 0.6s ease both" }}>
+          <div className="grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-10 items-center">
+            <div className="space-y-4">
+              <span className="text-xs font-bold tracking-widest text-[#1a3d2e] uppercase bg-[#e8c87d]/40 px-3.5 py-1.5 rounded-full inline-block">
+                About Us
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900" style={{ fontFamily: "Georgia, serif" }}>
+                Food as medicine, rooted in home
+              </h2>
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                DineWithMee is a preventive nutrition and digital health platform helping Africans use food as a tool for better health. We exist to address the growing burden of nutrition-related non-communicable diseases such as hypertension and diabetes by making culturally relevant nutrition support accessible, practical, and sustainable.
+              </p>
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                Rather than asking people to abandon the foods they know and love, we help them rediscover the healing power of African cuisine through evidence-based nutrition guidance, personalized meal planning, and digital health solutions tailored to local realities.
+              </p>
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                At DineWithMee, we believe healthier communities can be built by combining indigenous food knowledge, modern nutrition science, and technology.
+              </p>
+            </div>
+            {/* Decorative floating food glyphs */}
+            <div className="relative h-64 hidden md:block" aria-hidden="true">
+              <div className="absolute top-2 left-6 food-float-a"><IconJollof size={54} /></div>
+              <div className="absolute top-16 right-8 food-float-b"><IconIsombe size={50} /></div>
+              <div className="absolute bottom-16 left-14 food-float-b" style={{ animationDelay: "1s" }}><IconPlantain size={46} /></div>
+              <div className="absolute bottom-4 right-4 food-float-a" style={{ animationDelay: "0.6s" }}><IconUbugali size={50} /></div>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 food-float-a" style={{ animationDelay: "1.4s" }}><IconPepper size={36} /></div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═════════════════════════════════════════════════════════════════════
+             MISSION & VISION
+           ═════════════════════════════════════════════════════════════════════ */}
+        <section className="px-4 sm:px-8 lg:px-16 xl:px-20 pb-14 w-full max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div id="mission" className="bg-[#1a3d2e] rounded-3xl p-8 md:p-10 text-white relative overflow-hidden">
+              <div className="absolute -bottom-4 -right-4 opacity-20 food-float-b"><IconSuya size={90} /></div>
+              <span className="text-xs font-bold tracking-widest text-[#e8c87d] uppercase">Our Mission</span>
+              <h3 className="text-xl sm:text-2xl font-bold mt-3 mb-3" style={{ fontFamily: "Georgia, serif" }}>Making prevention practical</h3>
+              <p className="text-sm text-white/80 leading-relaxed relative z-10">
+                To improve health outcomes across Africa by making preventive nutrition accessible through culturally relevant nutrition education, personalized care, and digital health innovation.
+              </p>
+            </div>
+            <div id="vision" className="bg-white border border-gray-200 rounded-3xl p-8 md:p-10 relative overflow-hidden">
+              <div className="absolute -bottom-4 -right-4 opacity-10 food-float-a"><IconPumpkin size={90} /></div>
+              <span className="text-xs font-bold tracking-widest text-[#1a3d2e] uppercase">Our Vision</span>
+              <h3 className="text-xl sm:text-2xl font-bold mt-3 mb-3 text-gray-900" style={{ fontFamily: "Georgia, serif" }}>A continent, nourished</h3>
+              <p className="text-sm text-gray-600 leading-relaxed relative z-10">
+                To become Africa's leading nutrition and preventive health platform, empowering millions of people to prevent and manage chronic diseases while preserving and celebrating the continent's rich food heritage.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ═════════════════════════════════════════════════════════════════════
+             WHAT WE DO
+           ═════════════════════════════════════════════════════════════════════ */}
+        <section id="what-we-do" className="px-4 sm:px-8 lg:px-16 xl:px-20 pb-16 w-full max-w-6xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
+            <span className="text-xs font-bold tracking-widest text-[#1a3d2e] uppercase bg-[#e8c87d]/40 px-3.5 py-1.5 rounded-full inline-block">
+              What We Do
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900" style={{ fontFamily: "Georgia, serif" }}>
+              Nutrition support, built for real life
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[
+              { title: "Personalized Nutrition Support", desc: "We provide individualized nutrition consultations and meal plans designed around each person's health goals, medical conditions, lifestyle, and cultural food preferences.", Icon: IconJollof },
+              { title: "Culturally Relevant Meal Planning", desc: "We create practical nutrition solutions using familiar African foods and ingredients, making healthy eating realistic, affordable, and sustainable.", Icon: IconIsombe },
+              { title: "Digital Preventive Health Solutions", desc: "Through technology, we make nutrition guidance more accessible, scalable, and personalized for individuals and communities across Africa.", Icon: IconUbugali },
+              { title: "Nutrition Education", desc: "We equip people with the knowledge and tools they need to make informed food choices and build healthier lifestyles for the long term.", Icon: IconPlantain },
+              { title: "Partnerships for Healthier Communities", desc: "We collaborate with healthcare professionals, food providers, and community organizations to improve access to preventive nutrition services and promote healthier populations.", Icon: IconBrochette },
+            ].map((item, i) => (
+              <div key={item.title} className="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-md transition-shadow" style={{ animation: "cardIn 0.5s ease both", animationDelay: `${i * 0.08}s` }}>
+                <div className="w-12 h-12 rounded-xl bg-[#f5f0e8] flex items-center justify-center mb-4">
+                  <item.Icon size={26} />
+                </div>
+                <h3 className="font-bold text-gray-900 mb-2 leading-snug" style={{ fontFamily: "Georgia, serif" }}>{item.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* ═════════════════════════════════════════════════════════════════════
              UPDATED SECTION: Discover & Learn (Nigerian & Rwandan Food Heritage)
@@ -1811,6 +2280,7 @@ export default function LandingPage() {
                   <span className="absolute bottom-4 left-4 text-xs font-bold text-white bg-[#1a3d2e] px-3 py-1 rounded-lg">
                     01 / West African Micro-Nutrients
                   </span>
+                  <div className="absolute -top-4 -right-4 food-float-a bg-white rounded-full p-2 shadow-md" aria-hidden="true"><IconPepper size={26} /></div>
                 </div>
                 <h3 className="text-lg font-bold text-gray-900" style={{ fontFamily: "Georgia, serif" }}>
                   Nigerian Bio-actives & Metabolic Balancing
@@ -1832,6 +2302,7 @@ export default function LandingPage() {
                   <span className="absolute bottom-4 left-4 text-xs font-bold text-white bg-[#e8c87d] text-gray-950 px-3 py-1 rounded-lg">
                     02 / East African High-Altitude Staples
                   </span>
+                  <div className="absolute -top-4 -right-4 food-float-b bg-white rounded-full p-2 shadow-md" aria-hidden="true"><IconIsombe size={26} /></div>
                 </div>
                 <h3 className="text-lg font-bold text-gray-900" style={{ fontFamily: "Georgia, serif" }}>
                   Rwandan Isombe, Legumes & Cellular Fiber
@@ -1862,8 +2333,48 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ═════════════════════════════════════════════════════════════════════
+             EDUCATIONAL TIPS — open access, no sign-in required
+           ═════════════════════════════════════════════════════════════════════ */}
+        <section id="edu-tips" className="px-4 sm:px-8 lg:px-16 xl:px-20 pb-14 w-full max-w-6xl mx-auto">
+          <div className="bg-white rounded-3xl border border-gray-200 p-8 md:p-12 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-8">
+              <div className="space-y-2">
+                <span className="text-xs font-bold tracking-widest text-[#1a3d2e] uppercase bg-[#e8c87d]/40 px-3.5 py-1.5 rounded-full inline-block">
+                  Educational Tips
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900" style={{ fontFamily: "Georgia, serif" }}>
+                  Small changes, real results
+                </h2>
+              </div>
+              <p className="text-sm text-gray-500 max-w-xs">
+                Free, bite-sized nutrition guidance — no account needed. Browse anytime.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {[
+                { Icon: IconPepper,    title: "Spice smart, salt less", tip: "Lean on scotch bonnet, ginger, and garlic for flavor — it lets you cut back on added salt without losing the taste you love." },
+                { Icon: IconPlantain,  title: "Ripe vs. green plantain", tip: "Boiled or grilled green plantain has a lower glycemic impact than fried ripe plantain — a simple swap for blood-sugar control." },
+                { Icon: IconIsombe,    title: "Leafy greens, daily", tip: "Cassava leaves, ugu, and amaranth are packed with iron and fiber. Aim for a serving of leafy greens with at least one meal a day." },
+                { Icon: IconUbugali,   title: "Balance your plate", tip: "Pair starchy staples like ubugali or fufu with a protein and a vegetable side to slow digestion and steady energy levels." },
+                { Icon: IconBrochette, title: "Portion your protein", tip: "A palm-sized portion of grilled protein per meal is enough for most adults — grilling beats deep-frying for heart health." },
+                { Icon: IconPumpkin,   title: "Snack on the harvest", tip: "Roasted pumpkin, groundnuts, or boiled corn make satisfying low-processed snacks between meals." },
+              ].map((t, i) => (
+                <div key={t.title} className="p-5 rounded-2xl border border-gray-100 bg-[#f5f0e8]/50 hover:bg-[#f5f0e8] transition-colors" style={{ animation: "cardIn 0.5s ease both", animationDelay: `${i * 0.06}s` }}>
+                  <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center mb-3 shadow-sm">
+                    <t.Icon size={22} />
+                  </div>
+                  <h3 className="font-bold text-gray-900 text-sm mb-1.5" style={{ fontFamily: "Georgia, serif" }}>{t.title}</h3>
+                  <p className="text-xs text-gray-500 leading-relaxed">{t.tip}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* ─── Interactive Path Cards Section Title ─── */}
-        <div className="text-center px-4 pt-4 pb-6">
+        <div id="get-started" className="text-center px-4 pt-4 pb-6">
           <h2 className="text-xl sm:text-2xl font-black" style={{ color: "#1a3d2e", fontFamily: "Georgia, serif" }}>
             Choose Your Access Path Below
           </h2>
@@ -1874,7 +2385,7 @@ export default function LandingPage() {
 
         {/* ─── Path Matrix Grid ────────────────────────────────────────── */}
         <div className="px-4 sm:px-8 lg:px-16 xl:px-20 pb-16 w-full max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5 lg:gap-6">
             {PATHS.map((path, i) => (
               <PathCard key={path.id} path={path} index={i} onSelect={handleSelectPath} />
             ))}
