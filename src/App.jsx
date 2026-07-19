@@ -81,6 +81,9 @@ import Pharmacist from "./components/Pharmacist.jsx";
 //Clincal Nutritionist Module Components
 import ClinicalNutritionist from "./components/ClinicalNutritionist.jsx";
 
+// Team Bios Component
+import TeamBios from "./components/Teambios.jsx";
+
 function App() {
   return (
     <Router>
@@ -104,6 +107,8 @@ function App() {
         <Route path="/AdminAll" element={<AdminAll />} />
         <Route path="/ClinicalNutritional" element={<ClinicalNutritionist />} />
         <Route path="/Pharmacist" element={<Pharmacist />} />
+
+        <Route path="/teambios" element={<TeamBios />} />
 
           {/* ── Admin pages ───────────────────────────── */}
           {/* <Route path="/admin"         element={<AdminAll />} /> */}
