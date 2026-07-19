@@ -1209,6 +1209,17 @@ import { useState, useEffect, useRef, createContext, useContext } from "react";
 // this file (adjust the path below if your project structure differs).
 import dinewithmeeLogo from "./dinewithmee-logo.png";
 
+// ─── DineWithMee video ─────────────────────────────────────────────────────────
+// Used two places: as the silent, looping background behind the "Welcome to
+// DineWithMee" hero, and (with sound) inside the "Watch our story" modal.
+// Place DineWithMee_Hero_Video.mp4 next to this file (adjust the path if needed).
+import heroVideo from "./Dinewithmee hero Video.mp4";
+
+// ─── About Us photo ────────────────────────────────────────────────────────────
+// Real clinic photo: nutritionist consultation with patient. Place
+// homepage-about.png next to this file (adjust the path if needed).
+import aboutUsPhoto from "./homepage-about.png";
+
 // ─── Import the Workspace Pages ──────────────────────────────────────────────
 import NutritionDashboard from "./NutritionDashboard";
 import AdminAll from "./AdminAll";
@@ -1713,11 +1724,12 @@ function StoryVideoModal({ onClose }) {
         </div>
         <div className="rounded-2xl overflow-hidden shadow-2xl bg-black">
           <video
-            controls autoPlay playsInline
-            poster="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1200&q=80&auto=format&fit=crop"
+            controls
+            autoPlay
+            playsInline
             className="w-full aspect-video"
           >
-            <source src="/videos/dinewithmee-story.mp4" type="video/mp4" />
+            <source src={heroVideo} type="video/mp4" />
           </video>
         </div>
       </div>
@@ -1777,6 +1789,21 @@ export default function LandingPage() {
   const [activeServiceModal, setActiveServiceModal] = useState(null);
   const [showStoryVideo, setShowStoryVideo] = useState(false);
   const [showTeamPage, setShowTeamPage] = useState(false);
+  const heroVideoRef = useRef(null);
+
+  // Respect "prefers-reduced-motion": pause the ambient hero video for
+  // people who've asked their system to minimize motion.
+  useEffect(() => {
+    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const applyMotionPreference = () => {
+      if (!heroVideoRef.current) return;
+      if (mql.matches) heroVideoRef.current.pause();
+      else heroVideoRef.current.play().catch(() => {});
+    };
+    applyMotionPreference();
+    mql.addEventListener("change", applyMotionPreference);
+    return () => mql.removeEventListener("change", applyMotionPreference);
+  }, []);
 
   // Close the Paths dropdown on outside click or Escape
   useEffect(() => {
@@ -2105,17 +2132,20 @@ export default function LandingPage() {
 
       {/* ─── Main Content Wrapper ───────────────────────────────────────── */}
       <main className="flex-1 flex flex-col">
-        {/* ─── Hero Block — full-bleed video background ─── */}
+        {/* ─── Hero Block — "Welcome to DineWithMee" with its own background video ─── */}
         <div className="relative overflow-hidden min-h-[70vh] sm:min-h-[82vh] flex items-center">
-          {/* Background video: muted / looping / autoplay, fills the entire hero.
-              Swap the <source src> below for the first Drive video once it's shared as a direct file link. */}
+          {/* Background video: silent, looping, autoplay — fills only this hero block. */}
           <div className="absolute inset-0">
             <video
-              autoPlay muted loop playsInline
+              ref={heroVideoRef}
+              autoPlay
+              muted
+              loop
+              playsInline
               poster="https://images.unsplash.com/photo-1638436684761-7e59f8a9072f?w=1600&q=80&auto=format&fit=crop"
               className="absolute inset-0 w-full h-full object-cover"
             >
-              <source src="/videos/dinewithmee-hero-bg.mp4" type="video/mp4" />
+              <source src={heroVideo} type="video/mp4" />
             </video>
             <div className="absolute inset-0 bg-gradient-to-b from-[#0d2019]/85 via-[#1a3d2e]/65 to-[#0d2019]/90" />
           </div>
@@ -2203,23 +2233,13 @@ export default function LandingPage() {
                 </svg>
               </button>
             </div>
-            {/* Decorative floating food photography — placeholder until custom photography is provided */}
-            <div className="relative h-64 hidden md:block" aria-hidden="true">
-              <div className="absolute top-2 left-6 w-20 h-20 rounded-full overflow-hidden shadow-lg border-4 border-white food-float-a">
-                <img src="https://images.unsplash.com/photo-1664992960082-0ea299a9c53e?w=200&q=80&auto=format&fit=crop" alt="Nigerian jollof rice" className="w-full h-full object-cover" />
-              </div>
-              <div className="absolute top-14 right-6 w-24 h-24 rounded-full overflow-hidden shadow-lg border-4 border-white food-float-b">
-                <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200&q=80&auto=format&fit=crop" alt="Rwandan cassava leaf stew" className="w-full h-full object-cover" />
-              </div>
-              <div className="absolute bottom-16 left-16 w-16 h-16 rounded-full overflow-hidden shadow-lg border-4 border-white food-float-b" style={{ animationDelay: "1s" }}>
-                <img src="https://images.unsplash.com/photo-1540714605746-4f474eefc6d4?w=200&q=80&auto=format&fit=crop" alt="Fried plantain" className="w-full h-full object-cover" />
-              </div>
-              <div className="absolute bottom-2 right-2 w-20 h-20 rounded-full overflow-hidden shadow-lg border-4 border-white food-float-a" style={{ animationDelay: "0.6s" }}>
-                <img src="https://images.unsplash.com/photo-1661588669110-81142a5b9e57?w=200&q=80&auto=format&fit=crop" alt="East African legume stew" className="w-full h-full object-cover" />
-              </div>
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full overflow-hidden shadow-lg border-4 border-white food-float-a" style={{ animationDelay: "1.4s" }}>
-                <img src="https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=200&q=80&auto=format&fit=crop" alt="West African pepper vegetable stew" className="w-full h-full object-cover" />
-              </div>
+            {/* About Us photo — nutritionist consultation, real clinic photography */}
+            <div className="relative rounded-3xl overflow-hidden shadow-xl border-4 border-white h-64 sm:h-80 md:h-[26rem]">
+              <img
+                src={aboutUsPhoto}
+                alt="A DineWithMee nutritionist reviewing a patient's blood pressure, blood sugar, and weight progress on a laptop, with fresh fruits and vegetables and monitoring equipment on the desk"
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
         </section>
