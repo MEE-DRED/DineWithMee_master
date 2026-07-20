@@ -1,3 +1,4 @@
+
 // import { useState, useEffect, useRef, createContext, useContext } from "react";
 
 // // ─── Brand Asset ──────────────────────────────────────────────────────────────
@@ -1218,7 +1219,7 @@ import heroVideo from "./Dinewithmee hero Video.mp4";
 // ─── About Us photo ────────────────────────────────────────────────────────────
 // Real clinic photo: nutritionist consultation with patient. Place
 // homepage-about.png next to this file (adjust the path if needed).
-import aboutUsPhoto from "./homepage-about.png";
+import aboutUsPhoto from "./homepage-about.jpeg";
 
 // ─── Import the Workspace Pages ──────────────────────────────────────────────
 import NutritionDashboard from "./NutritionDashboard";
@@ -1707,7 +1708,7 @@ function SignInModal({ onClose, onSuccess }) {
 // ─── Story Video Modal ─────────────────────────────────────────────────────────
 // Lightbox for the "Watch our story" video (plays with sound + controls).
 // Swap the <source src> below for the second Drive video once shared as a direct file link.
-function StoryVideoModal({ onClose }) {
+function StoryVideoModal({ onClose, src = heroVideo, label = "Watch with sound" }) {
   return (
     <div className="fixed inset-0 bg-black/85 flex items-center justify-center z-50 p-4" style={{ animation: "fadeIn 0.2s ease both" }} onClick={onClose}>
       <div className="w-full max-w-2xl" style={{ animation: "slideUp 0.25s ease both" }} onClick={(e) => e.stopPropagation()}>
@@ -1716,7 +1717,7 @@ function StoryVideoModal({ onClose }) {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
               <path d="M11 5 6 9H2v6h4l5 4V5z" /><path d="M15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13" />
             </svg>
-            Watch with sound
+            {label}
           </p>
           <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.6" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
@@ -1729,7 +1730,7 @@ function StoryVideoModal({ onClose }) {
             playsInline
             className="w-full aspect-video"
           >
-            <source src={heroVideo} type="video/mp4" />
+            <source src={src} type="video/mp4" />
           </video>
         </div>
       </div>
@@ -1786,6 +1787,7 @@ export default function LandingPage() {
   const [pathsMenuOpen, setPathsMenuOpen] = useState(false);
   const pathsMenuRef = useRef(null);
   const [aboutExpanded, setAboutExpanded] = useState(false);
+  const [whatWeDoIndex, setWhatWeDoIndex] = useState(0);
   const [activeServiceModal, setActiveServiceModal] = useState(null);
   const [showStoryVideo, setShowStoryVideo] = useState(false);
   const [showTeamPage, setShowTeamPage] = useState(false);
@@ -2208,16 +2210,16 @@ export default function LandingPage() {
                 Food as medicine, rooted in home
               </h2>
               <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                DineWithMee is a preventive nutrition and digital health platform helping Africans use food as a tool for better health, addressing nutrition-related diseases like hypertension and diabetes through culturally relevant, practical support.
+                DineWithMee helps Africans fight hypertension and diabetes using the food already on their plate.
               </p>
 
               {aboutExpanded && (
                 <div className="space-y-4" style={{ animation: "fadeIn 0.35s ease both" }}>
                   <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                    Rather than asking people to abandon the foods they know and love, we help them rediscover the healing power of African cuisine through evidence-based nutrition guidance, personalized meal planning, and digital health solutions tailored to local realities.
+                    We don't ask you to give up the foods you love. We help you rediscover their healing power.
                   </p>
                   <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                    At DineWithMee, we believe healthier communities can be built by combining indigenous food knowledge, modern nutrition science, and technology.
+                    Indigenous food knowledge, modern nutrition science, and technology, built for healthier communities.
                   </p>
                 </div>
               )}
@@ -2249,22 +2251,47 @@ export default function LandingPage() {
            ═════════════════════════════════════════════════════════════════════ */}
         <section className="px-4 sm:px-8 lg:px-16 xl:px-20 pb-14 w-full max-w-5xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div id="mission" className="bg-[#1a3d2e] rounded-3xl p-8 md:p-10 text-white relative overflow-hidden">
-              <div className="absolute -bottom-4 -right-4 opacity-20 food-float-b"><IconSuya size={90} /></div>
-              <span className="text-xs font-bold tracking-widest text-[#e8c87d] uppercase">Our Mission</span>
-              <h3 className="text-xl sm:text-2xl font-bold mt-3 mb-3" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Making prevention practical</h3>
-              <p className="text-sm text-white/80 leading-relaxed relative z-10">
-                Accessible preventive nutrition, culturally relevant education, and digital health innovation, across Africa.
-              </p>
+
+            {/* Mission — photo card: pharmacist consultation */}
+            <div
+              id="mission"
+              className="group rounded-3xl overflow-hidden relative aspect-[4/5] sm:aspect-[4/3] shadow-lg"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1739289696449-cba3a5ef085d?w=900&q=80&auto=format&fit=crop"
+                alt="A DineWithMee pharmacist consulting with a patient"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1a3d2e]/95 via-[#1a3d2e]/30 to-black/10" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+                <span className="text-xs font-bold tracking-widest text-[#e8c87d] uppercase">Our Mission</span>
+                <h3 className="text-xl sm:text-2xl font-bold mt-2 mb-1.5 text-white" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Making prevention practical</h3>
+                <p className="text-sm text-white/80 leading-relaxed">
+                  Preventive nutrition, culturally rooted, and built for everyday African life.
+                </p>
+              </div>
             </div>
-            <div id="vision" className="bg-white border border-gray-200 rounded-3xl p-8 md:p-10 relative overflow-hidden">
-              <div className="absolute -bottom-4 -right-4 opacity-10 food-float-a"><IconPumpkin size={90} /></div>
-              <span className="text-xs font-bold tracking-widest text-[#1a3d2e] uppercase">Our Vision</span>
-              <h3 className="text-xl sm:text-2xl font-bold mt-3 mb-3 text-gray-900" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>A continent, nourished</h3>
-              <p className="text-sm text-gray-600 leading-relaxed relative z-10">
-                Africa's leading nutrition platform, helping millions prevent chronic disease while celebrating our food heritage.
-              </p>
+
+            {/* Vision — photo card: recommending real food */}
+            <div
+              id="vision"
+              className="group rounded-3xl overflow-hidden relative aspect-[4/5] sm:aspect-[4/3] shadow-lg"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1556911073-52527ac43761?w=900&q=80&auto=format&fit=crop"
+                alt="A nutritionist recommending fresh, healthy foods to a client"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-black/10" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+                <span className="text-xs font-bold tracking-widest text-[#e8c87d] uppercase">Our Vision</span>
+                <h3 className="text-xl sm:text-2xl font-bold mt-2 mb-1.5 text-white" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>A continent, nourished</h3>
+                <p className="text-sm text-white/80 leading-relaxed">
+                  Millions living free of chronic disease, without giving up the food they love.
+                </p>
+              </div>
             </div>
+
           </div>
         </section>
 
@@ -2280,36 +2307,70 @@ export default function LandingPage() {
               Nutrition support, built for real life
             </h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[
-              { title: "Personalized Nutrition Support", desc: "Consultations and meal plans built around your health goals and culture.", full: "We provide individualized nutrition consultations and meal plans designed around each person's health goals, medical conditions, lifestyle, and cultural food preferences.", img: "https://images.unsplash.com/photo-1664992960082-0ea299a9c53e?w=300&q=80&auto=format&fit=crop", dark: true },
-              { title: "Culturally Relevant Meal Planning", desc: "Practical, affordable meals using familiar African ingredients.", full: "We create practical nutrition solutions using familiar African foods and ingredients, making healthy eating realistic, affordable, and sustainable.", img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300&q=80&auto=format&fit=crop", dark: false },
-              { title: "Digital Preventive Health Solutions", desc: "Accessible, scalable nutrition guidance, powered by technology.", full: "Through technology, we make nutrition guidance more accessible, scalable, and personalized for individuals and communities across Africa.", img: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=300&q=80&auto=format&fit=crop", dark: false },
-              { title: "Nutrition Education", desc: "The knowledge and tools for healthier lifestyle choices.", full: "We equip people with the knowledge and tools they need to make informed food choices and build healthier lifestyles for the long term.", img: "https://images.unsplash.com/photo-1540714605746-4f474eefc6d4?w=300&q=80&auto=format&fit=crop", dark: true },
-              { title: "Partnerships for Healthier Communities", desc: "Working with health and food partners to widen access.", full: "We collaborate with healthcare professionals, food providers, and community organizations to improve access to preventive nutrition services and promote healthier populations.", img: "https://images.unsplash.com/photo-1661588669110-81142a5b9e57?w=300&q=80&auto=format&fit=crop", dark: false },
-            ].map((item, i) => (
-              <div
-                key={item.title}
-                className={`rounded-2xl border p-6 transition-shadow hover:shadow-md ${item.dark ? "bg-[#1a3d2e] border-[#1a3d2e] text-white" : "bg-white border-gray-200"}`}
-                style={{ animation: "cardIn 0.5s ease both", animationDelay: `${i * 0.08}s` }}
-              >
-                <div className="w-14 h-14 rounded-xl overflow-hidden mb-4 shadow-sm border-2 border-white/70">
-                  <img src={item.img} alt="" className="w-full h-full object-cover" />
+
+          {(() => {
+            const WHAT_WE_DO = [
+              { title: "Personalized Nutrition Support", desc: "Consultations and meal plans built around your health goals and culture.", full: "We provide individualized nutrition consultations and meal plans designed around each person's health goals, medical conditions, lifestyle, and cultural food preferences.", img: "https://images.unsplash.com/photo-1664992960082-0ea299a9c53e?w=1200&q=80&auto=format&fit=crop" },
+              { title: "Culturally Relevant Meal Planning", desc: "Practical, affordable meals using familiar African ingredients.", full: "We create practical nutrition solutions using familiar African foods and ingredients, making healthy eating realistic, affordable, and sustainable.", img: "https://images.unsplash.com/photo-1634324092526-91f5e878b72f?w=1200&q=80&auto=format&fit=crop" },
+              { title: "Digital Preventive Health Solutions", desc: "Accessible, scalable nutrition guidance, powered by technology.", full: "Through technology, we make nutrition guidance more accessible, scalable, and personalized for individuals and communities across Africa.", img: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=1200&q=80&auto=format&fit=crop" },
+              { title: "Nutrition Education", desc: "The knowledge and tools for healthier lifestyle choices.", full: "We equip people with the knowledge and tools they need to make informed food choices and build healthier lifestyles for the long term.", img: "https://images.unsplash.com/photo-1540714605746-4f474eefc6d4?w=1200&q=80&auto=format&fit=crop" },
+              { title: "Partnerships for Healthier Communities", desc: "Working with health and food partners to widen access.", full: "We collaborate with healthcare professionals, food providers, and community organizations to improve access to preventive nutrition services and promote healthier populations.", img: "https://images.unsplash.com/photo-1666181551815-b9adecb24e46?w=1200&q=80&auto=format&fit=crop" },
+            ];
+            const active = WHAT_WE_DO[whatWeDoIndex];
+            return (
+              <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-4 sm:p-6 md:p-8">
+                {/* Big image — the dominant element */}
+                <div className="relative rounded-2xl overflow-hidden aspect-[16/10] sm:aspect-[16/8] group">
+                  <img
+                    key={active.img}
+                    src={active.img}
+                    alt={active.title}
+                    className="w-full h-full object-cover"
+                    style={{ animation: "fadeIn 0.5s ease both" }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#1a3d2e]/90 via-[#1a3d2e]/10 to-transparent" />
+
+                  {/* Number badge */}
+                  <span className="absolute top-4 right-4 sm:top-6 sm:right-6 text-xs font-bold text-white/90 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20">
+                    0{whatWeDoIndex + 1} / 0{WHAT_WE_DO.length}
+                  </span>
+
+                  {/* Text — deliberately small, sitting on top of the big image */}
+                  <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8 md:p-10 flex items-end justify-between gap-4">
+                    <div className="max-w-md" style={{ animation: "fadeIn 0.4s ease both" }} key={`text-${active.title}`}>
+                      <h3 className="text-base sm:text-xl font-bold text-white leading-snug" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>{active.title}</h3>
+                      <p className="text-xs sm:text-sm text-white/75 leading-relaxed mt-1 hidden sm:block">{active.desc}</p>
+                    </div>
+                    <button
+                      onClick={() => setActiveServiceModal(active)}
+                      className="flex-shrink-0 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#1a3d2e] bg-[#e8c87d] hover:bg-white px-4 py-2.5 rounded-full transition-colors"
+                    >
+                      More
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-                <h3 className={`font-bold mb-2 leading-snug ${item.dark ? "text-white" : "text-gray-900"}`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>{item.title}</h3>
-                <p className={`text-sm leading-relaxed mb-3 ${item.dark ? "text-white/80" : "text-gray-500"}`}>{item.desc}</p>
-                <button
-                  onClick={() => setActiveServiceModal(item)}
-                  className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider transition-all hover:gap-2.5 ${item.dark ? "text-[#e8c87d]" : "text-[#1a3d2e]"}`}
-                >
-                  More
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 12h14M12 5l7 7-7 7" />
-                  </svg>
-                </button>
+
+                {/* Thumbnail rail — small, secondary, drives which image is "playing" above */}
+                <div className="flex gap-2.5 sm:gap-3 mt-4 sm:mt-5 overflow-x-auto pb-1 -mx-1 px-1">
+                  {WHAT_WE_DO.map((item, i) => (
+                    <button
+                      key={item.title}
+                      onClick={() => setWhatWeDoIndex(i)}
+                      className={`relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden transition-all duration-300 ${
+                        i === whatWeDoIndex ? "ring-2 ring-[#1a3d2e] ring-offset-2 scale-105" : "opacity-50 hover:opacity-90"
+                      }`}
+                      aria-label={item.title}
+                    >
+                      <img src={item.img} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
+            );
+          })()}
         </section>
 
         {/* ═════════════════════════════════════════════════════════════════════
@@ -2327,7 +2388,7 @@ export default function LandingPage() {
                 Science Meets Heritage
               </h2>
               <p className="text-sm text-gray-500 leading-relaxed">
-                Traditional Nigerian and Rwandan diets, optimized with modern nutrition science.
+                Your grandmother's recipes, backed by modern nutrition science.
               </p>
             </div>
 
@@ -2338,21 +2399,21 @@ export default function LandingPage() {
               <div className="space-y-4">
                 <div className="overflow-hidden rounded-2xl aspect-[4/3] relative group shadow-inner border border-gray-100">
                   <img 
-                    src="https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=800&q=80&auto=format&fit=crop" 
-                    alt="Nigerian spiced pepper stews and Jollof" 
+                    src="https://images.unsplash.com/photo-1634324092526-91f5e878b72f?w=800&q=80&auto=format&fit=crop" 
+                    alt="A vibrant plate of Nigerian jollof rice with peppers and grilled meat" 
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-80" />
                   <span className="absolute bottom-4 left-4 text-xs font-bold text-white bg-[#1a3d2e] px-3 py-1 rounded-lg">
-                    01 / West African Micro-Nutrients
+                    01 / Nigeria
                   </span>
                   <div className="absolute -top-4 -right-4 food-float-a bg-white rounded-full p-2 shadow-md" aria-hidden="true"><IconPepper size={26} /></div>
                 </div>
                 <h3 className="text-lg font-bold text-gray-900" style={{ fontFamily: "Georgia, serif" }}>
-                  Nigerian Bio-actives & Metabolic Balancing
+                  Jollof, Pepper & Egusi
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-                  Peppers, ginger, garlic, egusi, and plantain, naturally balancing blood sugar and healthy fats.
+                  The peppers and egusi in your favorite dishes naturally help balance blood sugar.
                 </p>
               </div>
 
@@ -2360,21 +2421,21 @@ export default function LandingPage() {
               <div className="space-y-4">
                 <div className="overflow-hidden rounded-2xl aspect-[4/3] relative group shadow-inner border border-gray-100">
                   <img 
-                    src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80&auto=format&fit=crop" 
-                    alt="Rwandan greens, beans, and fresh agricultural produce" 
+                    src="https://images.unsplash.com/photo-1666181551815-b9adecb24e46?w=800&q=80&auto=format&fit=crop" 
+                    alt="A plated East African meal of ugali, grilled fish, and fresh vegetables" 
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-80" />
                   <span className="absolute bottom-4 left-4 text-xs font-bold text-white bg-[#e8c87d] text-gray-950 px-3 py-1 rounded-lg">
-                    02 / East African High-Altitude Staples
+                    02 / Rwanda
                   </span>
                   <div className="absolute -top-4 -right-4 food-float-b bg-white rounded-full p-2 shadow-md" aria-hidden="true"><IconIsombe size={26} /></div>
                 </div>
                 <h3 className="text-lg font-bold text-gray-900" style={{ fontFamily: "Georgia, serif" }}>
-                  Rwandan Isombe, Legumes & Cellular Fiber
+                  Isombe, Ubugali & Legumes
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-                  Isombe, legumes, and Rwanda's agricultural richness, supporting gut health with natural fiber.
+                  Rwanda's staple greens and legumes, a natural source of fiber for a healthy gut.
                 </p>
               </div>
 
@@ -2420,12 +2481,12 @@ export default function LandingPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {[
-                { img: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=200&q=80&auto=format&fit=crop", title: "Spice smart, salt less", tip: "Lean on scotch bonnet, ginger, and garlic for flavor, so you can cut back on added salt without losing the taste you love." },
-                { img: "https://images.unsplash.com/photo-1540714605746-4f474eefc6d4?w=200&q=80&auto=format&fit=crop", title: "Ripe vs. green plantain", tip: "Boiled or grilled green plantain has a lower glycemic impact than fried ripe plantain, a simple swap for blood-sugar control." },
-                { img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200&q=80&auto=format&fit=crop", title: "Leafy greens, daily", tip: "Cassava leaves, ugu, and amaranth are packed with iron and fiber. Aim for a serving of leafy greens with at least one meal a day." },
-                { img: "https://images.unsplash.com/photo-1661588669110-81142a5b9e57?w=200&q=80&auto=format&fit=crop", title: "Balance your plate", tip: "Pair starchy staples like ubugali or fufu with a protein and a vegetable side to slow digestion and steady energy levels." },
-                { img: "https://images.unsplash.com/photo-1664992960082-0ea299a9c53e?w=200&q=80&auto=format&fit=crop", title: "Portion your protein", tip: "A palm-sized portion of grilled protein per meal is enough for most adults, and grilling beats deep-frying for heart health." },
-                { img: "https://images.unsplash.com/photo-1604329756574-bda1f2cada6f?w=200&q=80&auto=format&fit=crop", title: "Snack on the harvest", tip: "Roasted pumpkin, groundnuts, or boiled corn make satisfying low-processed snacks between meals." },
+                { img: "https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?w=200&q=80&auto=format&fit=crop", title: "Spice smart, salt less", tip: "Scotch bonnet, ginger, and garlic bring the flavor, so you need less salt." },
+                { img: "https://images.unsplash.com/photo-1540714605746-4f474eefc6d4?w=200&q=80&auto=format&fit=crop", title: "Ripe vs. green plantain", tip: "Boiled green plantain beats fried ripe plantain for blood-sugar control." },
+                { img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200&q=80&auto=format&fit=crop", title: "Leafy greens, daily", tip: "Cassava leaves, ugu, and amaranth pack in iron and fiber. Eat them daily." },
+                { img: "https://images.unsplash.com/photo-1661588669110-81142a5b9e57?w=200&q=80&auto=format&fit=crop", title: "Balance your plate", tip: "Pair ubugali or fufu with protein and vegetables for steady energy." },
+                { img: "https://images.unsplash.com/photo-1664992960082-0ea299a9c53e?w=200&q=80&auto=format&fit=crop", title: "Portion your protein", tip: "A palm-sized portion of grilled protein per meal is plenty." },
+                { img: "https://images.unsplash.com/photo-1604329756574-bda1f2cada6f?w=200&q=80&auto=format&fit=crop", title: "Snack on the harvest", tip: "Roasted pumpkin, groundnuts, or boiled corn make a satisfying snack." },
               ].map((t, i) => (
                 <div key={t.title} className="p-5 rounded-2xl border border-gray-100 bg-[#f5f0e8]/50 hover:bg-[#f5f0e8] transition-colors" style={{ animation: "cardIn 0.5s ease both", animationDelay: `${i * 0.06}s` }}>
                   <div className="w-10 h-10 rounded-full overflow-hidden mb-3 shadow-sm border-2 border-white">
