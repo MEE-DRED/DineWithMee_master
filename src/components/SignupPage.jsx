@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import dinewithmeeLogo from "./dinewithmee-logo.png";
 
 const API_BASE = "https://new-dine-with-mee-backend.onrender.com/api/v1";
 
@@ -73,27 +74,18 @@ function Header({ navigate }) {
         className="flex items-center gap-2.5 cursor-pointer"
         onClick={() => navigate("landing")}
       >
-        <svg width="32" height="32" viewBox="0 0 42 42" fill="none">
-          <circle cx="21" cy="21" r="21" fill="#1a3d2e" />
-          <path
-            d="M21 7c0 0-9.5 7.5-9.5 14.5a9.5 9.5 0 0019 0C30.5 14.5 21 7 21 7z"
-            fill="#e8c87d"
-          />
-          <path
-            d="M21 13c0 0-5 5-5 8.5a5 5 0 0010 0C26 17 21 13 21 13z"
-            fill="#c9a84c"
-            opacity="0.5"
-          />
-        </svg>
-        <div>
-          <p className="text-sm font-black text-[#1a3d2e] tracking-tight">
-            Dine with Mee
-          </p>
-          <p className="text-[9px] text-stone-400 font-medium">
-            Clinical Nutrition Platform
-          </p>
-        </div>
+        <img src={dinewithmeeLogo} alt="DineWithMee" className="h-8 sm:h-9 w-auto object-contain" />
       </div>
+      <button
+        onClick={() => navigate("landing")}
+        className="flex items-center gap-1.5 text-sm font-bold text-stone-500 hover:text-[#1a3d2e] transition-colors"
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 9.5 12 3l9 6.5" />
+          <path d="M5 10v10h14V10" />
+        </svg>
+        Home
+      </button>
     </header>
   );
 }
@@ -103,21 +95,10 @@ function Footer() {
     <footer className="border-t border-stone-200 bg-stone-100 px-6 sm:px-10 py-5">
       <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <svg width="26" height="26" viewBox="0 0 42 42" fill="none">
-            <circle cx="21" cy="21" r="21" fill="#1a3d2e" />
-            <path
-              d="M21 7c0 0-9.5 7.5-9.5 14.5a9.5 9.5 0 0019 0C30.5 14.5 21 7 21 7z"
-              fill="#e8c87d"
-            />
-          </svg>
-          <div className="leading-none">
-            <p className="text-[10px] font-extrabold text-[#1a3d2e]">
-              Dine with Mee
-            </p>
-            <p className="text-[10px] text-stone-400">
-              © 2026 Dine With Me. Clinical Nutrition & Culinary Excellence.
-            </p>
-          </div>
+          <img src={dinewithmeeLogo} alt="DineWithMee" className="h-6 w-auto object-contain" />
+          <p className="text-[10px] text-stone-400">
+            © 2026 Dine With Me. Clinical Nutrition & Culinary Excellence.
+          </p>
         </div>
       </div>
     </footer>
