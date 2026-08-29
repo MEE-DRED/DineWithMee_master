@@ -1,5 +1,3 @@
-
-
 // import { useState } from "react";
 // import { Link, useLocation } from "react-router-dom";
 
@@ -335,9 +333,24 @@
 
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import axios from "axios";
 
-// Base URL mapped directly from your Swagger documentation screenshots
-const API_BASE_URL = "https://new-dine-with-mee-backend.onrender.com/api/v1";
+// Live backend base URL. NOTE: these /meals and /meal-plans endpoints are
+// NOT confirmed against the Swagger docs reviewed so far (only "Auth" and
+// "Users" sections have been checked) — they're kept as best-guess REST
+// paths under /api/v1 and fall back to local mock data on failure below.
+// Confirm the real paths against the "Health Profiles"/nutrition sections
+// of your Swagger docs and update these if they differ.
+const API_BASE_URL = "https://new-dine-with-mee-backend-z7it.onrender.com/api/v1";
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: { "Content-Type": "application/json" },
+});
+
+const authHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("dwm_token") || ""}`,
+});
 
 // Placeholder Meal Plan ID (Replace with your actual state or auth-derived ID)
 const ACTIVE_MEAL_PLAN_ID = "current-user-plan-id"; 
@@ -469,29 +482,28 @@ export default function DineWithMee() {
         setLoading(true);
 
         // Fetch Featured Meal & General Meals Database
-        const [featRes, allMealsRes, summaryRes, swapsRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/meals/featured`),
-          fetch(`${API_BASE_URL}/meals`),
-          fetch(`${API_BASE_URL}/meal-plans/${ACTIVE_MEAL_PLAN_ID}/nutritional-summary`),
-          fetch(`${API_BASE_URL}/meals/recommended/for-me`)
+        const [featRes, allMealsRes, summaryRes, swapsRes] = await Promise.allSettled([
+          api.get("/meals/featured", { headers: authHeaders() }),
+          api.get("/meals", { headers: authHeaders() }),
+          api.get(`/meal-plans/${ACTIVE_MEAL_PLAN_ID}/nutritional-summary`, { headers: authHeaders() }),
+          api.get("/meals/recommended/for-me", { headers: authHeaders() }),
         ]);
 
         // Process Featured Meal
-        if (featRes.ok) {
-          const featData = await featRes.json();
+        if (featRes.status === "fulfilled") {
+          const featData = featRes.value.data;
           setFeaturedMeal(Array.isArray(featData) ? featData[0] : featData);
         }
 
         // Process Standard/Complementary Meals
-        if (allMealsRes.ok) {
-          const mealsData = await allMealsRes.json();
-          // Filter out the featured item if it exists in the list
-          setComplementaryMeals(mealsData.slice(0, 2)); 
+        if (allMealsRes.status === "fulfilled") {
+          const mealsData = allMealsRes.value.data;
+          setComplementaryMeals(mealsData.slice(0, 2));
         }
 
         // Process Nutritional Target Progress Summary
-        if (summaryRes.ok) {
-          const summaryData = await summaryRes.json();
+        if (summaryRes.status === "fulfilled") {
+          const summaryData = summaryRes.value.data;
           setNutritionalSummary({
             current: summaryData.currentCalories || 1320,
             target: summaryData.targetCalories || 1900
@@ -499,9 +511,14 @@ export default function DineWithMee() {
         }
 
         // Process Smart Recommendation Swaps
-        if (swapsRes.ok) {
-          const swapsData = await swapsRes.json();
+        if (swapsRes.status === "fulfilled") {
+          const swapsData = swapsRes.value.data;
           setRecommendedSwaps(swapsData.slice(0, 3));
+        }
+
+        // If nothing came back, fall back to visual placeholder data.
+        if ([featRes, allMealsRes, summaryRes, swapsRes].every(r => r.status === "rejected")) {
+          applyVisualFallbackData();
         }
 
       } catch (err) {
@@ -537,26 +554,21 @@ export default function DineWithMee() {
   // ── CREATE / UPDATE: Add meal item directly to current planning sheet ──
   const handleLogMealItem = async (mealId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/meal-plans/${ACTIVE_MEAL_PLAN_ID}/items`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mealId, loggedAt: new Date() })
-      });
-
-      if (response.ok) {
-        alert("Meal added to your active plan tracking successfully!");
-        // Refresh nutritional breakdown target
-        const summaryRes = await fetch(`${API_BASE_URL}/meal-plans/${ACTIVE_MEAL_PLAN_ID}/nutritional-summary`);
-        if (summaryRes.ok) {
-          const summaryData = await summaryRes.json();
-          setNutritionalSummary({ current: summaryData.currentCalories, target: summaryData.targetCalories });
-        }
-      } else {
-        // Fallback simulated update context
-        setNutritionalSummary(prev => ({ ...prev, current: Math.min(prev.current + 400, prev.target) }));
-      }
+      await api.post(
+        `/meal-plans/${ACTIVE_MEAL_PLAN_ID}/items`,
+        { mealId, loggedAt: new Date() },
+        { headers: authHeaders() }
+      );
+      alert("Meal added to your active plan tracking successfully!");
+      // Refresh nutritional breakdown target
+      const { data: summaryData } = await api.get(
+        `/meal-plans/${ACTIVE_MEAL_PLAN_ID}/nutritional-summary`,
+        { headers: authHeaders() }
+      );
+      setNutritionalSummary({ current: summaryData.currentCalories, target: summaryData.targetCalories });
     } catch (err) {
       console.warn("Could not post meal item context.", err);
+      // Fallback simulated update so the UI still feels responsive.
       setNutritionalSummary(prev => ({ ...prev, current: Math.min(prev.current + 400, prev.target) }));
     }
   };
@@ -564,13 +576,8 @@ export default function DineWithMee() {
   // ── DELETE: Remove meal item safely from active custom plan layout ──
   const handleRemoveMealItem = async (mealItemId) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/meal-plans/${ACTIVE_MEAL_PLAN_ID}/items/${mealItemId}`, {
-        method: "DELETE"
-      });
-
-      if (response.ok) {
-        setRecommendedSwaps(prev => prev.filter(item => item._id !== mealItemId));
-      }
+      await api.delete(`/meal-plans/${ACTIVE_MEAL_PLAN_ID}/items/${mealItemId}`, { headers: authHeaders() });
+      setRecommendedSwaps(prev => prev.filter(item => item._id !== mealItemId));
     } catch (err) {
       // Local clean eviction update rule fallback
       setRecommendedSwaps(prev => prev.filter(item => item._id !== mealItemId));

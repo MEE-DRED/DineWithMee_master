@@ -557,6 +557,7 @@
 
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import axios from "axios";
 
 // ─── Icon primitive ───────────────────────────────────────────────────────────
 const Icon = ({ d, size = 18, className = "", strokeWidth = 1.8 }) => (
@@ -616,13 +617,19 @@ const RECOMMENDED = [
   { name: "Berberine HCl",      dose: "500mg • Glucose Support",    price: "$24.00", badge: "Matched"  },
 ];
 
-// Base API URL config
-const API_BASE = "https://new-dine-with-mee-backend.onrender.com";
+// Base API URL config. Users/health-profile resources live under /api/v1
+// (confirmed against the Swagger "Users" section), while other routes here
+// (/orders) are best-guess paths not yet confirmed in the docs shown.
+const API_BASE = "https://new-dine-with-mee-backend-z7it.onrender.com";
 
-// Shared configuration headers helper (e.g., Auth Bearer tokens)
+const api = axios.create({
+  baseURL: API_BASE,
+  headers: { "Content-Type": "application/json" },
+});
+
+// Shared configuration headers helper (Auth Bearer token)
 const getHeaders = () => ({
-  "Content-Type": "application/json",
-  "Authorization": `Bearer ${localStorage.getItem("token") || "mock-token"}`
+  Authorization: `Bearer ${localStorage.getItem("dwm_token") || ""}`,
 });
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
@@ -790,16 +797,11 @@ export default function Orders() {
   useEffect(() => {
     async function fetchOrders() {
       try {
-        const response = await fetch(`${API_BASE}/orders`, {
-          method: "GET",
-          headers: getHeaders(),
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setOrdersList(data.orders || data);
-          if ((data.orders || data).length > 0) {
-            setExpandedId((data.orders || data)[0]._id || (data.orders || data)[0].id);
-          }
+        const { data } = await api.get("/orders", { headers: getHeaders() });
+        const list = data.orders || data;
+        setOrdersList(list);
+        if (list.length > 0) {
+          setExpandedId(list[0]._id || list[0].id);
         }
       } catch (error) {
         console.error("Error retrieving user orders:", error);
@@ -815,14 +817,8 @@ export default function Orders() {
   useEffect(() => {
     async function fetchHealthProfile() {
       try {
-        const response = await fetch(`${API_BASE}/api/v1/health-profiles/me`, {
-          method: "GET",
-          headers: getHeaders(),
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setHealthProfile(data.profile || data);
-        }
+        const { data } = await api.get("/api/v1/health-profiles/me", { headers: getHeaders() });
+        setHealthProfile(data.profile || data);
       } catch (error) {
         console.error("Error retrieving personal profile context:", error);
       }
@@ -835,19 +831,13 @@ export default function Orders() {
   const handleCancelOrder = async (orderId) => {
     if (!window.confirm("Are you sure you want to cancel this order?")) return;
     try {
-      const response = await fetch(`${API_BASE}/orders/${orderId}/cancel`, {
-        method: "PATCH",
-        headers: getHeaders(),
-      });
-      if (response.ok) {
-        // Optimistically or explicitly apply local changes following successful patch transmission
-        setOrdersList(prev => prev.map(o => (o._id === orderId || o.id === orderId) ? { ...o, status: "Cancelled" } : o));
-        alert("Order cancelled successfully.");
-      } else {
-        alert("Unable to modify order status. It may have already been shipped.");
-      }
+      await api.patch(`/orders/${orderId}/cancel`, null, { headers: getHeaders() });
+      // Optimistically apply the change locally after a confirmed success.
+      setOrdersList(prev => prev.map(o => (o._id === orderId || o.id === orderId) ? { ...o, status: "Cancelled" } : o));
+      alert("Order cancelled successfully.");
     } catch (error) {
       console.error("Error executing target context order cancellation:", error);
+      alert("Unable to modify order status. It may have already been shipped.");
     }
   };
 

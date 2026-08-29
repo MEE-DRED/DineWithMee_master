@@ -1,4 +1,3 @@
-
 // import { useState, useEffect } from "react";
 // import { Link, useLocation } from "react-router-dom";
 
@@ -436,6 +435,7 @@
 
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import axios from "axios";
 
 const NAV_ITEMS = [
   { id: "profile", label: "Profile", icon: ProfileIcon },
@@ -480,11 +480,21 @@ function DeviceIcon({ type }) {
 }
 
 export default function SecuritySettings() {
-  const API_BASE_URL = "https://new-dine-with-mee-backend.onrender.com/api/v1";
-  
+  // Live backend base URL. NOTE: the Users resource lives under /api/v1
+  // (confirmed against the Swagger "Users" section: GET/PATCH /api/v1/users/me),
+  // while auth actions (change-password, logout) live directly under /auth
+  // with no /api/v1 prefix (confirmed against the Swagger "Auth" section) —
+  // so each axios call below builds its own full path rather than sharing
+  // one baseURL with a fixed prefix.
+  const API_BASE = "https://new-dine-with-mee-backend-z7it.onrender.com";
+
+  const api = axios.create({
+    baseURL: API_BASE,
+    headers: { "Content-Type": "application/json" },
+  });
+
   const getAuthHeader = () => ({
-    "Authorization": `Bearer ${localStorage.getItem("dwm_token") || ""}`,
-    "Content-Type": "application/json"
+    Authorization: `Bearer ${localStorage.getItem("dwm_token") || ""}`,
   });
 
   const [activeNav, setActiveNav] = useState("security");
@@ -502,17 +512,15 @@ export default function SecuritySettings() {
   const [signedOutAll, setSignedOutAll] = useState(false);
   const [deletedKeys, setDeletedKeys] = useState(false);
 
+  // ─── API INTEGRATION: GET /api/v1/users/me ─────────────────────────────
   useEffect(() => {
     async function fetchSecurityDashboardData() {
       try {
-        const userProfileRes = await fetch(`${API_BASE_URL}/users/me`, { headers: getAuthHeader() });
-        if (userProfileRes.ok) {
-          const profileData = await userProfileRes.json();
-          if(profileData.twoFactorEnabled !== undefined) {
-             setTwoFA(profileData.twoFactorEnabled);
-          }
+        const { data: profileData } = await api.get("/api/v1/users/me", { headers: getAuthHeader() });
+        if (profileData.twoFactorEnabled !== undefined) {
+          setTwoFA(profileData.twoFactorEnabled);
         }
-        
+
         setLoginActivity([
           { id: "session_1", device: "MacBook Pro 16\"", icon: "laptop", location: "San Francisco, CA", date: "Today, 2:45 PM", status: "current" },
           { id: "session_2", device: "iPhone 15 Pro", icon: "phone", location: "San Francisco, CA", date: "Yesterday, 9:12 AM", status: "authorized" }
@@ -524,14 +532,11 @@ export default function SecuritySettings() {
     fetchSecurityDashboardData();
   }, []);
 
+  // ─── API INTEGRATION: PATCH /api/v1/users/me ───────────────────────────
   const handleTwoFAToggle = async (nextValue) => {
     setTwoFA(nextValue);
     try {
-      await fetch(`${API_BASE_URL}/users/me`, {
-        method: "PATCH",
-        headers: getAuthHeader(),
-        body: JSON.stringify({ twoFactorEnabled: nextValue })
-      });
+      await api.patch("/api/v1/users/me", { twoFactorEnabled: nextValue }, { headers: getAuthHeader() });
     } catch (err) {
       console.error("Failed to commit settings configuration updates:", err);
     }
@@ -553,26 +558,20 @@ export default function SecuritySettings() {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
-        method: "POST",
-        headers: getAuthHeader(),
-        body: JSON.stringify({
-          currentPassword: currentPassword,
-          newPassword: newPassword
-        })
-      });
-
-      if (response.ok) {
-        setPasswordMsg({ type: "success", text: "Password updated successfully!" });
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-      } else {
-        const errData = await response.json();
-        setPasswordMsg({ type: "error", text: errData.message || "Failed to update target password structure." });
-      }
+      const { data } = await api.post(
+        "/auth/change-password",
+        { currentPassword, newPassword },
+        { headers: getAuthHeader() }
+      );
+      setPasswordMsg({ type: "success", text: "Password updated successfully!" });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
     } catch (error) {
-      setPasswordMsg({ type: "error", text: "Server connectivity error encountered." });
+      setPasswordMsg({
+        type: "error",
+        text: error?.response?.data?.message || "Failed to update password. Please try again.",
+      });
     }
     setTimeout(() => setPasswordMsg(null), 3500);
   }
@@ -585,12 +584,10 @@ export default function SecuritySettings() {
     }
   }
 
+  // ─── API INTEGRATION: POST /auth/logout ────────────────────────────────
   async function handleGlobalApplicationSignOut() {
     try {
-      await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: "POST",
-        headers: getAuthHeader()
-      });
+      await api.post("/auth/logout", null, { headers: getAuthHeader() });
     } catch (error) {
       console.error("Error executing clean component log out routine:", error);
     } finally {
@@ -599,17 +596,13 @@ export default function SecuritySettings() {
     }
   }
 
+  // ─── API INTEGRATION: POST /auth/logout (all sessions) ─────────────────
   async function handleSignOutAll() {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: "POST",
-        headers: getAuthHeader()
-      });
-      if (response.ok) {
-        setSignedOutAll(true);
-        setLoginActivity(prev => prev.filter(item => item.status === "current"));
-      }
-    } catch(err) {
+      await api.post("/auth/logout", null, { headers: getAuthHeader() });
+      setSignedOutAll(true);
+      setLoginActivity(prev => prev.filter(item => item.status === "current"));
+    } catch (err) {
       console.error("Failure processing full contextual device clears:", err);
     }
     setTimeout(() => setSignedOutAll(false), 3000);
