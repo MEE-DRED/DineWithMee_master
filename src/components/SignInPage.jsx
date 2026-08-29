@@ -1,7 +1,26 @@
+
 import { useState, useEffect } from "react";
+import axios from "axios";
 import dinewithmeeLogo from "./dinewithmee-logo.png";
 
-const API_BASE = "https://new-dine-with-mee-backend.onrender.com/api/v1";
+// Live backend base URL — all auth routes live directly under /auth
+// (no /api/v1 prefix).
+const API_BASE = "https://new-dine-with-mee-backend-z7it.onrender.com";
+
+// Shared axios instance for every request in this file. `withCredentials`
+// mirrors the old `credentials: "include"` fetch option, so an httpOnly
+// refresh-token cookie (if the backend sets one) still gets sent/received.
+const api = axios.create({
+  baseURL: API_BASE,
+  headers: { "Content-Type": "application/json" },
+  withCredentials: true,
+});
+
+// Pulls a human-readable message out of an axios error, falling back to a
+// caller-supplied default when the backend didn't send one.
+function apiErrorMessage(err, fallback) {
+  return err?.response?.data?.message || fallback;
+}
 
 const EyeIcon = ({ open }) => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -45,23 +64,30 @@ function normalizeRole(rawRole) {
 // Pulls the authenticated user's profile right after login so the app has
 // role + basic identity info available immediately (used by the landing
 // page for role-based dashboard routing, and by other screens for display).
-async function fetchAndStoreProfile(token) {
+async function fetchAndStoreProfile(token, { allowRefresh = true } = {}) {
   try {
-    const res = await fetch(`${API_BASE}/auth/profile`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+    const res = await api.get("/auth/profile", {
+      headers: { Authorization: `Bearer ${token}` },
+      validateStatus: () => true, // handle 401 ourselves below instead of throwing
     });
-    const data = await res.json();
-    if (res.ok) {
+
+    // Access token expired — try once to silently refresh, then retry.
+    if (res.status === 401 && allowRefresh) {
+      const refreshed = await refreshAccessToken();
+      if (refreshed) return fetchAndStoreProfile(refreshed, { allowRefresh: false });
+      return;
+    }
+
+    if (res.status >= 200 && res.status < 300) {
+      const data = res.data;
       const user = data.user || data.data || data;
       localStorage.setItem(
         "dwm_user",
         JSON.stringify({
           id: user._id || user.id,
-          fullName: user.fullName || user.name,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          fullName: user.fullName || user.name || [user.firstName, user.lastName].filter(Boolean).join(" "),
           email: user.email,
           role: user.role,
           portalRole: normalizeRole(user.role),
@@ -73,14 +99,152 @@ async function fetchAndStoreProfile(token) {
   }
 }
 
-export default function SignInPage({ navigate }) {
+// ─── API INTEGRATION: POST /auth/refresh ───────────────────────────────────
+// Exchanges the stored refresh token (if the backend issues one as an
+// httpOnly cookie, `credentials: "include"` picks it up automatically) for
+// a fresh access token, and persists it. Returns the new token or null.
+export async function refreshAccessToken() {
+  try {
+    const res = await api.post("/auth/refresh");
+    const token = res.data?.token;
+    if (!token) return null;
+    localStorage.setItem("dwm_token", token);
+    return token;
+  } catch {
+    return null;
+  }
+}
+
+// ─── API INTEGRATION: GET /auth/profile (session bootstrap) ────────────────
+// Used by LandingPage on mount to confirm a cached token is still valid
+// (refreshing it if it's merely expired) before trusting a restored session.
+export async function validateSession() {
+  const token = localStorage.getItem("dwm_token");
+  if (!token) return false;
+
+  try {
+    let res = await api.get("/auth/profile", {
+      headers: { Authorization: `Bearer ${token}` },
+      validateStatus: () => true,
+    });
+
+    if (res.status === 401) {
+      const refreshed = await refreshAccessToken();
+      if (!refreshed) return false;
+      res = await api.get("/auth/profile", {
+        headers: { Authorization: `Bearer ${refreshed}` },
+        validateStatus: () => true,
+      });
+    }
+
+    if (res.status < 200 || res.status >= 300) return false;
+
+    const data = res.data;
+    const user = data.user || data.data || data;
+    localStorage.setItem(
+      "dwm_user",
+      JSON.stringify({
+        id: user._id || user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        fullName: user.fullName || user.name || [user.firstName, user.lastName].filter(Boolean).join(" "),
+        email: user.email,
+        role: user.role,
+        portalRole: normalizeRole(user.role),
+      })
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ─── API INTEGRATION: GET /auth/google/callback ────────────────────────────
+// Google redirects the browser back to the backend's callback route after
+// the user approves access. Depending on how the backend finishes the
+// flow, the browser can land back on this app in one of two shapes:
+//   1) Backend already exchanged the code and redirected here with a
+//      ready-to-use token: e.g. "?token=<jwt>".
+//   2) Backend forwards the raw authorization code and lets the frontend
+//      complete the exchange: e.g. "?code=<code>&state=<state>", which we
+//      forward to GET /auth/google/callback ourselves.
+// Returns { status: "success" | "error" | "none", message? }.
+export async function completeGoogleOAuthRedirect() {
+  const params = new URLSearchParams(window.location.search);
+  const error = params.get("error");
+  const token = params.get("token");
+  const code = params.get("code");
+
+  if (!error && !token && !code) return { status: "none" };
+
+  // Strip OAuth params from the URL so a refresh doesn't replay them.
+  const cleanUrl = () => {
+    const url = new URL(window.location.href);
+    ["token", "code", "state", "error"].forEach((key) => url.searchParams.delete(key));
+    window.history.replaceState({}, "", url.pathname + url.search + url.hash);
+  };
+
+  if (error) {
+    cleanUrl();
+    return { status: "error", message: "Google sign-in was cancelled or denied." };
+  }
+
+  try {
+    let finalToken = token;
+
+    if (!finalToken && code) {
+      const res = await api.get(`/auth/google/callback${window.location.search}`, {
+        validateStatus: () => true,
+      });
+      if (res.status < 200 || res.status >= 300 || !res.data?.token) {
+        cleanUrl();
+        return { status: "error", message: res.data?.message || "Google sign-in failed. Please try again." };
+      }
+      finalToken = res.data.token;
+    }
+
+    if (!finalToken) {
+      cleanUrl();
+      return { status: "error", message: "Google sign-in failed. Please try again." };
+    }
+
+    localStorage.setItem("dwm_token", finalToken);
+    await fetchAndStoreProfile(finalToken);
+    cleanUrl();
+    return { status: "success" };
+  } catch {
+    cleanUrl();
+    return { status: "error", message: "Google sign-in failed. Please try again." };
+  }
+}
+
+// ─── API INTEGRATION: POST /auth/logout ────────────────────────────────────
+// Invalidates the session on the backend, then clears local session state.
+// Exported so LandingPage's logout button can call the real endpoint.
+export async function logoutRequest() {
+  const token = localStorage.getItem("dwm_token");
+  try {
+    if (token) {
+      await api.post("/auth/logout", null, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    }
+  } catch {
+    // Non-fatal: proceed with local logout regardless of backend response.
+  } finally {
+    localStorage.removeItem("dwm_token");
+    localStorage.removeItem("dwm_user");
+  }
+}
+
+export default function SignInPage({ navigate, initialError }) {
   // "signin" | "forgot" | "reset"
   const [mode, setMode] = useState("signin");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState(initialError || "");
   const [isLoading, setIsLoading] = useState(false);
 
   // Forgot / reset password flow state
@@ -90,26 +254,20 @@ export default function SignInPage({ navigate }) {
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [infoMsg, setInfoMsg] = useState("");
 
-  // ─── API INTEGRATION: POST /api/v1/auth/login ──────────────────────────────
+  // Surface an OAuth failure (e.g. Google sign-in denied) that LandingPage
+  // discovers after this component has already mounted.
+  useEffect(() => {
+    if (initialError) setErrorMsg(initialError);
+  }, [initialError]);
+
+  // ─── API INTEGRATION: POST /auth/login ──────────────────────────────
   async function handleSignIn(e) {
     e.preventDefault();
     setErrorMsg("");
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Invalid credentials. Please try again.");
-      }
+      const { data } = await api.post("/auth/login", { email, password });
 
       if (data.token) {
         localStorage.setItem("dwm_token", data.token);
@@ -118,13 +276,13 @@ export default function SignInPage({ navigate }) {
 
       navigate("dashboard");
     } catch (err) {
-      setErrorMsg(err.message);
+      setErrorMsg(apiErrorMessage(err, "Invalid credentials. Please try again."));
     } finally {
       setIsLoading(false);
     }
   }
 
-  // ─── API INTEGRATION: POST /api/v1/auth/forgot-password ───────────────────
+  // ─── API INTEGRATION: POST /auth/forgot-password ───────────────────
   async function handleForgotPassword(e) {
     e.preventDefault();
     setErrorMsg("");
@@ -132,27 +290,18 @@ export default function SignInPage({ navigate }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE}/auth/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: resetEmail }),
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Couldn't send reset instructions. Please try again.");
-      }
+      await api.post("/auth/forgot-password", { email: resetEmail });
 
       setInfoMsg("If that email is registered, a reset code has been sent. Enter it below.");
       setMode("reset");
     } catch (err) {
-      setErrorMsg(err.message);
+      setErrorMsg(apiErrorMessage(err, "Couldn't send reset instructions. Please try again."));
     } finally {
       setIsLoading(false);
     }
   }
 
-  // ─── API INTEGRATION: POST /api/v1/auth/reset-password ────────────────────
+  // ─── API INTEGRATION: POST /auth/reset-password ────────────────────
   async function handleResetPassword(e) {
     e.preventDefault();
     setErrorMsg("");
@@ -165,20 +314,11 @@ export default function SignInPage({ navigate }) {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE}/auth/reset-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: resetEmail,
-          token: resetToken,
-          password: newPassword,
-        }),
+      await api.post("/auth/reset-password", {
+        email: resetEmail,
+        token: resetToken,
+        password: newPassword,
       });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Couldn't reset password. Check the code and try again.");
-      }
 
       setInfoMsg("Password reset successfully. Please sign in with your new password.");
       setEmail(resetEmail);
@@ -189,7 +329,7 @@ export default function SignInPage({ navigate }) {
       setConfirmNewPassword("");
       setMode("signin");
     } catch (err) {
-      setErrorMsg(err.message);
+      setErrorMsg(apiErrorMessage(err, "Couldn't reset password. Check the code and try again."));
     } finally {
       setIsLoading(false);
     }
@@ -292,6 +432,27 @@ export default function SignInPage({ navigate }) {
                   {isLoading ? "Signing In..." : "Sign In"}
                 </button>
               </form>
+
+              <div className="flex items-center gap-3 mt-6">
+                <div className="h-px flex-1 bg-stone-200" />
+                <span className="text-[11px] font-bold uppercase tracking-widest text-stone-400">or</span>
+                <div className="h-px flex-1 bg-stone-200" />
+              </div>
+
+              {/* ─── API INTEGRATION: GET /auth/google ─────────────────────── */}
+              <button
+                type="button"
+                onClick={() => { window.location.href = `${API_BASE}/auth/google`; }}
+                className="w-full h-12 mt-4 flex items-center justify-center gap-2.5 border border-stone-200 rounded-2xl text-sm font-bold text-stone-700 hover:bg-stone-50 transition-all"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47a5.53 5.53 0 0 1-2.4 3.63v3.02h3.87c2.27-2.09 3.58-5.17 3.58-8.84z" />
+                  <path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.94-2.9l-3.87-3.02c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.28v3.11A12 12 0 0 0 12 24z" />
+                  <path fill="#FBBC05" d="M5.27 14.27a7.2 7.2 0 0 1 0-4.54V6.62H1.28a12 12 0 0 0 0 10.76z" />
+                  <path fill="#EA4335" d="M12 4.77c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.28 6.62l3.99 3.11C6.22 6.88 8.87 4.77 12 4.77z" />
+                </svg>
+                Continue with Google
+              </button>
 
               <p className="text-center text-sm text-gray-500 mt-6">
                 Don't have an account?{" "}

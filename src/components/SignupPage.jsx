@@ -1,7 +1,32 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import dinewithmeeLogo from "./dinewithmee-logo.png";
 
-const API_BASE = "https://new-dine-with-mee-backend.onrender.com/api/v1";
+// Live backend base URL — all auth routes live directly under /auth
+// (no /api/v1 prefix).
+const API_BASE = "https://new-dine-with-mee-backend-z7it.onrender.com";
+
+// Shared axios instance for every request in this file.
+const api = axios.create({
+  baseURL: API_BASE,
+  headers: { "Content-Type": "application/json" },
+  withCredentials: true,
+});
+
+// Pulls a human-readable message out of an axios error, falling back to a
+// caller-supplied default when the backend didn't send one.
+function apiErrorMessage(err, fallback) {
+  return err?.response?.data?.message || fallback;
+}
+
+// Role options shown in the UI, mapped to the backend's strict enum
+// (CUSTOMER | NUTRITIONIST | ADMIN | PHARMACY_PARTNER). "ADMIN" is
+// intentionally not self-selectable from public signup.
+const ROLE_OPTIONS = [
+  { value: "CUSTOMER", label: "Patient / Personal User" },
+  { value: "NUTRITIONIST", label: "Nutritionist / Health Professional" },
+  { value: "PHARMACY_PARTNER", label: "Pharmacy Partner" },
+];
 
 // Best-effort role → portal normalization so the landing page can route a
 // freshly authenticated user to the right workspace without guessing.
@@ -19,26 +44,47 @@ function normalizeRole(rawRole) {
 // ─── API INTEGRATION: GET /auth/profile ────────────────────────────────────
 async function fetchAndStoreProfile(token) {
   try {
-    const res = await fetch(`${API_BASE}/auth/profile`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    const res = await api.get("/auth/profile", {
+      headers: { Authorization: `Bearer ${token}` },
     });
-    const data = await res.json();
-    if (res.ok) {
-      const user = data.user || data.data || data;
-      localStorage.setItem(
-        "dwm_user",
-        JSON.stringify({
-          id: user._id || user.id,
-          fullName: user.fullName || user.name,
-          email: user.email,
-          role: user.role,
-          portalRole: normalizeRole(user.role),
-        })
-      );
-    }
+    const data = res.data;
+    const user = data.user || data.data || data;
+    localStorage.setItem(
+      "dwm_user",
+      JSON.stringify({
+        id: user._id || user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        fullName: user.fullName || user.name || [user.firstName, user.lastName].filter(Boolean).join(" "),
+        email: user.email,
+        role: user.role,
+        portalRole: normalizeRole(user.role),
+      })
+    );
   } catch {
     // Non-fatal: registration already succeeded, profile is a best-effort enrichment.
+  }
+}
+
+// ─── API INTEGRATION: PUT /auth/profile (best-effort medical metadata sync) ─
+// The signup DTO doesn't accept allergies/dietaryGoals/medicalConditions
+// directly (the backend rejected "medicalMetadata" as an unknown property),
+// so we save the account first and then push this data to the profile
+// endpoint once we have an authenticated token. Non-fatal: the account
+// already exists even if this fails, so we surface nothing to the user.
+async function syncMedicalProfile(token, formData) {
+  try {
+    await api.put(
+      "/auth/profile",
+      {
+        allergies: formData.allergies,
+        dietaryGoals: formData.dietaryGoals,
+        medicalConditions: formData.medicalConditions,
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  } catch {
+    // Non-fatal — see comment above.
   }
 }
 
@@ -114,15 +160,17 @@ export function SignUpPage({ navigate }) {
 
   // Form Fields State
   const [formData, setFormData] = useState({
-    fullName: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    role: "Patient", 
+    role: "CUSTOMER",
     allergies: [],
     dietaryGoals: [],
     medicalConditions: [],
     termsAccepted: false,
+    privacyAccepted: false,
   });
 
   const handleChange = (e) => {
@@ -156,6 +204,12 @@ export function SignUpPage({ navigate }) {
   // Step 1 Validation: Base credentials
   const handleStep1Submit = (e) => {
     e.preventDefault();
+    const first = formData.firstName.trim();
+    const last = formData.lastName.trim();
+    if (first.length < 2 || first.length > 50 || last.length < 2 || last.length > 50) {
+      setErrorMsg("First and last name must each be between 2 and 50 characters.");
+      return;
+    }
     if (formData.password !== formData.confirmPassword) {
       setErrorMsg("Passwords do not match.");
       return;
@@ -171,35 +225,27 @@ export function SignUpPage({ navigate }) {
   const [isVerifying, setIsVerifying] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
 
-  // Step 7 Trigger: Final submit handler — POST /api/v1/auth/register
+  // Step 7 Trigger: Final submit handler — POST /auth/signup
   const handleFinalSubmit = async () => {
     setErrorMsg("");
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${API_BASE}/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fullName: formData.fullName,
-          email: formData.email,
-          password: formData.password,
-          role: formData.role,
-          medicalMetadata: {
-            allergies: formData.allergies,
-            dietaryGoals: formData.dietaryGoals,
-            medicalConditions: formData.medicalConditions
-          }
-        }),
+      const { data } = await api.post("/auth/signup", {
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+        // NOTE: the backend's DTO validation messages ("Terms acceptance
+        // must be a boolean") indicate these two keys are defined with
+        // literal spaced property names rather than camelCase — so we
+        // send them exactly as the validator names them. If the backend
+        // is ever updated to camelCase, swap these two keys back to
+        // "termsAccepted" / "privacyPolicyAccepted".
+        "Terms acceptance": formData.termsAccepted === true,
+        "Privacy policy acceptance": formData.privacyAccepted === true,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Registration service encountered an error.");
-      }
 
       setApiSuccess(true);
 
@@ -207,6 +253,7 @@ export function SignUpPage({ navigate }) {
         // Backend already authenticated this account — no OTP step needed.
         localStorage.setItem("dwm_token", data.token);
         await fetchAndStoreProfile(data.token);
+        await syncMedicalProfile(data.token, formData);
         setOtpVerified(true);
         setStep(9);
       } else {
@@ -214,42 +261,35 @@ export function SignUpPage({ navigate }) {
       }
     } catch (err) {
       setApiSuccess(false);
-      setErrorMsg(err.message || "Registration failed. Please check your details and try again.");
+      setErrorMsg(apiErrorMessage(err, "Registration failed. Please check your details and try again."));
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Step 8 Trigger: OTP verification — POST /api/v1/auth/verify-otp
+  // Step 8 Trigger: OTP verification — POST /auth/verify-otp
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setErrorMsg("");
     setIsVerifying(true);
 
     try {
-      const response = await fetch(`${API_BASE}/auth/verify-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: formData.email, otp }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "That code didn't work. Please check it and try again.");
-      }
+      const { data } = await api.post("/auth/verify-otp", { email: formData.email, otp });
 
       if (data.token) {
         localStorage.setItem("dwm_token", data.token);
       }
 
       const token = data.token || localStorage.getItem("dwm_token");
-      if (token) await fetchAndStoreProfile(token);
+      if (token) {
+        await fetchAndStoreProfile(token);
+        await syncMedicalProfile(token, formData);
+      }
 
       setOtpVerified(true);
       nextStep(); // move on to success (step 9)
     } catch (err) {
-      setErrorMsg(err.message);
+      setErrorMsg(apiErrorMessage(err, "That code didn't work. Please check it and try again."));
     } finally {
       setIsVerifying(false);
     }
@@ -293,19 +333,39 @@ export function SignUpPage({ navigate }) {
           {/* STEP 1: CREDENTIALS */}
           {step === 1 && (
             <form onSubmit={handleStep1Submit} className="space-y-5">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  name="fullName"
-                  required
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  placeholder="John Doe"
-                  className="w-full h-12 px-4 rounded-2xl border border-stone-200 text-sm focus:outline-none focus:border-emerald-700 bg-stone-50/50"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    required
+                    minLength={2}
+                    maxLength={50}
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    placeholder="John"
+                    className="w-full h-12 px-4 rounded-2xl border border-stone-200 text-sm focus:outline-none focus:border-emerald-700 bg-stone-50/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    required
+                    minLength={2}
+                    maxLength={50}
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    placeholder="Doe"
+                    className="w-full h-12 px-4 rounded-2xl border border-stone-200 text-sm focus:outline-none focus:border-emerald-700 bg-stone-50/50"
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">
@@ -355,6 +415,29 @@ export function SignUpPage({ navigate }) {
               >
                 Continue Setup
               </button>
+
+              <div className="flex items-center gap-3 pt-1">
+                <div className="h-px flex-1 bg-stone-200" />
+                <span className="text-[11px] font-bold uppercase tracking-widest text-stone-400">or</span>
+                <div className="h-px flex-1 bg-stone-200" />
+              </div>
+
+              {/* ─── API INTEGRATION: GET /auth/google ───────────────────────
+                  Redirects to the backend's Google OAuth flow; it will
+                  redirect back with a session token on success. */}
+              <button
+                type="button"
+                onClick={() => { window.location.href = `${API_BASE}/auth/google`; }}
+                className="w-full h-12 flex items-center justify-center gap-2.5 border border-stone-200 rounded-2xl text-sm font-bold text-stone-700 hover:bg-stone-50 transition-all"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M23.52 12.27c0-.85-.08-1.67-.22-2.45H12v4.64h6.47a5.53 5.53 0 0 1-2.4 3.63v3.02h3.87c2.27-2.09 3.58-5.17 3.58-8.84z" />
+                  <path fill="#34A853" d="M12 24c3.24 0 5.96-1.07 7.94-2.9l-3.87-3.02c-1.08.72-2.45 1.15-4.07 1.15-3.13 0-5.78-2.11-6.73-4.96H1.28v3.11A12 12 0 0 0 12 24z" />
+                  <path fill="#FBBC05" d="M5.27 14.27a7.2 7.2 0 0 1 0-4.54V6.62H1.28a12 12 0 0 0 0 10.76z" />
+                  <path fill="#EA4335" d="M12 4.77c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.28 6.62l3.99 3.11C6.22 6.88 8.87 4.77 12 4.77z" />
+                </svg>
+                Continue with Google
+              </button>
             </form>
           )}
 
@@ -364,11 +447,11 @@ export function SignUpPage({ navigate }) {
               <p className="text-sm text-stone-500 mb-4">
                 Select your functional primary access level inside the Dine With Mee ecosystems.
               </p>
-              {["Patient", "Nutritionist/Professional", "Culinary Expert/Chef"].map((role) => (
+              {ROLE_OPTIONS.map(({ value, label }) => (
                 <label
-                  key={role}
+                  key={value}
                   className={`flex items-center gap-4 p-4 rounded-2xl border cursor-pointer transition-all ${
-                    formData.role === role
+                    formData.role === value
                       ? "border-emerald-700 bg-emerald-50/40 font-bold"
                       : "border-stone-200 hover:bg-stone-50"
                   }`}
@@ -376,12 +459,12 @@ export function SignUpPage({ navigate }) {
                   <input
                     type="radio"
                     name="role"
-                    value={role}
-                    checked={formData.role === role}
+                    value={value}
+                    checked={formData.role === value}
                     onChange={handleChange}
                     className="accent-emerald-800 h-4 w-4"
                   />
-                  <span className="text-sm text-stone-700">{role}</span>
+                  <span className="text-sm text-stone-700">{label}</span>
                 </label>
               ))}
               <div className="flex justify-between gap-4 pt-4">
@@ -547,7 +630,19 @@ export function SignUpPage({ navigate }) {
                   className="mt-0.5 h-4 w-4 accent-emerald-800 rounded"
                 />
                 <span className="text-xs text-stone-600 leading-tight">
-                  I explicitly certify acceptance of the data tracking provisions and terms of service.
+                  I certify acceptance of the Terms of Service.
+                </span>
+              </label>
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="privacyAccepted"
+                  checked={formData.privacyAccepted}
+                  onChange={handleChange}
+                  className="mt-0.5 h-4 w-4 accent-emerald-800 rounded"
+                />
+                <span className="text-xs text-stone-600 leading-tight">
+                  I certify acceptance of the Privacy Policy and data tracking provisions.
                 </span>
               </label>
               <div className="flex justify-between gap-4 pt-4">
@@ -559,7 +654,7 @@ export function SignUpPage({ navigate }) {
                 </button>
                 <button
                   onClick={nextStep}
-                  disabled={!formData.termsAccepted}
+                  disabled={!formData.termsAccepted || !formData.privacyAccepted}
                   className="flex-1 h-12 bg-emerald-800 text-white rounded-2xl text-sm font-bold hover:bg-emerald-900 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Accept & Continue
@@ -575,8 +670,8 @@ export function SignUpPage({ navigate }) {
                 Verification Manifest
               </p>
               <div className="border border-stone-200 rounded-2xl p-4 bg-stone-50/50 text-sm space-y-2.5">
-                <p><span className="text-stone-400">Identifier:</span> {formData.fullName} ({formData.email})</p>
-                <p><span className="text-stone-400">System Access Tier:</span> {formData.role}</p>
+                <p><span className="text-stone-400">Identifier:</span> {formData.firstName} {formData.lastName} ({formData.email})</p>
+                <p><span className="text-stone-400">System Access Tier:</span> {ROLE_OPTIONS.find((r) => r.value === formData.role)?.label || formData.role}</p>
                 <p>
                   <span className="text-stone-400">Allergies Recorded:</span>{" "}
                   {formData.allergies.length ? formData.allergies.join(", ") : "None Inputted"}
