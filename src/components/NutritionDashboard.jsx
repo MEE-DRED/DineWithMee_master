@@ -526,6 +526,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
+import dinewithmeeLogo from "./dinewithmee-logo.png";
 
 // Live backend base URL. NOTE: only the "Users" and "Auth" sections of the
 // Swagger docs have been confirmed so far — GET /api/v1/users/me is a real,
@@ -766,13 +767,29 @@ function Sidebar({ collapsed, setCollapsed, userData }) {
     <aside className={`flex flex-col bg-[#1a4731] text-white transition-all duration-300 ease-in-out flex-shrink-0
       ${collapsed ? "w-16" : "w-56"} min-h-screen`}>
       <div className={`flex items-center gap-3 px-4 py-5 border-b border-white/10 ${collapsed ? "justify-center" : ""}`}>
-        <div className="w-8 h-8 rounded-xl bg-[#e05a2b] flex items-center justify-center flex-shrink-0">
-          <Icon.Drop />
-        </div>
-        {!collapsed && <span className="font-extrabold text-base tracking-tight">NutriTrack</span>}
+        <Link to="/" className="flex items-center gap-2 min-w-0">
+          <div className={`bg-white rounded-lg flex-shrink-0 flex items-center justify-center ${collapsed ? "p-1" : "px-2 py-1.5"}`}>
+            <img
+              src={dinewithmeeLogo}
+              alt="DineWithMee"
+              className={`w-auto object-contain ${collapsed ? "h-5" : "h-6"}`}
+            />
+          </div>
+        </Link>
       </div>
 
       <nav className="flex-1 py-4 space-y-1 px-2">
+        <Link to="/"
+          title={collapsed ? "Home" : ""}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/60 hover:bg-white/10 hover:text-white transition-all duration-150 ${collapsed ? "justify-center" : ""}`}>
+          <span className="flex-shrink-0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 9.5 12 3l9 6.5" />
+              <path d="M5 10v10h14V10" />
+            </svg>
+          </span>
+          {!collapsed && <span>Home</span>}
+        </Link>
         {navItems.map(item => {
           const IconComp = Icon[item.icon];
           const active = location.pathname === item.path || (item.id === "dashboard" && location.pathname === "/");
@@ -829,17 +846,24 @@ function MobileDrawer({ onClose }) {
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <aside className="relative w-64 bg-[#1a4731] text-white flex flex-col min-h-screen" style={{ animation: "slideRight 0.2s ease" }}>
         <div className="flex items-center justify-between px-4 py-5 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[#e05a2b] flex items-center justify-center">
-              <Icon.Drop />
+          <Link to="/" className="flex items-center gap-3" onClick={onClose}>
+            <div className="bg-white rounded-lg px-2 py-1.5 flex items-center justify-center">
+              <img src={dinewithmeeLogo} alt="DineWithMee" className="h-6 w-auto object-contain" />
             </div>
-            <span className="font-extrabold text-base">NutriTrack</span>
-          </div>
+          </Link>
           <button onClick={onClose} className="text-white/60 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-all">
             <Icon.X />
           </button>
         </div>
         <nav className="flex-1 py-4 space-y-1 px-2">
+          <Link to="/" onClick={onClose}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-white/60 hover:bg-white/10 hover:text-white">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 9.5 12 3l9 6.5" />
+              <path d="M5 10v10h14V10" />
+            </svg>
+            <span>Home</span>
+          </Link>
           {navItems.map(item => {
             const IconComp = Icon[item.icon];
             const active = location.pathname === item.path || (item.id === "dashboard" && location.pathname === "/");

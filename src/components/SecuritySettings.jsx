@@ -436,6 +436,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
+import dinewithmeeLogo from "./dinewithmee-logo.png";
 
 const NAV_ITEMS = [
   { id: "profile", label: "Profile", icon: ProfileIcon },
@@ -619,15 +620,9 @@ export default function SecuritySettings() {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
-          <div className="flex items-center gap-2 min-w-[140px]">
-            <div className="w-8 h-8 rounded-full bg-[#2d5a3d] flex items-center justify-center">
-              <span className="text-white text-xs font-bold">DM</span>
-            </div>
-            <div className="hidden sm:block">
-              <div className="font-bold text-[#2d5a3d] text-sm leading-tight">Dine</div>
-              <div className="text-[10px] text-gray-400 leading-tight">with Mee</div>
-            </div>
-          </div>
+          <Link to="/" className="flex items-center gap-2 min-w-[140px]">
+            <img src={dinewithmeeLogo} alt="DineWithMee" className="h-8 sm:h-9 w-auto object-contain" />
+          </Link>
           {/* Center nav */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-500">
             <Link to="/dashboard" className="hover:text-[#2d5a3d] transition-colors">Dashboard</Link>
@@ -639,6 +634,16 @@ export default function SecuritySettings() {
           </nav>
           {/* Right icons */}
           <div className="flex items-center gap-3">
+            <Link
+              to="/"
+              className="hidden sm:flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-[#2d5a3d] transition-colors"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 9.5 12 3l9 6.5" />
+                <path d="M5 10v10h14V10" />
+              </svg>
+              Home
+            </Link>
             <button className="relative p-1.5 text-gray-500 hover:text-[#2d5a3d] transition-colors">
               <BellIcon />
               <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-[#c9763a] rounded-full" />
