@@ -66,7 +66,7 @@ function normalizeRole(rawRole) {
 // page for role-based dashboard routing, and by other screens for display).
 async function fetchAndStoreProfile(token, { allowRefresh = true } = {}) {
   try {
-    const res = await api.get("/auth/profile", {
+    const res = await api.get("https://new-dine-with-mee-backend-z7it.onrender.com/auth/profile", {
       headers: { Authorization: `Bearer ${token}` },
       validateStatus: () => true, // handle 401 ourselves below instead of throwing
     });
@@ -105,7 +105,7 @@ async function fetchAndStoreProfile(token, { allowRefresh = true } = {}) {
 // a fresh access token, and persists it. Returns the new token or null.
 export async function refreshAccessToken() {
   try {
-    const res = await api.post("/auth/refresh");
+    const res = await api.post("https://new-dine-with-mee-backend-z7it.onrender.com/auth/refresh");
     const token = res.data?.token;
     if (!token) return null;
     localStorage.setItem("dwm_token", token);
@@ -123,7 +123,7 @@ export async function validateSession() {
   if (!token) return false;
 
   try {
-    let res = await api.get("/auth/profile", {
+    let res = await api.get("https://new-dine-with-mee-backend-z7it.onrender.com/auth/profile", {
       headers: { Authorization: `Bearer ${token}` },
       validateStatus: () => true,
     });
@@ -131,7 +131,7 @@ export async function validateSession() {
     if (res.status === 401) {
       const refreshed = await refreshAccessToken();
       if (!refreshed) return false;
-      res = await api.get("/auth/profile", {
+      res = await api.get("https://new-dine-with-mee-backend-z7it.onrender.com/auth/profile", {
         headers: { Authorization: `Bearer ${refreshed}` },
         validateStatus: () => true,
       });
@@ -193,7 +193,7 @@ export async function completeGoogleOAuthRedirect() {
     let finalToken = token;
 
     if (!finalToken && code) {
-      const res = await api.get(`/auth/google/callback${window.location.search}`, {
+      const res = await api.get(`https://new-dine-with-mee-backend-z7it.onrender.com/auth/google/callback${window.location.search}`, {
         validateStatus: () => true,
       });
       if (res.status < 200 || res.status >= 300 || !res.data?.token) {
@@ -225,7 +225,7 @@ export async function logoutRequest() {
   const token = localStorage.getItem("dwm_token");
   try {
     if (token) {
-      await api.post("/auth/logout", null, {
+      await api.post("https://new-dine-with-mee-backend-z7it.onrender.com/auth/logout", null, {
         headers: { Authorization: `Bearer ${token}` },
       });
     }
@@ -267,7 +267,7 @@ export default function SignInPage({ navigate, initialError }) {
     setIsLoading(true);
 
     try {
-      const { data } = await api.post("/auth/login", { email, password });
+      const { data } = await api.post("https://new-dine-with-mee-backend-z7it.onrender.com/auth/login", { email, password });
 
       if (data.token) {
         localStorage.setItem("dwm_token", data.token);
@@ -290,7 +290,7 @@ export default function SignInPage({ navigate, initialError }) {
     setIsLoading(true);
 
     try {
-      await api.post("/auth/forgot-password", { email: resetEmail });
+      await api.post("https://new-dine-with-mee-backend-z7it.onrender.com/auth/forgot-password", { email: resetEmail });
 
       setInfoMsg("If that email is registered, a reset code has been sent. Enter it below.");
       setMode("reset");
@@ -314,7 +314,7 @@ export default function SignInPage({ navigate, initialError }) {
 
     setIsLoading(true);
     try {
-      await api.post("/auth/reset-password", {
+      await api.post("https://new-dine-with-mee-backend-z7it.onrender.com/auth/reset-password", {
         email: resetEmail,
         token: resetToken,
         password: newPassword,
@@ -442,7 +442,7 @@ export default function SignInPage({ navigate, initialError }) {
               {/* ─── API INTEGRATION: GET /auth/google ─────────────────────── */}
               <button
                 type="button"
-                onClick={() => { window.location.href = `${API_BASE}/auth/google`; }}
+                onClick={() => { window.location.href = "https://new-dine-with-mee-backend-z7it.onrender.com/auth/google"; }}
                 className="w-full h-12 mt-4 flex items-center justify-center gap-2.5 border border-stone-200 rounded-2xl text-sm font-bold text-stone-700 hover:bg-stone-50 transition-all"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24">

@@ -44,7 +44,7 @@ function normalizeRole(rawRole) {
 // ─── API INTEGRATION: GET /auth/profile ────────────────────────────────────
 async function fetchAndStoreProfile(token) {
   try {
-    const res = await api.get("/auth/profile", {
+    const res = await api.get("https://new-dine-with-mee-backend-z7it.onrender.com/auth/profile", {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = res.data;
@@ -75,7 +75,7 @@ async function fetchAndStoreProfile(token) {
 async function syncMedicalProfile(token, formData) {
   try {
     await api.put(
-      "/auth/profile",
+      "https://new-dine-with-mee-backend-z7it.onrender.com/auth/profile",
       {
         allergies: formData.allergies,
         dietaryGoals: formData.dietaryGoals,
@@ -231,7 +231,7 @@ export function SignUpPage({ navigate }) {
     setIsSubmitting(true);
 
     try {
-      const { data } = await api.post("/auth/signup", {
+      const { data } = await api.post("https://new-dine-with-mee-backend-z7it.onrender.com/auth/signup", {
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
         email: formData.email,
@@ -274,7 +274,7 @@ export function SignUpPage({ navigate }) {
     setIsVerifying(true);
 
     try {
-      const { data } = await api.post("/auth/verify-otp", { email: formData.email, otp });
+      const { data } = await api.post("https://new-dine-with-mee-backend-z7it.onrender.com/auth/verify-otp", { email: formData.email, otp });
 
       if (data.token) {
         localStorage.setItem("dwm_token", data.token);
@@ -427,7 +427,7 @@ export function SignUpPage({ navigate }) {
                   redirect back with a session token on success. */}
               <button
                 type="button"
-                onClick={() => { window.location.href = `${API_BASE}/auth/google`; }}
+                onClick={() => { window.location.href = `$https://new-dine-with-mee-backend-z7it.onrender.com/auth/google`; }}
                 className="w-full h-12 flex items-center justify-center gap-2.5 border border-stone-200 rounded-2xl text-sm font-bold text-stone-700 hover:bg-stone-50 transition-all"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24">
