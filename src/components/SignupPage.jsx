@@ -224,6 +224,18 @@ export function SignUpPage({ navigate }) {
   const [otp, setOtp] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendMsg, setResendMsg] = useState("");
+
+  // Countdown ticker for the resend cooldown.
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((s) => (s <= 1 ? 0 : s - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   // Step 7 Trigger: Final submit handler — POST /auth/signup
   const handleFinalSubmit = async () => {
@@ -292,6 +304,30 @@ export function SignUpPage({ navigate }) {
       setErrorMsg(apiErrorMessage(err, "That code didn't work. Please check it and try again."));
     } finally {
       setIsVerifying(false);
+    }
+  };
+
+  // ─── API INTEGRATION: POST /auth/resend-otp ─────────────────────────────
+  // NOTE: this exact path isn't confirmed against the Swagger docs reviewed
+  // so far (only /auth/signup, /auth/verify-otp, /auth/login, etc. were
+  // visible) — it's the standard naming convention for this kind of route.
+  // If the backend uses a different path (e.g. re-hitting /auth/signup, or
+  // a dedicated /auth/otp/resend), swap the URL below to match.
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0 || isResending) return;
+    setErrorMsg("");
+    setResendMsg("");
+    setIsResending(true);
+
+    try {
+      await api.post("/auth/resend-otp", { email: formData.email });
+      setResendMsg("A new code has been sent to your email.");
+      setOtp("");
+      setResendCooldown(60);
+    } catch (err) {
+      setErrorMsg(apiErrorMessage(err, "Couldn't resend the code. Please try again shortly."));
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -719,21 +755,52 @@ export function SignUpPage({ navigate }) {
                   </label>
                   <input
                     type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
                     required
                     value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    placeholder="Enter code"
-                    className="w-full h-12 px-4 rounded-2xl border border-stone-200 text-sm tracking-widest focus:outline-none focus:border-emerald-700 bg-stone-50/50"
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    placeholder="Enter 6-digit code"
+                    maxLength={6}
+                    className="w-full h-12 px-4 rounded-2xl border border-stone-200 text-sm tracking-[0.5em] text-center font-bold focus:outline-none focus:border-emerald-700 bg-stone-50/50"
                   />
+                  <p className="text-[11px] text-stone-400 mt-1.5 text-right">{otp.length}/6</p>
                 </div>
                 <button
                   type="submit"
-                  disabled={isVerifying}
-                  className="w-full h-12 bg-emerald-800 text-white rounded-2xl text-sm font-bold shadow-lg hover:bg-emerald-900 transition-all disabled:opacity-50"
+                  disabled={otp.length !== 6 || isVerifying}
+                  className={`w-full h-12 rounded-2xl text-sm font-bold shadow-lg transition-all ${
+                    otp.length === 6
+                      ? "bg-emerald-800 text-white hover:bg-emerald-900"
+                      : "bg-stone-200 text-stone-400 shadow-none cursor-not-allowed"
+                  } disabled:opacity-50`}
                 >
                   {isVerifying ? "Verifying..." : "Verify & Activate Account"}
                 </button>
               </form>
+
+              {/* ─── Resend OTP ─────────────────────────────────────────── */}
+              <div className="text-center pt-1">
+                {resendMsg && (
+                  <p className="text-xs font-medium text-emerald-700 mb-2">{resendMsg}</p>
+                )}
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={resendCooldown > 0 || isResending}
+                  className={`text-xs font-bold transition-colors ${
+                    resendCooldown > 0 || isResending
+                      ? "text-stone-300 cursor-not-allowed"
+                      : "text-emerald-800 hover:text-emerald-900 underline underline-offset-2"
+                  }`}
+                >
+                  {isResending
+                    ? "Sending..."
+                    : resendCooldown > 0
+                    ? `Resend code in ${resendCooldown}s`
+                    : "Didn't get a code? Resend it"}
+                </button>
+              </div>
             </div>
           )}
 
