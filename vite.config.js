@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
-import imagemin from 'vite-plugin-imagemin'
+import { ViteImageOptimizer } from 'vite-plugin-image-optimizer'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command }) => ({
@@ -12,13 +12,13 @@ export default defineConfig(({ command }) => ({
     ...(command === 'build' ? [
       visualizer({
         filename: 'dist/stats.html',
-        open: true,
+        open: false, // Set open to false in production builds
         gzipSize: true
       }),
-      imagemin({
-        gifsicle: { optimizationLevel: 7 },
-        mozjpeg: { quality: 80 },
-        pngquant: { quality: [0.65, 0.8] },
+      ViteImageOptimizer({
+        png: { quality: 80 },
+        jpeg: { quality: 80 },
+        gif: { optimizationLevel: 3 },
         svgo: {
           plugins: [
             { name: 'removeViewBox', active: false },
