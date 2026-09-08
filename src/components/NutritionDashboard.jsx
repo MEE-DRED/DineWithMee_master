@@ -1,5 +1,3 @@
-
-
 // import { useState, useRef, useEffect } from "react";
 // import { Link, useLocation } from "react-router-dom";
 
@@ -527,8 +525,28 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import axios from "axios";
+import dinewithmeeLogo from "./dinewithmee-logo.png";
 
-const API_BASE_URL = "https://new-dine-with-mee-backend.onrender.com";
+// Live backend base URL. NOTE: only the "Users" and "Auth" sections of the
+// Swagger docs have been confirmed so far — GET /api/v1/users/me is a real,
+// confirmed route and is used below for the user summary. The
+// hydration/meals/biometrics/notifications endpoints are NOT confirmed
+// against the docs (no "Nutrition"/"Hydration" section was visible in the
+// screenshots reviewed) — they're kept as best-guess REST paths under
+// /api/v1 and will 404 gracefully into the existing fallback data below
+// until the real routes are confirmed from the "Health Profiles" section
+// (or wherever meal/hydration logging actually lives) in your Swagger docs.
+const API_BASE = "https://new-dine-with-mee-backend-z7it.onrender.com";
+
+const api = axios.create({
+  baseURL: API_BASE,
+  headers: { "Content-Type": "application/json" },
+});
+
+const authHeaders = () => ({
+  Authorization: `Bearer ${localStorage.getItem("dwm_token") || ""}`,
+});
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const Icon = {
@@ -689,7 +707,7 @@ function NotifPanel({ onClose, notifications, setNotifications }) {
   const markAllRead = async () => {
     try {
       setNotifications(prev => prev.map(x => ({ ...x, unread: false })));
-      await fetch(`${API_BASE_URL}/api/notifications/read-all`, { method: "PUT" });
+      await api.put("/api/notifications/read-all", null, { headers: authHeaders() });
     } catch (err) {
       console.error("Error marking notifications as read:", err);
     }
@@ -698,7 +716,7 @@ function NotifPanel({ onClose, notifications, setNotifications }) {
   const markAsRead = async (id) => {
     try {
       setNotifications(prev => prev.map(x => x.id === id ? { ...x, unread: false } : x));
-      await fetch(`${API_BASE_URL}/api/notifications/${id}/read`, { method: "PUT" });
+      await api.put(`/api/notifications/${id}/read`, null, { headers: authHeaders() });
     } catch (err) {
       console.error("Error updating notification status:", err);
     }
@@ -749,13 +767,29 @@ function Sidebar({ collapsed, setCollapsed, userData }) {
     <aside className={`flex flex-col bg-[#1a4731] text-white transition-all duration-300 ease-in-out flex-shrink-0
       ${collapsed ? "w-16" : "w-56"} min-h-screen`}>
       <div className={`flex items-center gap-3 px-4 py-5 border-b border-white/10 ${collapsed ? "justify-center" : ""}`}>
-        <div className="w-8 h-8 rounded-xl bg-[#e05a2b] flex items-center justify-center flex-shrink-0">
-          <Icon.Drop />
-        </div>
-        {!collapsed && <span className="font-extrabold text-base tracking-tight">NutriTrack</span>}
+        <Link to="/" className="flex items-center gap-2 min-w-0">
+          <div className={`bg-white rounded-lg flex-shrink-0 flex items-center justify-center ${collapsed ? "p-1" : "px-2 py-1.5"}`}>
+            <img
+              src={dinewithmeeLogo}
+              alt="DineWithMee"
+              className={`w-auto object-contain ${collapsed ? "h-5" : "h-6"}`}
+            />
+          </div>
+        </Link>
       </div>
 
       <nav className="flex-1 py-4 space-y-1 px-2">
+        <Link to="/"
+          title={collapsed ? "Home" : ""}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/60 hover:bg-white/10 hover:text-white transition-all duration-150 ${collapsed ? "justify-center" : ""}`}>
+          <span className="flex-shrink-0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 9.5 12 3l9 6.5" />
+              <path d="M5 10v10h14V10" />
+            </svg>
+          </span>
+          {!collapsed && <span>Home</span>}
+        </Link>
         {navItems.map(item => {
           const IconComp = Icon[item.icon];
           const active = location.pathname === item.path || (item.id === "dashboard" && location.pathname === "/");
@@ -812,17 +846,24 @@ function MobileDrawer({ onClose }) {
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <aside className="relative w-64 bg-[#1a4731] text-white flex flex-col min-h-screen" style={{ animation: "slideRight 0.2s ease" }}>
         <div className="flex items-center justify-between px-4 py-5 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-[#e05a2b] flex items-center justify-center">
-              <Icon.Drop />
+          <Link to="/" className="flex items-center gap-3" onClick={onClose}>
+            <div className="bg-white rounded-lg px-2 py-1.5 flex items-center justify-center">
+              <img src={dinewithmeeLogo} alt="DineWithMee" className="h-6 w-auto object-contain" />
             </div>
-            <span className="font-extrabold text-base">NutriTrack</span>
-          </div>
+          </Link>
           <button onClick={onClose} className="text-white/60 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-all">
             <Icon.X />
           </button>
         </div>
         <nav className="flex-1 py-4 space-y-1 px-2">
+          <Link to="/" onClick={onClose}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-white/60 hover:bg-white/10 hover:text-white">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 9.5 12 3l9 6.5" />
+              <path d="M5 10v10h14V10" />
+            </svg>
+            <span>Home</span>
+          </Link>
           {navItems.map(item => {
             const IconComp = Icon[item.icon];
             const active = location.pathname === item.path || (item.id === "dashboard" && location.pathname === "/");
@@ -857,46 +898,52 @@ export default function NutritionDashboard() {
   const [biometrics, setBiometrics] = useState([]);
   const [notifications, setNotifications] = useState([]);
 
-  // Fetch all initial data from Render backend
+  // Fetch all initial data from the live backend
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        
-        // 1. Fetch Summary & User Overview Data
-        const summaryRes = await fetch(`${API_BASE_URL}/api/user/summary`);
-        if (summaryRes.ok) {
-          const summaryData = await summaryRes.json();
-          setUserData(summaryData.user || userData);
-          setCaloricSummary(summaryData.calories || caloricSummary);
+
+        // 1. Fetch User Overview Data — GET /api/v1/users/me (confirmed route)
+        try {
+          const { data: summaryData } = await api.get("/api/v1/users/me", { headers: authHeaders() });
+          const user = summaryData.user || summaryData;
+          setUserData(prev => ({
+            ...prev,
+            name: user.fullName || [user.firstName, user.lastName].filter(Boolean).join(" ") || prev.name,
+            avatar: user.avatar || prev.avatar,
+            planTier: user.planTier || prev.planTier,
+          }));
+          if (summaryData.calories) setCaloricSummary(summaryData.calories);
+        } catch (err) {
+          console.error("Error fetching user profile summary:", err);
         }
 
-        // 2. Fetch Water Tracking Data
-        const hydrationRes = await fetch(`${API_BASE_URL}/api/hydration`);
-        if (hydrationRes.ok) {
-          const hydData = await hydrationRes.json();
+        // 2. Fetch Water Tracking Data — NOT CONFIRMED in Swagger docs shown; best-guess path.
+        try {
+          const { data: hydData } = await api.get("/api/v1/hydration", { headers: authHeaders() });
           setHydration({ current: hydData.current, target: hydData.target });
+        } catch {
+          // Keep existing default hydration state.
         }
 
-        // 3. Fetch Logged Meals Data
-        const mealsRes = await fetch(`${API_BASE_URL}/api/meals/today`);
-        if (mealsRes.ok) {
-          const mealsData = await mealsRes.json();
+        // 3. Fetch Logged Meals Data — NOT CONFIRMED in Swagger docs shown; best-guess path.
+        try {
+          const { data: mealsData } = await api.get("/api/v1/meals/today", { headers: authHeaders() });
           setMeals(mealsData);
-        } else {
-          // Fallback if endpoint structure differs
+        } catch {
+          // Fallback if endpoint structure differs / route not yet confirmed
           setMeals({
             breakfast: { label: "BREAKFAST", name: "Avocado & Poached Egg", kcal: 340, protein: "18g Protein", img: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400&q=80" },
             lunch: { label: "LUNCH", name: "Roasted Harvest Bowl", kcal: 520, protein: "12g Protein", img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80" }
           });
         }
 
-        // 4. Fetch Biometrics 
-        const bioRes = await fetch(`${API_BASE_URL}/api/biometrics`);
-        if (bioRes.ok) {
-          const bioData = await bioRes.json();
+        // 4. Fetch Biometrics — NOT CONFIRMED in Swagger docs shown; best-guess path.
+        try {
+          const { data: bioData } = await api.get("/api/v1/biometrics", { headers: authHeaders() });
           setBiometrics(bioData);
-        } else {
+        } catch {
           setBiometrics([
             { label: "Weight", value: "64.2", unit: "kg", delta: "↘ 0.5kg", color: "text-emerald-600" },
             { label: "Heart Rate", value: "72", unit: "bpm", delta: "— Stable", color: "text-gray-400" },
@@ -905,12 +952,11 @@ export default function NutritionDashboard() {
           ]);
         }
 
-        // 5. Fetch Active Alert System Notifications
-        const notifRes = await fetch(`${API_BASE_URL}/api/notifications`);
-        if (notifRes.ok) {
-          const notifData = await notifRes.json();
+        // 5. Fetch Active Alert System Notifications — NOT CONFIRMED; best-guess path.
+        try {
+          const { data: notifData } = await api.get("/api/notifications", { headers: authHeaders() });
           setNotifications(notifData);
-        } else {
+        } catch {
           setNotifications([
             { id: 1, title: "Session reminder", body: "Nutrition Strategy with Dr. Sarah Chen at 4:30 PM", time: "10 min ago", unread: true, icon: "📅" },
             { id: 2, title: "Hydration goal", body: "You're 900ml away from your daily water goal!", time: "1 hr ago", unread: true, icon: "💧" }
@@ -927,19 +973,15 @@ export default function NutritionDashboard() {
     fetchDashboardData();
   }, []);
 
-  // Update Hydration Logic (POST/PUT action item to server)
+  // Update Hydration Logic — POST /api/v1/hydration/add (NOT CONFIRMED; best-guess path)
   const addHydrationValue = async (amount) => {
     const updatedAmount = Math.min(hydration.current + amount, hydration.target);
-    
+
     // Optimistic UI calculation response wrapper
     setHydration(prev => ({ ...prev, current: updatedAmount }));
 
     try {
-      await fetch(`${API_BASE_URL}/api/hydration/add`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount })
-      });
+      await api.post("/api/v1/hydration/add", { amount }, { headers: authHeaders() });
     } catch (err) {
       console.error("Backend failed synchronization validation step on amount step adjustments:", err);
     }

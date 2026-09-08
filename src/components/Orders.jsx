@@ -557,6 +557,8 @@
 
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import axios from "axios";
+import dinewithmeeLogo from "./dinewithmee-logo.png";
 
 // ─── Icon primitive ───────────────────────────────────────────────────────────
 const Icon = ({ d, size = 18, className = "", strokeWidth = 1.8 }) => (
@@ -616,13 +618,19 @@ const RECOMMENDED = [
   { name: "Berberine HCl",      dose: "500mg • Glucose Support",    price: "$24.00", badge: "Matched"  },
 ];
 
-// Base API URL config
-const API_BASE = "https://new-dine-with-mee-backend.onrender.com";
+// Base API URL config. Users/health-profile resources live under /api/v1
+// (confirmed against the Swagger "Users" section), while other routes here
+// (/orders) are best-guess paths not yet confirmed in the docs shown.
+const API_BASE = "https://new-dine-with-mee-backend-z7it.onrender.com";
 
-// Shared configuration headers helper (e.g., Auth Bearer tokens)
+const api = axios.create({
+  baseURL: API_BASE,
+  headers: { "Content-Type": "application/json" },
+});
+
+// Shared configuration headers helper (Auth Bearer token)
 const getHeaders = () => ({
-  "Content-Type": "application/json",
-  "Authorization": `Bearer ${localStorage.getItem("token") || "mock-token"}`
+  Authorization: `Bearer ${localStorage.getItem("dwm_token") || ""}`,
 });
 
 // ─── Status badge ─────────────────────────────────────────────────────────────
@@ -790,16 +798,11 @@ export default function Orders() {
   useEffect(() => {
     async function fetchOrders() {
       try {
-        const response = await fetch(`${API_BASE}/orders`, {
-          method: "GET",
-          headers: getHeaders(),
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setOrdersList(data.orders || data);
-          if ((data.orders || data).length > 0) {
-            setExpandedId((data.orders || data)[0]._id || (data.orders || data)[0].id);
-          }
+        const { data } = await api.get("/orders", { headers: getHeaders() });
+        const list = data.orders || data;
+        setOrdersList(list);
+        if (list.length > 0) {
+          setExpandedId(list[0]._id || list[0].id);
         }
       } catch (error) {
         console.error("Error retrieving user orders:", error);
@@ -815,14 +818,8 @@ export default function Orders() {
   useEffect(() => {
     async function fetchHealthProfile() {
       try {
-        const response = await fetch(`${API_BASE}/api/v1/health-profiles/me`, {
-          method: "GET",
-          headers: getHeaders(),
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setHealthProfile(data.profile || data);
-        }
+        const { data } = await api.get("/api/v1/health-profiles/me", { headers: getHeaders() });
+        setHealthProfile(data.profile || data);
       } catch (error) {
         console.error("Error retrieving personal profile context:", error);
       }
@@ -835,19 +832,13 @@ export default function Orders() {
   const handleCancelOrder = async (orderId) => {
     if (!window.confirm("Are you sure you want to cancel this order?")) return;
     try {
-      const response = await fetch(`${API_BASE}/orders/${orderId}/cancel`, {
-        method: "PATCH",
-        headers: getHeaders(),
-      });
-      if (response.ok) {
-        // Optimistically or explicitly apply local changes following successful patch transmission
-        setOrdersList(prev => prev.map(o => (o._id === orderId || o.id === orderId) ? { ...o, status: "Cancelled" } : o));
-        alert("Order cancelled successfully.");
-      } else {
-        alert("Unable to modify order status. It may have already been shipped.");
-      }
+      await api.patch(`/orders/${orderId}/cancel`, null, { headers: getHeaders() });
+      // Optimistically apply the change locally after a confirmed success.
+      setOrdersList(prev => prev.map(o => (o._id === orderId || o.id === orderId) ? { ...o, status: "Cancelled" } : o));
+      alert("Order cancelled successfully.");
     } catch (error) {
       console.error("Error executing target context order cancellation:", error);
+      alert("Unable to modify order status. It may have already been shipped.");
     }
   };
 
@@ -892,13 +883,16 @@ export default function Orders() {
         <button onClick={() => setSidebarOpen(v => !v)} className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
           <Icon d={IC.hamburger} size={20} className="text-[#1a2e2a]" />
         </button>
+        <Link to="/">
+          <img src={dinewithmeeLogo} alt="DineWithMee" className="h-7 w-auto object-contain" />
+        </Link>
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-xl bg-[#c96a4f] flex items-center justify-center shadow">
-            <span className="text-white text-xs font-extrabold">D</span>
-          </div>
-          <span className="font-extrabold text-[#1a2e2a] text-sm">Dine with Mee</span>
-        </div>
-        <div className="flex items-center gap-2">
+          <Link to="/" className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors" aria-label="Home">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a2e2a" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 9.5 12 3l9 6.5" />
+              <path d="M5 10v10h14V10" />
+            </svg>
+          </Link>
           <button className="relative">
             <Icon d={IC.bell} size={18} className="text-[#1a2e2a]" />
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-[#c96a4f] rounded-full" />
@@ -916,15 +910,9 @@ export default function Orders() {
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         `}>
           {/* Logo */}
-          <div className="hidden lg:flex items-center gap-2.5 px-5 mb-8">
-            <div className="w-9 h-9 rounded-xl bg-[#c96a4f] flex items-center justify-center shadow-md">
-              <span className="text-white font-extrabold text-sm">D</span>
-            </div>
-            <div className="leading-tight">
-              <p className="font-extrabold text-[#1a2e2a] text-sm">Dine with Mee</p>
-              <p className="text-[10px] text-gray-400 font-medium">Eating Things Strong</p>
-            </div>
-          </div>
+          <Link to="/" className="hidden lg:flex items-center gap-2.5 px-5 mb-8">
+            <img src={dinewithmeeLogo} alt="DineWithMee" className="h-9 w-auto object-contain" />
+          </Link>
 
           <nav className="flex-1 px-3 space-y-0.5">
             {NAV.map(item => {
@@ -966,6 +954,16 @@ export default function Orders() {
           <div className="hidden lg:flex items-center justify-between mb-8">
             <h1 className="text-2xl font-extrabold text-[#1a2e2a] tracking-tight">Orders</h1>
             <div className="flex items-center gap-3">
+              <Link
+                to="/"
+                className="flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-[#1a2e2a] transition-colors"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9.5 12 3l9 6.5" />
+                  <path d="M5 10v10h14V10" />
+                </svg>
+                Home
+              </Link>
               <div className="relative">
                 <Icon d={IC.search} size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input

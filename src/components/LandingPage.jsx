@@ -22,7 +22,7 @@ import AdminAll from "./AdminAll";
 import ClinicalNutritionist from "./ClinicalNutritionist";
 import Pharmacist from "./Pharmacist";
 import TeamBios from "./Teambios";
-import SignInPage from "./SignInPage";
+import SignInPage, { logoutRequest, validateSession, completeGoogleOAuthRedirect } from "./SignInPage";
 import { SignUpPage } from "./SignupPage";
 
 /* ═══════════════════════════════════════════════════════════
@@ -494,6 +494,7 @@ const NAV_LINKS = [
 export default function LandingPage() {
   const [session, setSession] = useState({ isAuthenticated: false, currentPortal: null });
   const [pendingPortal, setPendingPortal] = useState(null);
+  const [authError, setAuthError] = useState("");
   const [authPage, setAuthPage] = useState(null); // null | "signin" | "signup"
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("about");
@@ -506,13 +507,56 @@ export default function LandingPage() {
   const [showTeamPage, setShowTeamPage] = useState(false);
   const heroVideoRef = useRef(null);
 
-  // Restore an authenticated session on mount if a token + profile are
-  // already cached in localStorage (e.g. after a page refresh).
+  // ─── API INTEGRATION: GET /auth/google/callback (OAuth redirect landing) ──
+  // Google → backend → back to this app. On mount, check whether we just
+  // came back from that round trip (a "token"/"code" or "error" query
+  // param on the URL) and, if so, complete the session before falling back
+  // to the normal cached-token restore below.
+  useEffect(() => {
+    let cancelled = false;
+
+    completeGoogleOAuthRedirect().then((result) => {
+      if (cancelled || result.status === "none") return;
+
+      if (result.status === "error") {
+        setAuthError(result.message || "Google sign-in failed. Please try again.");
+        setAuthPage("signin");
+        return;
+      }
+
+      // status === "success" — token + profile are already stored.
+      setAuthPage(null);
+      setSession({
+        isAuthenticated: true,
+        currentPortal: resolvePortalFromStoredUser(pendingPortal || "user-dashboard"),
+      });
+    });
+
+    return () => { cancelled = true; };
+  }, []);
+
+  // Restore an authenticated session on mount if a token is already cached
+  // in localStorage (e.g. after a page refresh). Optimistically shows the
+  // cached portal immediately, then confirms the token against
+  // GET /auth/profile in the background (refreshing it via POST /auth/refresh
+  // if it's merely expired) and logs the user out if it's no longer valid.
   useEffect(() => {
     const token = localStorage.getItem("dwm_token");
     if (!token) return;
+
     const portal = resolvePortalFromStoredUser(null);
     setSession({ isAuthenticated: true, currentPortal: portal });
+
+    validateSession().then((isValid) => {
+      if (!isValid) {
+        setSession({ isAuthenticated: false, currentPortal: null });
+        localStorage.removeItem("dwm_token");
+        localStorage.removeItem("dwm_user");
+        return;
+      }
+      // Profile may have been refreshed/updated — re-resolve the portal.
+      setSession({ isAuthenticated: true, currentPortal: resolvePortalFromStoredUser(portal) });
+    });
   }, []);
 
   // Respect "prefers-reduced-motion": pause the ambient hero video for
@@ -595,6 +639,7 @@ export default function LandingPage() {
   // Shared navigate() handler passed into SignInPage / SignUpPage — both
   // components call navigate("landing" | "signin" | "signup" | "dashboard").
   const handleAuthNavigate = (target) => {
+    setAuthError("");
     if (target === "landing") {
       setAuthPage(null);
       window.scrollTo({ top: 0, behavior: "auto" });
@@ -611,9 +656,11 @@ export default function LandingPage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("dwm_token");
-    localStorage.removeItem("dwm_user");
+  // ─── API INTEGRATION: POST /auth/logout ────────────────────────────────
+  // Invalidates the session on the backend before clearing local state, so
+  // the token can't be replayed after the user signs out.
+  const handleLogout = async () => {
+    await logoutRequest();
     setSession({ isAuthenticated: false, currentPortal: null });
     setPendingPortal(null);
   };
@@ -636,7 +683,7 @@ export default function LandingPage() {
 
   // ─── Sign In / Sign Up Pages (public, no auth required) ──────────────────────
   if (authPage === "signin") {
-    return <SignInPage navigate={handleAuthNavigate} />;
+    return <SignInPage navigate={handleAuthNavigate} initialError={authError} />;
   }
   if (authPage === "signup") {
     return <SignUpPage navigate={handleAuthNavigate} />;
@@ -1317,4 +1364,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
