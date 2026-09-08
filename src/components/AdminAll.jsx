@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -53,10 +53,59 @@ const P = {
   x:      ["M18 6 6 18", "M6 6l12 12"],
   check:  ["M20 6 9 17l-5-5"],
   fork:   ["M8 3v4a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V3", "M10 8v13", "M16 3l-1 7h2l-1 7"],
+  search: ["M11 17a6 6 0 1 0 0-12 6 6 0 0 0 0 12z", "M21 21l-4.35-4.35"],
+  edit:   ["M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7", "M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"],
+  refresh:["M23 4v6h-6", "M1 20v-6h6", "M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"],
+  menu:   ["M3 12h18", "M3 6h18", "M3 18h18"],
 };
 
-// ─── Meals API endpoint ──────────────────────────────────────────────────────
-const MEALS_ENDPOINT = "https://new-dine-with-mee-backend.onrender.com/api/v1/meals";
+// ─── Dine with Mee API config ────────────────────────────────────────────────
+// Live backend — see https://new-dine-with-mee-backend-z7it.onrender.com/api-docs
+const API_BASE        = "https://new-dine-with-mee-backend-z7it.onrender.com/api/v1";
+const MEALS_ENDPOINT  = `${API_BASE}/meals`;
+
+// Admin/Nutritionist-only routes require a Bearer token. Adjust the localStorage
+// key below to match wherever your login flow stores the auth token.
+const AUTH_TOKEN_KEY = "authToken";
+function getAuthToken() {
+  try { return localStorage.getItem(AUTH_TOKEN_KEY) || ""; } catch { return ""; }
+}
+
+// Generic request wrapper: adds auth header, parses JSON, throws readable errors.
+async function apiRequest(path, { method = "GET", body, isFormData = false } = {}) {
+  const token = getAuthToken();
+  const headers = {};
+  if (!isFormData) headers["Content-Type"] = "application/json";
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    method,
+    headers,
+    body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
+  });
+
+  let data = null;
+  try { data = await res.json(); } catch { /* empty body, e.g. some 204s */ }
+
+  if (!res.ok) {
+    const msg = data?.message || data?.error || `Request failed (${res.status})`;
+    throw new Error(msg);
+  }
+  return data;
+}
+
+// Normalizes whatever shape the backend wraps the meal list/object in
+// (raw array, { meals }, { data }, { data: { meals } }, single object, etc).
+function extractMealList(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.meals)) return data.meals;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.data?.meals)) return data.data.meals;
+  return [];
+}
+function extractMeal(data) {
+  return data?.meal || data?.data?.meal || data?.data || data || null;
+}
 
 // ─── Shared UI Primitives ────────────────────────────────────────────────────
 function Card({ children, style = {} }) {
@@ -106,7 +155,7 @@ function SectionTitle({ children }) {
 
 function PageHeader({ title, subtitle, action }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3" style={{ marginBottom: 24 }}>
       <div>
         <h1 style={{ fontSize: 21, fontWeight: 800, color: C.dark, margin: 0 }}>{title}</h1>
         {subtitle && <p style={{ fontSize: 12, color: C.muted, margin: "4px 0 0" }}>{subtitle}</p>}
@@ -151,16 +200,18 @@ function Avatar({ name, color = C.teal, size = 28 }) {
 
 function Table({ headers, rows }) {
   return (
-    <table style={{ width: "100%", borderCollapse: "collapse" }}>
-      <thead>
-        <tr style={{ borderBottom: `1px solid ${C.border}` }}>
-          {headers.map(h => (
-            <th key={h} style={{ textAlign: "left", padding: "8px 12px", fontSize: 11, color: C.muted, fontWeight: 500 }}>{h}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>{rows}</tbody>
-    </table>
+    <div className="overflow-x-auto -mx-1 px-1">
+      <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 560 }}>
+        <thead>
+          <tr style={{ borderBottom: `1px solid ${C.border}` }}>
+            {headers.map(h => (
+              <th key={h} style={{ textAlign: "left", padding: "8px 12px", fontSize: 11, color: C.muted, fontWeight: 500, whiteSpace: "nowrap" }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>{rows}</tbody>
+      </table>
+    </div>
   );
 }
 
@@ -180,64 +231,82 @@ function TD({ children, bold, color, mono }) {
 }
 
 // ─── Sidebar ─────────────────────────────────────────────────────────────────
-function Sidebar({ active, setActive }) {
+// Off-canvas drawer on mobile/tablet (< lg), permanently docked from lg (1024px) up.
+function Sidebar({ active, setActive, mobileOpen, onClose }) {
   return (
-    <aside style={{
-      width: 210, background: C.sidebar, color: "#fff",
-      display: "flex", flexDirection: "column",
-      height: "100vh", position: "fixed", left: 0, top: 0, zIndex: 20,
-    }}>
-      <div style={{ padding: "20px 18px 16px", borderBottom: "1px solid rgba(255,255,255,.07)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{
-            width: 34, height: 34, borderRadius: 9, background: C.accent,
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17,
-          }}>🍽</div>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 13, lineHeight: 1.2 }}>Dine with Mee</div>
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,.45)", marginTop: 1 }}>Admin Portal</div>
+    <>
+      {/* Backdrop — only rendered/visible while the mobile drawer is open */}
+      {mobileOpen && (
+        <div
+          onClick={onClose}
+          className="fixed inset-0 bg-black/40 z-30 lg:hidden"
+        />
+      )}
+      <aside
+        className={`fixed left-0 top-0 z-40 h-screen w-[210px] flex flex-col
+          transition-transform duration-200 ease-out
+          lg:translate-x-0
+          ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+        style={{ background: C.sidebar, color: "#fff" }}
+      >
+        <div style={{ padding: "20px 18px 16px", borderBottom: "1px solid rgba(255,255,255,.07)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{
+                width: 34, height: 34, borderRadius: 9, background: C.accent,
+                display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17,
+              }}>🍽</div>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: 13, lineHeight: 1.2 }}>Dine with Mee</div>
+                <div style={{ fontSize: 10, color: "rgba(255,255,255,.45)", marginTop: 1 }}>Admin Portal</div>
+              </div>
+            </div>
+            {/* Close button — mobile/tablet only */}
+            <button onClick={onClose} className="lg:hidden" style={{ background: "none", border: "none", color: "rgba(255,255,255,.6)", cursor: "pointer", padding: 4 }}>
+              <Ic d={P.x} size={16} />
+            </button>
           </div>
         </div>
-      </div>
 
-      <nav style={{ flex: 1, padding: "10px 8px", overflowY: "auto" }}>
-        <div style={{ fontSize: 9, color: "rgba(255,255,255,.3)", padding: "8px 12px 4px", textTransform: "uppercase", letterSpacing: ".08em" }}>Main Menu</div>
-        {NAV.map(item => (
-          <button
-            key={item.id}
-            onClick={() => setActive(item.id)}
-            style={{
-              display: "flex", alignItems: "center", gap: 9,
-              width: "100%", padding: "8px 12px", borderRadius: 8,
-              border: "none", cursor: "pointer", textAlign: "left", marginBottom: 2,
-              background: active === item.id ? C.sidebarActive : "transparent",
-              color: active === item.id ? "#fff" : "rgba(255,255,255,.55)",
-              fontSize: 12, fontWeight: active === item.id ? 600 : 400,
-              transition: "all .15s",
-            }}
-          >
-            <span style={{ fontSize: 14, width: 18, textAlign: "center" }}>{item.icon}</span>
-            {item.label}
-            {active === item.id && (
-              <div style={{ marginLeft: "auto", width: 4, height: 4, borderRadius: 2, background: C.accent }} />
-            )}
-          </button>
-        ))}
-      </nav>
+        <nav style={{ flex: 1, padding: "10px 8px", overflowY: "auto" }}>
+          <div style={{ fontSize: 9, color: "rgba(255,255,255,.3)", padding: "8px 12px 4px", textTransform: "uppercase", letterSpacing: ".08em" }}>Main Menu</div>
+          {NAV.map(item => (
+            <button
+              key={item.id}
+              onClick={() => { setActive(item.id); onClose?.(); }}
+              style={{
+                display: "flex", alignItems: "center", gap: 9,
+                width: "100%", padding: "8px 12px", borderRadius: 8,
+                border: "none", cursor: "pointer", textAlign: "left", marginBottom: 2,
+                background: active === item.id ? C.sidebarActive : "transparent",
+                color: active === item.id ? "#fff" : "rgba(255,255,255,.55)",
+                fontSize: 12, fontWeight: active === item.id ? 600 : 400,
+                transition: "all .15s",
+              }}
+            >
+              <span style={{ fontSize: 14, width: 18, textAlign: "center" }}>{item.icon}</span>
+              {item.label}
+              {active === item.id && (
+                <div style={{ marginLeft: "auto", width: 4, height: 4, borderRadius: 2, background: C.accent }} />
+              )}
+            </button>
+          ))}
+        </nav>
 
-      <div style={{ padding: "14px 16px", borderTop: "1px solid rgba(255,255,255,.07)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-          <div style={{
-            width: 30, height: 30, borderRadius: "50%", background: C.accent,
-            display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800,
-          }}>A</div>
-          <div>
-            <div style={{ fontSize: 12, fontWeight: 600 }}>Super Admin</div>
-            <div style={{ fontSize: 10, color: "rgba(255,255,255,.35)" }}>admin@dinewithmee.com</div>
+        <div style={{ padding: "14px 16px", borderTop: "1px solid rgba(255,255,255,.07)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+            <div style={{
+              width: 30, height: 30, borderRadius: "50%", background: C.accent,
+              display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800,
+            }}>A</div>
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 600 }}>Super Admin</div>
+              <div style={{ fontSize: 10, color: "rgba(255,255,255,.35)" }}>admin@dinewithmee.com</div>
+            </div>
           </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }
 
@@ -266,13 +335,13 @@ function Overview() {
   return (
     <div>
       <PageHeader title="System Overview" subtitle="Live platform performance at a glance" action="+ Generate Report" />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 18 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4" style={{ gap: 14, marginBottom: 18 }}>
         <KPICard label="Active Users"  value="14.2k"  delta="+8.3% vs last month"  color={C.teal}   />
         <KPICard label="Providers"     value="1,482"  delta="+3.1% vs last month"  color={C.info}   />
         <KPICard label="Orders Today"  value="3,291"  delta="+12.4% vs yesterday"  color={C.accent} />
         <KPICard label="Revenue MTD"   value="$84.2k" delta="+5.7% vs last month"  color="#EC4899"  />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 14, marginBottom: 18 }}>
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr]" style={{ gap: 14, marginBottom: 18 }}>
         <Card>
           <SectionTitle>Platform Growth</SectionTitle>
           <ResponsiveContainer width="100%" height={190}>
@@ -343,18 +412,19 @@ function UserDirectory() {
   return (
     <div>
       <PageHeader title="User Directory" subtitle="Manage all chefs, customers and admins" action="+ Invite User" />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 18 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4" style={{ gap: 14, marginBottom: 18 }}>
         <KPICard label="Total Users"  value="12,482" delta="+6.2%" color={C.teal}   />
         <KPICard label="Active Chefs" value="8,291"  delta="+4.1%" color={C.info}   />
         <KPICard label="Customers"    value="4,103k" delta="+7.8%" color={C.accent} />
         <KPICard label="Total Spend"  value="$84.2k" delta="+5.7%" color="#EC4899"  />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 14 }}>
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr]" style={{ gap: 14 }}>
         <Card>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2" style={{ marginBottom: 14 }}>
             <SectionTitle>Staffed Providers</SectionTitle>
             <input placeholder="🔍 Search users…" value={search} onChange={e => setSearch(e.target.value)}
-              style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 12, outline: "none", width: 180 }} />
+              className="w-full sm:w-[180px]"
+              style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 12, outline: "none", boxSizing: "border-box" }} />
           </div>
           <Table
             headers={["Name", "Role", "Status", "Joined", "Rating"]}
@@ -438,13 +508,13 @@ function ProviderManagement() {
   return (
     <div>
       <PageHeader title="Provider Management" subtitle="Oversee chefs, performance and onboarding pipeline" action="+ Add Provider" />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 18 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4" style={{ gap: 14, marginBottom: 18 }}>
         <KPICard label="Total Providers" value="1,482" delta="+3.1%" color={C.teal}   />
         <KPICard label="Active Today"    value="891"   delta="+6.4%" color={C.info}   />
         <KPICard label="Pending Review"  value="42"                  color={C.accent} />
         <KPICard label="Avg Rating"      value="4.7★"               color="#F59E0B"  />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 14 }}>
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr]" style={{ gap: 14 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
           <Card>
             <SectionTitle>Provider Performance Trends</SectionTitle>
@@ -506,7 +576,7 @@ const MACROCOLS   = [
 ];
 
 // Meal card (posted meals grid)
-function MealCard({ meal, onView, onDelete }) {
+function MealCard({ meal, onView, onEdit, onDelete }) {
   return (
     <div style={{
       background: C.card, border: `1px solid ${C.border}`, borderRadius: 14,
@@ -537,7 +607,10 @@ function MealCard({ meal, onView, onDelete }) {
         <button onClick={() => onView(meal)} style={{ flex: 1, padding: "7px 0", borderRadius: 8, border: `1px solid ${C.border}`, background: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, color: C.mid, display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
           <Ic d={P.eye} size={13} /> View
         </button>
-        <button onClick={() => onDelete(meal._localId)} style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${C.border}`, background: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.danger }}>
+        <button onClick={() => onEdit(meal)} style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${C.border}`, background: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.mid }}>
+          <Ic d={P.edit} size={13} />
+        </button>
+        <button onClick={() => onDelete(meal)} style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${C.border}`, background: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.danger }}>
           <Ic d={P.trash} size={13} color={C.danger} />
         </button>
       </div>
@@ -563,7 +636,7 @@ function MealDetailModal({ meal, onClose }) {
         </div>
         <div style={{ padding: "18px 22px" }}>
           {/* Macro grid */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10, marginBottom: 18 }}>
+          <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 10, marginBottom: 18 }}>
             {MACROCOLS.map(col => (
               <div key={col.key} style={{ textAlign: "center", padding: "10px 6px", borderRadius: 10, background: col.bg, border: `1px solid ${col.border}` }}>
                 <div style={{ fontSize: 16, fontWeight: 800, color: col.accent }}>{meal[col.key] || "—"}</div>
@@ -599,10 +672,16 @@ function MealDetailModal({ meal, onClose }) {
 function MealManagement() {
   const [tab, setTab]               = useState("list");        // "form" | "list"
   const [formData, setFormData]     = useState(EMPTY_FORM);
-  const [postedMeals, setPostedMeals] = useState([]);
+  const [postedMeals, setPostedMeals] = useState([]);           // server + local-fallback meals
+  const [loadingMeals, setLoadingMeals] = useState(true);
+  const [loadError, setLoadError]   = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [editingMeal, setEditingMeal] = useState(null);         // meal object being edited, or null = creating
   const [viewMeal, setViewMeal]     = useState(null);
   const [toasts, setToasts]         = useState([]);
+  const [query, setQuery]           = useState("");
+  const [searching, setSearching]   = useState(false);
   const toastSeq                    = useRef(0);
   const fileInputRef                = useRef(null);
 
@@ -613,6 +692,21 @@ function MealManagement() {
     setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4500);
   };
 
+  // ── GET /api/v1/meals — load all meals on mount ─────────────────────────
+  const fetchMeals = async () => {
+    setLoadingMeals(true);
+    setLoadError("");
+    try {
+      const data = await apiRequest("/meals");
+      setPostedMeals(extractMealList(data).map(m => ({ ...m, _localId: m._id || m.id })));
+    } catch (err) {
+      setLoadError(err.message || "Could not reach the meals API.");
+    } finally {
+      setLoadingMeals(false);
+    }
+  };
+  useEffect(() => { fetchMeals(); }, []); // load meals from the server once on mount
+
   const handleInput = e => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -622,6 +716,30 @@ function MealManagement() {
     if (e.target.files?.[0]) setFormData(prev => ({ ...prev, imageFile: e.target.files[0] }));
   };
 
+  const startCreate = () => {
+    setEditingMeal(null);
+    setFormData(EMPTY_FORM);
+    setTab("form");
+  };
+
+  const startEdit = meal => {
+    setEditingMeal(meal);
+    setFormData({
+      name: meal.name || "",
+      category: meal.category || "Breakfast",
+      kcal: meal.kcal ?? "",
+      protein: meal.protein ?? "",
+      carbs: meal.carbs ?? "",
+      fats: meal.fats ?? "",
+      ingredients: Array.isArray(meal.ingredients) ? meal.ingredients.join(", ") : (meal.ingredients || ""),
+      instructions: Array.isArray(meal.instructions) ? meal.instructions.join("\n") : (meal.instructions || ""),
+      tags: Array.isArray(meal.tags) ? meal.tags.join(", ") : (meal.tags || ""),
+      imageFile: null,
+    });
+    setTab("form");
+  };
+
+  // ── POST /api/v1/meals (create)  ·  PATCH /api/v1/meals/{id} (update) ───
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.kcal) {
@@ -629,40 +747,93 @@ function MealManagement() {
       return;
     }
     setSubmitting(true);
+    const isEdit = Boolean(editingMeal);
+    const mealId = editingMeal?._id || editingMeal?.id;
     try {
       const body = new FormData();
       Object.entries(formData).forEach(([k, v]) => { if (k !== "imageFile" && v) body.append(k, v); });
       if (formData.imageFile) body.append("image", formData.imageFile);
 
-      const res  = await fetch(MEALS_ENDPOINT, { method: "POST", body });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Server error");
-      setPostedMeals(prev => [{ ...formData, _localId: Date.now(), serverRecord: data.meal || null }, ...prev]);
-      addToast("Meal posted to server successfully!");
-    } catch {
-      // Offline / CORS fallback — store locally
-      const localRecord = {
-        ...formData,
-        _localId: Date.now(),
-        mocked: true,
-        ingredients: formData.ingredients.split(",").map(s => s.trim()).filter(Boolean),
-        instructions: formData.instructions.split("\n").map(s => s.trim()).filter(Boolean),
-        tags: formData.tags.split(",").map(s => s.trim()).filter(Boolean),
-      };
-      setPostedMeals(prev => [localRecord, ...prev]);
-      addToast("Saved locally — server unavailable.", "info");
+      const data = await apiRequest(isEdit ? `/meals/${mealId}` : "/meals", {
+        method: isEdit ? "PATCH" : "POST",
+        body,
+        isFormData: true,
+      });
+      const saved = extractMeal(data) || formData;
+
+      if (isEdit) {
+        setPostedMeals(prev => prev.map(m => (m._localId === mealId ? { ...saved, _localId: mealId } : m)));
+        addToast("Meal updated on server.");
+      } else {
+        const newId = saved?._id || saved?.id || Date.now();
+        setPostedMeals(prev => [{ ...saved, _localId: newId }, ...prev]);
+        addToast("Meal posted to server successfully!");
+      }
+    } catch (err) {
+      if (isEdit) {
+        // Update failed — keep the previous record, just notify.
+        addToast(err.message || "Update failed — server unavailable.", "error");
+      } else {
+        // Create failed (offline / CORS) — fall back to a local-only record.
+        const localRecord = {
+          ...formData,
+          _localId: Date.now(),
+          mocked: true,
+          ingredients: formData.ingredients.split(",").map(s => s.trim()).filter(Boolean),
+          instructions: formData.instructions.split("\n").map(s => s.trim()).filter(Boolean),
+          tags: formData.tags.split(",").map(s => s.trim()).filter(Boolean),
+        };
+        setPostedMeals(prev => [localRecord, ...prev]);
+        addToast("Saved locally — server unavailable.", "info");
+      }
     } finally {
       setSubmitting(false);
       setFormData(EMPTY_FORM);
+      setEditingMeal(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
       setTab("list");
     }
   };
 
-  const deleteLocal = id => {
-    setPostedMeals(prev => prev.filter(m => m._localId !== id));
-    addToast("Meal removed.", "info");
+  // ── DELETE /api/v1/meals/{id} ────────────────────────────────────────────
+  const handleDelete = async meal => {
+    const id = meal._id || meal.id || meal._localId;
+    if (!window.confirm(`Delete "${meal.name}"? This can't be undone.`)) return;
+
+    if (meal.mocked) {
+      setPostedMeals(prev => prev.filter(m => m._localId !== meal._localId));
+      addToast("Meal removed.", "info");
+      return;
+    }
+    setDeletingId(id);
+    try {
+      await apiRequest(`/meals/${id}`, { method: "DELETE" });
+      setPostedMeals(prev => prev.filter(m => m._localId !== id));
+      addToast("Meal deleted from server.", "info");
+    } catch (err) {
+      addToast(err.message || "Delete failed — server unavailable.", "error");
+    } finally {
+      setDeletingId(null);
+    }
   };
+
+  // ── GET /api/v1/meals/search?query= ──────────────────────────────────────
+  const handleSearch = async e => {
+    e?.preventDefault?.();
+    if (!query.trim()) { fetchMeals(); return; }
+    setSearching(true);
+    setLoadError("");
+    try {
+      const data = await apiRequest(`/meals/search?query=${encodeURIComponent(query.trim())}`);
+      setPostedMeals(extractMealList(data).map(m => ({ ...m, _localId: m._id || m.id })));
+    } catch (err) {
+      setLoadError(err.message || "Search failed.");
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const clearSearch = () => { setQuery(""); fetchMeals(); };
 
   // ── input style helper ─────────────────────────────────────────────────
   const inp = (extra = {}) => ({
@@ -675,15 +846,15 @@ function MealManagement() {
   return (
     <div style={{ position: "relative" }}>
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3" style={{ marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: 21, fontWeight: 800, color: C.dark, margin: 0 }}>Meal Management</h1>
           <p style={{ fontSize: 12, color: C.muted, margin: "4px 0 0" }}>Create and manage meal entries for the platform</p>
         </div>
         {/* Tab switcher */}
-        <div style={{ display: "flex", background: "#F3F2EE", padding: 4, borderRadius: 10, border: `1px solid ${C.border}` }}>
+        <div className="self-start sm:self-auto" style={{ display: "flex", background: "#F3F2EE", padding: 4, borderRadius: 10, border: `1px solid ${C.border}` }}>
           {[["list", "Active Meals", P.list], ["form", "+ Add Meal", P.plus]].map(([id, label, icon]) => (
-            <button key={id} onClick={() => setTab(id)} style={{
+            <button key={id} onClick={() => (id === "form" ? startCreate() : setTab(id))} style={{
               display: "flex", alignItems: "center", gap: 6,
               padding: "7px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600,
               background: tab === id ? C.card : "transparent",
@@ -701,26 +872,62 @@ function MealManagement() {
       {tab === "list" && (
         <div>
           {/* KPIs */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 20 }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4" style={{ gap: 14, marginBottom: 20 }}>
             <KPICard label="Total Meals"   value={postedMeals.length || "0"} color={C.teal}   />
             <KPICard label="Avg Calories"  value={postedMeals.length ? Math.round(postedMeals.reduce((a, m) => a + (+m.kcal || 0), 0) / postedMeals.length) + " kcal" : "—"} color={C.accent} />
             <KPICard label="Categories"    value={new Set(postedMeals.map(m => m.category)).size || "—"} color={C.info}   />
             <KPICard label="Server Synced" value={postedMeals.filter(m => !m.mocked).length} color="#F59E0B" />
           </div>
 
-          {postedMeals.length === 0 ? (
+          {/* Search + refresh bar (GET /meals/search, GET /meals) */}
+          <form onSubmit={handleSearch} className="flex flex-wrap sm:flex-nowrap" style={{ gap: 10, marginBottom: 16 }}>
+            <div style={{ position: "relative", flex: "1 1 200px" }}>
+              <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: C.muted }}>
+                <Ic d={P.search} size={14} />
+              </div>
+              <input
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder="Search meals by name, tag or category…"
+                style={{ width: "100%", padding: "9px 12px 9px 34px", borderRadius: 10, border: `1px solid ${C.border}`, fontSize: 13, outline: "none", background: C.card, boxSizing: "border-box" }}
+              />
+            </div>
+            {query && (
+              <button type="button" onClick={clearSearch} style={{ padding: "9px 14px", borderRadius: 10, border: `1px solid ${C.border}`, background: C.card, fontSize: 12, cursor: "pointer", color: C.mid }}>
+                Clear
+              </button>
+            )}
+            <button type="submit" disabled={searching} style={{ padding: "9px 16px", borderRadius: 10, border: "none", background: C.dark, color: "#fff", fontSize: 12, fontWeight: 700, cursor: searching ? "not-allowed" : "pointer" }}>
+              {searching ? "Searching…" : "Search"}
+            </button>
+            <button type="button" onClick={fetchMeals} title="Refresh from server" style={{ width: 36, borderRadius: 10, border: `1px solid ${C.border}`, background: C.card, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.mid }}>
+              <Ic d={P.refresh} size={14} />
+            </button>
+          </form>
+
+          {loadError && (
+            <div style={{ padding: "10px 14px", borderRadius: 10, background: "#FEF2F2", border: "1px solid #FECACA", color: "#B91C1C", fontSize: 12, marginBottom: 16 }}>
+              {loadError} — showing any locally cached meals below.
+            </div>
+          )}
+
+          {loadingMeals ? (
+            <Card style={{ padding: 48, textAlign: "center" }}>
+              <div style={{ fontSize: 12, color: C.muted }}>Loading meals from server…</div>
+            </Card>
+          ) : postedMeals.length === 0 ? (
             <Card style={{ padding: 48, textAlign: "center" }}>
               <div style={{ fontSize: 40, marginBottom: 14 }}>🥘</div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: C.dark, marginBottom: 6 }}>No meals posted yet</div>
-              <div style={{ fontSize: 12, color: C.muted, marginBottom: 18 }}>Create your first meal entry to populate the platform menu.</div>
-              <button onClick={() => setTab("form")} style={{ padding: "10px 22px", borderRadius: 10, border: "none", background: C.sidebar, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: C.dark, marginBottom: 6 }}>No meals found</div>
+              <div style={{ fontSize: 12, color: C.muted, marginBottom: 18 }}>{query ? "Try a different search term, or clear the search." : "Create your first meal entry to populate the platform menu."}</div>
+              <button onClick={startCreate} style={{ padding: "10px 22px", borderRadius: 10, border: "none", background: C.sidebar, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
                 Post First Meal
               </button>
             </Card>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14 }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3" style={{ gap: 14 }}>
               {postedMeals.map(meal => (
-                <MealCard key={meal._localId} meal={meal} onView={setViewMeal} onDelete={deleteLocal} />
+                <MealCard key={meal._localId} meal={meal} onView={setViewMeal} onEdit={startEdit} onDelete={handleDelete} />
               ))}
             </div>
           )}
@@ -729,15 +936,22 @@ function MealManagement() {
 
       {/* ── FORM TAB ── */}
       {tab === "form" && (
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 20 }}>
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr]" style={{ gap: 20 }}>
           {/* Form */}
           <Card style={{ padding: 24 }}>
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: C.dark }}>New Meal Entry</div>
-              <div style={{ fontSize: 12, color: C.muted, marginTop: 3 }}>Fill in the details below to add a meal to the platform</div>
+            <div style={{ marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: C.dark }}>{editingMeal ? "Edit Meal Entry" : "New Meal Entry"}</div>
+                <div style={{ fontSize: 12, color: C.muted, marginTop: 3 }}>{editingMeal ? `Updating "${editingMeal.name}"` : "Fill in the details below to add a meal to the platform"}</div>
+              </div>
+              {editingMeal && (
+                <button onClick={() => { setEditingMeal(null); setFormData(EMPTY_FORM); setTab("list"); }} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${C.border}`, background: "none", fontSize: 11, fontWeight: 600, cursor: "pointer", color: C.mid }}>
+                  Cancel Edit
+                </button>
+              )}
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 14, marginBottom: 14 }}>
               <div>
                 <label style={lbl}>Meal Name *</label>
                 <input name="name" value={formData.name} onChange={handleInput} placeholder="e.g. Avocado Salmon Bowl" style={inp()} />
@@ -751,7 +965,7 @@ function MealManagement() {
             </div>
 
             {/* Macro row */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 14 }}>
+            <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 12, marginBottom: 14 }}>
               {MACROCOLS.map(col => (
                 <div key={col.key}>
                   <label style={{ ...lbl, color: col.accent }}>{col.label} *</label>
@@ -792,8 +1006,10 @@ function MealManagement() {
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
             }}>
               {submitting
-                ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" style={{ animation: "spin 1s linear infinite" }}><circle cx="12" cy="12" r="10" strokeOpacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" /></svg> Posting…</>
-                : <><Ic d={P.plus} size={15} color="#fff" sw={2.5} /> Post Meal</>
+                ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" style={{ animation: "spin 1s linear infinite" }}><circle cx="12" cy="12" r="10" strokeOpacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" /></svg> {editingMeal ? "Saving…" : "Posting…"}</>
+                : editingMeal
+                  ? <><Ic d={P.check} size={15} color="#fff" sw={2.5} /> Save Changes</>
+                  : <><Ic d={P.plus} size={15} color="#fff" sw={2.5} /> Post Meal</>
               }
             </button>
             <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
@@ -806,7 +1022,7 @@ function MealManagement() {
             <div style={{ fontSize: 11, color: "rgba(255,255,255,.45)", marginBottom: 16 }}>What gets sent to the API</div>
 
             <div style={{ background: "rgba(0,0,0,.3)", borderRadius: 10, padding: "14px 16px", fontFamily: "monospace", fontSize: 11, color: "#A3E6CB", lineHeight: 1.7, marginBottom: 18 }}>
-              <span style={{ color: "#6EE7B7" }}>POST</span> /api/v1/meals<br />
+              <span style={{ color: "#6EE7B7" }}>{editingMeal ? "PATCH" : "POST"}</span> /api/v1/meals{editingMeal ? `/${editingMeal._id || editingMeal.id}` : ""}<br />
               <span style={{ color: "#94A3B8" }}>{"{"}</span><br />
               <span style={{ color: "#94A3B8", paddingLeft: 12 }}>"name": </span><span style={{ color: "#FCD34D" }}>"{formData.name || "…"}"</span>,<br />
               <span style={{ color: "#94A3B8", paddingLeft: 12 }}>"category": </span><span style={{ color: "#FCD34D" }}>"{formData.category}"</span>,<br />
@@ -819,7 +1035,7 @@ function MealManagement() {
             <div style={{ fontSize: 10, color: "rgba(255,255,255,.4)", marginBottom: 8, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".06em" }}>Target Endpoint</div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(0,0,0,.25)", borderRadius: 8, padding: "9px 12px" }}>
               <div style={{ width: 8, height: 8, borderRadius: "50%", background: C.teal, boxShadow: `0 0 0 3px ${C.teal}30` }} />
-              <span style={{ fontSize: 10, fontFamily: "monospace", color: "rgba(255,255,255,.6)", wordBreak: "break-all" }}>new-dine-with-mee-backend.onrender.com</span>
+              <span style={{ fontSize: 10, fontFamily: "monospace", color: "rgba(255,255,255,.6)", wordBreak: "break-all" }}>new-dine-with-mee-backend-z7it.onrender.com</span>
             </div>
           </div>
         </div>
@@ -829,7 +1045,7 @@ function MealManagement() {
       {viewMeal && <MealDetailModal meal={viewMeal} onClose={() => setViewMeal(null)} />}
 
       {/* Toast stack */}
-      <div style={{ position: "fixed", bottom: 20, right: 20, zIndex: 200, display: "flex", flexDirection: "column", gap: 8, pointerEvents: "none", maxWidth: 320 }}>
+      <div className="left-4 right-4 sm:left-auto sm:right-5 sm:max-w-[320px]" style={{ position: "fixed", bottom: 20, zIndex: 200, display: "flex", flexDirection: "column", gap: 8, pointerEvents: "none" }}>
         {toasts.map(t => (
           <div key={t.id} style={{
             display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -864,7 +1080,7 @@ function SystemComponents() {
   return (
     <div>
       <PageHeader title="System Components Library" subtitle="Health monitoring, wearable sync, and AI tooling" />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+      <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 14, marginBottom: 14 }}>
         <Card>
           <SectionTitle>🫀 System Health Insights</SectionTitle>
           {[
@@ -899,11 +1115,11 @@ function SystemComponents() {
           ))}
         </Card>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+      <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 14 }}>
         <Card>
           <SectionTitle>📋 Bulk Assignment Console</SectionTitle>
           <div style={{ fontSize: 11, color: C.muted, marginBottom: 14 }}>Assign providers to campaigns or regions in bulk</div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 8, marginBottom: 10 }}>
             {[["Select Region", ["All Regions", "North Zone", "South Zone", "East Zone"]], ["Select Campaign", ["Summer Feast", "New Chef Welcome", "Loyalty Q3"]]].map(([ph, opts]) => (
               <select key={ph} style={{ padding: "8px 10px", borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 12, background: C.card }}>
                 <option>{ph}</option>
@@ -955,18 +1171,18 @@ function CampaignCenter() {
   return (
     <div>
       <PageHeader title="Campaign Center" subtitle="Manage all promotions, referrals, and outreach" action="+ New Campaign" />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 18 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4" style={{ gap: 14, marginBottom: 18 }}>
         <KPICard label="Total Budget" value="$68,400" color={C.teal}   />
         <KPICard label="Amount Spent" value="$41,200" color={C.accent} />
         <KPICard label="Total Reach"  value="125k"    color={C.info}   />
         <KPICard label="Conversions"  value="18,240"  color="#F59E0B"  />
       </div>
       <Card>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3" style={{ marginBottom: 16 }}>
           <SectionTitle>All Campaigns</SectionTitle>
-          <div style={{ display: "flex", gap: 6 }}>
+          <div className="flex gap-1.5 overflow-x-auto sm:gap-1.5" style={{ paddingBottom: 2 }}>
             {["all", "active", "paused", "draft", "ended"].map(f => (
-              <button key={f} onClick={() => setFilter(f)} style={{ padding: "5px 12px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: filter === f ? C.sidebar : C.border, color: filter === f ? "#fff" : C.mid, textTransform: "capitalize" }}>{f}</button>
+              <button key={f} onClick={() => setFilter(f)} style={{ padding: "5px 12px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: filter === f ? C.sidebar : C.border, color: filter === f ? "#fff" : C.mid, textTransform: "capitalize", whiteSpace: "nowrap", flexShrink: 0 }}>{f}</button>
             ))}
           </div>
         </div>
@@ -1020,13 +1236,13 @@ function SecurityAudit() {
   return (
     <div>
       <PageHeader title="System Security & Audit" subtitle="Access logs, role policies and data governance" action="+ Add Policy" />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 18 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4" style={{ gap: 14, marginBottom: 18 }}>
         <KPICard label="Security Score"  value="96/100" color={C.teal}   />
         <KPICard label="Active Policies" value="24"     color={C.info}   />
         <KPICard label="Alerts (24 hr)"  value="3"      color={C.accent} />
         <KPICard label="Admin Sessions"  value="7"      color="#F59E0B"  />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 14 }}>
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr]" style={{ gap: 14 }}>
         <Card>
           <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
             {[["global", "Global Log"], ["admin", "Admin Audit"]].map(([id, label]) => (
@@ -1097,7 +1313,7 @@ function GeneralSettings() {
   return (
     <div>
       <PageHeader title="General Settings" subtitle="Platform configuration, branding and preferences" action="Save Changes" />
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 14 }}>
+      <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 14, marginBottom: 14 }}>
         <Card>
           <SectionTitle>Platform Branding</SectionTitle>
           {[{ label: "Platform Name", value: name, onChange: setName }, { label: "Tagline", value: tagline, onChange: setTagline }].map(f => (
@@ -1138,7 +1354,7 @@ function GeneralSettings() {
           ))}
         </Card>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+      <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 14 }}>
         <Card>
           <SectionTitle>Billing Cycles</SectionTitle>
           {plans.map(p => (
@@ -1188,6 +1404,7 @@ function GeneralSettings() {
 // ═══════════════════════════════════════════════════════════════════════════
 export default function AdminAll() {
   const [active, setActive] = useState("overview");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const PAGES = {
     overview:   <Overview />,
@@ -1201,11 +1418,25 @@ export default function AdminAll() {
   };
 
   return (
-    <div style={{ display: "flex", height: "100vh", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", background: C.bg }}>
-      <Sidebar active={active} setActive={setActive} />
-      <main style={{ marginLeft: 210, flex: 1, overflowY: "auto", padding: "26px 28px" }}>
-        {PAGES[active]}
-      </main>
+    <div style={{ display: "flex", minHeight: "100vh", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", background: C.bg }}>
+      <Sidebar active={active} setActive={setActive} mobileOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
+
+      <div className="flex-1 flex flex-col min-w-0 lg:ml-[210px]">
+        {/* Mobile/tablet top bar — hidden from lg up, where the sidebar is always docked */}
+        <div className="lg:hidden flex items-center gap-3 px-4 py-3 sticky top-0 z-20" style={{ background: C.card, borderBottom: `1px solid ${C.border}` }}>
+          <button onClick={() => setMobileNavOpen(true)} style={{ background: "none", border: "none", cursor: "pointer", color: C.dark, padding: 4 }}>
+            <Ic d={P.menu} size={20} />
+          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 26, height: 26, borderRadius: 7, background: C.accent, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>🍽</div>
+            <span style={{ fontWeight: 800, fontSize: 13, color: C.dark }}>Dine with Mee</span>
+          </div>
+        </div>
+
+        <main className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-7 lg:py-[26px]">
+          {PAGES[active]}
+        </main>
+      </div>
     </div>
   );
 }
