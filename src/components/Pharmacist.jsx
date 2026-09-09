@@ -1,8 +1,39 @@
 import { useState, useRef } from "react";
+import axios from "axios";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend, LineChart, Line,
 } from "recharts";
+
+// ─── Dine with Mee API config ────────────────────────────────────────────────
+// Live backend — see https://new-dine-with-mee-backend-z7it.onrender.com/api-docs
+// The Health Profiles routes used below (GET /health-profiles/user/{userId},
+// GET /health-profiles/{id}) are documented as "Admin/Nutritionist only" in
+// the Swagger docs. If the Pharmacist role isn't included in that allowlist
+// on the backend, these calls will 403 — the UI below handles that
+// gracefully and just shows "Not available" rather than crashing.
+const API_BASE = "https://new-dine-with-mee-backend-z7it.onrender.com/api/v1";
+const AUTH_TOKEN_KEY = "authToken";
+const api = axios.create({ baseURL: API_BASE });
+api.interceptors.request.use(config => {
+  let token = "";
+  try { token = localStorage.getItem(AUTH_TOKEN_KEY) || ""; } catch { /* no-op */ }
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  config.headers["Content-Type"] = "application/json";
+  return config;
+});
+
+// Best-effort normalization for a health-profile record — field names are
+// guessed from common shapes; adjust the fallbacks once confirmed against
+// the actual response schema.
+function normalizeHealthProfile(hp) {
+  if (!hp) return null;
+  return {
+    allergies: hp.allergies || hp.dietaryRestrictions?.allergies || [],
+    conditions: hp.medicalConditions || hp.conditions || [],
+    medications: hp.currentMedications || hp.medications || [],
+  };
+}
 
 // ─── Design Tokens ───────────────────────────────────────────────────────────
 const C = {
@@ -147,8 +178,32 @@ function Toggle({ value, onChange }) {
 function FulfillmentModal({ onClose }) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({ patient: "", dob: "", rx: "", drug: "", qty: "", insurance: "", bin: "" });
+  const [allergyCheck, setAllergyCheck] = useState(null); // { allergies, conditions } | "error" | null
+  const [checkingAllergies, setCheckingAllergies] = useState(false);
   const inp = { width: "100%", padding: "8px 10px", borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 12, outline: "none", background: "#FAFAF8", boxSizing: "border-box", color: C.dark };
   const lbl = { fontSize: 10, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: ".05em", display: "block", marginBottom: 4 };
+
+  // GET /health-profiles/user/{userId} — using the Patient ID / MRN field as
+  // the userId. Admin/Nutritionist only on the backend; swap this for
+  // whatever id your patient search actually resolves to.
+  const runAllergyCheck = async () => {
+    if (!form.rx) return;
+    setCheckingAllergies(true);
+    setAllergyCheck(null);
+    try {
+      const { data } = await api.get(`/health-profiles/user/${form.rx}`);
+      const profile = data.healthProfile || data.data || data;
+      setAllergyCheck({
+        allergies: profile.allergies || profile.dietaryRestrictions?.allergies || [],
+        conditions: profile.medicalConditions || profile.conditions || [],
+      });
+    } catch {
+      setAllergyCheck("error");
+    } finally {
+      setCheckingAllergies(false);
+    }
+  };
+
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.38)", backdropFilter: "blur(3px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 16 }}>
       <div style={{ background: C.card, borderRadius: 16, width: "100%", maxWidth: 540, maxHeight: "90vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,.22)" }}>
@@ -183,10 +238,25 @@ function FulfillmentModal({ onClose }) {
               { label: "Patient Identity", status: step >= 1 && form.patient ? "Verified" : "Pending" },
               { label: "Insurance Eligibility", status: step >= 3 && form.insurance ? "Verified" : "Pending" },
               { label: "Drug Interaction Check", status: step >= 2 && form.drug ? "Cleared" : "Pending" },
+              {
+                label: "Allergy / Health Profile",
+                status: checkingAllergies
+                  ? "Checking…"
+                  : allergyCheck === "error"
+                    ? "Unavailable"
+                    : allergyCheck
+                      ? (allergyCheck.allergies.length ? `⚠ ${allergyCheck.allergies.join(", ")}` : "No allergies on file")
+                      : "Not checked",
+              },
             ].map(r => (
               <div key={r.label} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 4 }}>
                 <span style={{ color: C.mid }}>{r.label}</span>
-                <span style={{ color: r.status === "Pending" ? C.muted : C.success, fontWeight: 600 }}>{r.status}</span>
+                <span style={{
+                  color: (r.status === "Pending" || r.status === "Not checked" || r.status === "Checking…") ? C.muted
+                    : (r.status === "Unavailable" || r.status.startsWith("⚠")) ? C.danger
+                    : C.success,
+                  fontWeight: 600,
+                }}>{r.status}</span>
               </div>
             ))}
           </div>
@@ -197,7 +267,31 @@ function FulfillmentModal({ onClose }) {
                 <div><label style={lbl}>Patient Name *</label><input value={form.patient} onChange={e => setForm(f => ({ ...f, patient: e.target.value }))} placeholder="Full name" style={inp} /></div>
                 <div><label style={lbl}>Date of Birth *</label><input type="date" value={form.dob} onChange={e => setForm(f => ({ ...f, dob: e.target.value }))} style={inp} /></div>
               </div>
-              <div><label style={lbl}>Patient ID / MRN</label><input value={form.rx} onChange={e => setForm(f => ({ ...f, rx: e.target.value }))} placeholder="e.g. MRN-002841" style={inp} /></div>
+              <div>
+                <label style={lbl}>Patient ID / MRN</label>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input value={form.rx} onChange={e => setForm(f => ({ ...f, rx: e.target.value }))} placeholder="e.g. MRN-002841" style={{ ...inp, flex: 1 }} />
+                  <button
+                    onClick={runAllergyCheck}
+                    disabled={!form.rx || checkingAllergies}
+                    style={{ padding: "0 14px", borderRadius: 8, border: "none", background: C.accent, color: "#fff", fontSize: 11, fontWeight: 700, cursor: form.rx ? "pointer" : "not-allowed", opacity: form.rx ? 1 : 0.5, whiteSpace: "nowrap" }}
+                  >
+                    {checkingAllergies ? "Checking…" : "🩺 Verify"}
+                  </button>
+                </div>
+                {/* GET /health-profiles/user/{userId} result */}
+                {allergyCheck === "error" && (
+                  <div style={{ fontSize: 10, color: C.danger, marginTop: 6 }}>Could not load this patient's health profile (may require Admin/Nutritionist access).</div>
+                )}
+                {allergyCheck && allergyCheck !== "error" && (
+                  <div style={{ marginTop: 8, padding: "8px 10px", borderRadius: 8, background: allergyCheck.allergies.length ? "#FEE2E2" : "#F4FAF7", fontSize: 10 }}>
+                    <div style={{ fontWeight: 700, color: allergyCheck.allergies.length ? C.danger : C.success, marginBottom: 3 }}>
+                      {allergyCheck.allergies.length ? `⚠ Known allergies: ${allergyCheck.allergies.join(", ")}` : "✓ No known allergies on file"}
+                    </div>
+                    {allergyCheck.conditions.length > 0 && <div style={{ color: C.mid }}>Conditions: {allergyCheck.conditions.join(", ")}</div>}
+                  </div>
+                )}
+              </div>
             </div>
           )}
           {step === 2 && (
@@ -402,21 +496,25 @@ function Dashboard({ onFulfillment }) {
 // ═══════════════════════════════════════════════════════════════════════════
 //  PAGE 2 — PRESCRIPTION QUEUE
 // ═══════════════════════════════════════════════════════════════════════════
+// NOTE: `userId` should be the patient's real backend user _id (as returned
+// by GET /api/v1/users or GET /api/v1/health-profiles). These are
+// placeholders — wire them up to whatever id your prescription queue
+// actually loads from the server once that endpoint is connected.
 const rxOrders = [
   {
-    id: "RX-1842", name: "Alexander Thomas",   drug: "Lisinopril 10mg",     qty: "90 tabs",  urgency: "urgent",  provider: "Dr. Keane",  time: "08:05 AM",
+    id: "RX-1842", userId: "1", name: "Alexander Thomas",   drug: "Lisinopril 10mg",     qty: "90 tabs",  urgency: "urgent",  provider: "Dr. Keane",  time: "08:05 AM",
     notes: "Patient has reported adverse reaction history — double-check allergy records before dispensing.",
   },
   {
-    id: "RX-1843", name: "Dr. Elena Rodriguez", drug: "Atorvastatin 40mg",  qty: "30 caps",  urgency: "normal",  provider: "Self-Rx",    time: "09:10 AM",
+    id: "RX-1843", userId: "2", name: "Dr. Elena Rodriguez", drug: "Atorvastatin 40mg",  qty: "30 caps",  urgency: "normal",  provider: "Self-Rx",    time: "09:10 AM",
     notes: "Refill authorized. Insurance pre-approval confirmed.",
   },
   {
-    id: "RX-1844", name: "Alima Dieng",          drug: "Metformin 500mg",    qty: "60 tabs",  urgency: "normal",  provider: "Dr. Osei",   time: "10:22 AM",
+    id: "RX-1844", userId: "3", name: "Alima Dieng",          drug: "Metformin 500mg",    qty: "60 tabs",  urgency: "normal",  provider: "Dr. Osei",   time: "10:22 AM",
     notes: "First fill. Patient counselling required upon pickup.",
   },
   {
-    id: "RX-1845", name: "Marcus Hill",           drug: "Sertraline 50mg",    qty: "30 tabs",  urgency: "normal",  provider: "Dr. Walsh",  time: "11:00 AM",
+    id: "RX-1845", userId: "4", name: "Marcus Hill",           drug: "Sertraline 50mg",    qty: "30 tabs",  urgency: "normal",  provider: "Dr. Walsh",  time: "11:00 AM",
     notes: "Controlled substance — verify DEA license before dispensing.",
   },
 ];
@@ -430,7 +528,31 @@ const recentActivity = [
 
 function PrescriptionQueue() {
   const [filter, setFilter] = useState("all");
+  const [healthProfiles, setHealthProfiles] = useState({}); // rxId -> normalized profile
+  const [healthLoading, setHealthLoading]   = useState({}); // rxId -> bool
+  const [healthErrors, setHealthErrors]     = useState({}); // rxId -> message
   const visible = filter === "all" ? rxOrders : rxOrders.filter(r => r.urgency === filter);
+
+  // GET /health-profiles/user/{userId} — Admin/Nutritionist only. Lazily
+  // fetched per prescription so the pharmacist can pull up a patient's
+  // allergies/conditions before dispensing, instead of relying solely on
+  // the free-text `notes` field.
+  const checkHealthProfile = async (rx) => {
+    if (!rx.userId) return;
+    setHealthLoading(s => ({ ...s, [rx.id]: true }));
+    setHealthErrors(s => ({ ...s, [rx.id]: "" }));
+    try {
+      const { data } = await api.get(`/health-profiles/user/${rx.userId}`);
+      const profile = normalizeHealthProfile(data.healthProfile || data.data || data);
+      setHealthProfiles(s => ({ ...s, [rx.id]: profile }));
+    } catch (err) {
+      const msg = err.response?.data?.message || err.response?.data?.error || err.message || "Could not load health profile.";
+      setHealthErrors(s => ({ ...s, [rx.id]: msg }));
+    } finally {
+      setHealthLoading(s => ({ ...s, [rx.id]: false }));
+    }
+  };
+
   return (
     <div>
       <PageHeader title="Prescription Queue" subtitle="Active Rx orders awaiting fulfillment" cta="+ Add Order" />
@@ -476,6 +598,35 @@ function PrescriptionQueue() {
                 <span style={{ fontSize: 12, color: C.muted }}>· {rx.qty}</span>
               </div>
               <div style={{ fontSize: 11, color: C.muted, lineHeight: 1.4, marginBottom: 10, padding: "6px 8px", background: "#F8F6F2", borderRadius: 6 }}>{rx.notes}</div>
+
+              {/* Health Profile lookup — GET /health-profiles/user/{userId} */}
+              <div style={{ marginBottom: 10 }}>
+                {!healthProfiles[rx.id] && !healthLoading[rx.id] && (
+                  <button onClick={() => checkHealthProfile(rx)} style={{ padding: "5px 10px", borderRadius: 7, border: `1px solid ${C.border}`, background: "none", fontSize: 10, fontWeight: 600, cursor: "pointer", color: C.info }}>
+                    🩺 Check Allergy / Health Profile
+                  </button>
+                )}
+                {healthLoading[rx.id] && (
+                  <div style={{ fontSize: 10, color: C.muted }}>Checking health profile…</div>
+                )}
+                {healthErrors[rx.id] && (
+                  <div style={{ fontSize: 10, color: C.danger }}>{healthErrors[rx.id]} (may require Admin/Nutritionist access)</div>
+                )}
+                {healthProfiles[rx.id] && (
+                  <div style={{ padding: "8px 10px", borderRadius: 7, background: healthProfiles[rx.id].allergies.length ? "#FEE2E2" : "#F0EEE8", fontSize: 10 }}>
+                    <div style={{ fontWeight: 700, color: healthProfiles[rx.id].allergies.length ? C.danger : C.mid, marginBottom: 3 }}>
+                      {healthProfiles[rx.id].allergies.length ? `⚠ Allergies: ${healthProfiles[rx.id].allergies.join(", ")}` : "No known allergies on file"}
+                    </div>
+                    {healthProfiles[rx.id].conditions.length > 0 && (
+                      <div style={{ color: C.mid }}>Conditions: {healthProfiles[rx.id].conditions.join(", ")}</div>
+                    )}
+                    {healthProfiles[rx.id].medications.length > 0 && (
+                      <div style={{ color: C.mid }}>Current meds: {healthProfiles[rx.id].medications.join(", ")}</div>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <div style={{ display: "flex", gap: 6 }}>
                 <button style={{ flex: 1, padding: "6px 0", borderRadius: 7, border: "none", background: C.teal, color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>Dispense</button>
                 <button style={{ flex: 1, padding: "6px 0", borderRadius: 7, border: `1px solid ${C.border}`, background: "none", color: C.mid, fontSize: 11, cursor: "pointer" }}>Hold</button>

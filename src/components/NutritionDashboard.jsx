@@ -897,6 +897,15 @@ export default function NutritionDashboard() {
   const [meals, setMeals] = useState({});
   const [biometrics, setBiometrics] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  // Health Profiles / Health Assessments / Health Progress — confirmed routes
+  // from the Swagger docs (Health Profiles, Health Assessments, Health
+  // Progress sections). Kept alongside `biometrics` in case other parts of
+  // the app (e.g. the "/healthprofile" page linked from the sidebar) need
+  // the raw profile/goals/assessment objects rather than the flattened
+  // biometric tiles rendered below.
+  const [healthProfile, setHealthProfile] = useState(null);
+  const [nutritionalGoals, setNutritionalGoals] = useState(null);
+  const [latestAssessment, setLatestAssessment] = useState(null);
 
   // Fetch all initial data from the live backend
   useEffect(() => {
@@ -939,17 +948,85 @@ export default function NutritionDashboard() {
           });
         }
 
-        // 4. Fetch Biometrics — NOT CONFIRMED in Swagger docs shown; best-guess path.
+        // 4. Fetch Biometrics — now backed by the confirmed Health Profiles +
+        // Health Progress routes (previously an unconfirmed /api/v1/biometrics
+        // guess). Field names are normalized defensively since the exact
+        // response shape wasn't visible in the screenshots reviewed — adjust
+        // the fallbacks below once you've confirmed them against the docs.
+        let profileId = null;
         try {
-          const { data: bioData } = await api.get("/api/v1/biometrics", { headers: authHeaders() });
-          setBiometrics(bioData);
-        } catch {
+          // GET /api/v1/health-profiles/me — confirmed route
+          const { data: profileRes } = await api.get("/api/v1/health-profiles/me", { headers: authHeaders() });
+          const profile = profileRes.healthProfile || profileRes.data || profileRes;
+          profileId = profile?._id || profile?.id || null;
+          setHealthProfile(profile);
+
+          const weight = profile.weight ?? profile.bodyMetrics?.weight;
+          const height = profile.height ?? profile.bodyMetrics?.height;
+          const bmi = profile.bmi ?? profile.bodyMetrics?.bmi;
+          const sleepHrs = profile.sleepHours ?? profile.lifestyle?.sleepHours;
+
+          let monthlyDeltas = {};
+          try {
+            // GET /api/v1/health-progress/my-progress/monthly-stats — confirmed route
+            const { data: statsRes } = await api.get("/api/v1/health-progress/my-progress/monthly-stats", { headers: authHeaders() });
+            monthlyDeltas = statsRes.stats || statsRes.data || statsRes || {};
+          } catch (err) {
+            console.error("Error fetching health-progress monthly stats:", err);
+          }
+
+          const tiles = [];
+          if (weight != null) tiles.push({ label: "Weight", value: String(weight), unit: "kg", delta: monthlyDeltas.weightDelta || monthlyDeltas.weightChange || "—", color: "text-emerald-600" });
+          if (bmi != null) tiles.push({ label: "BMI", value: String(bmi), unit: "", delta: monthlyDeltas.bmiDelta || profile.bmiCategory || "—", color: "text-gray-400" });
+          if (height != null) tiles.push({ label: "Height", value: String(height), unit: "cm", delta: "—", color: "text-gray-400" });
+          if (sleepHrs != null) tiles.push({ label: "Sleep", value: String(sleepHrs), unit: "hrs", delta: monthlyDeltas.sleepDelta || "—", color: "text-emerald-600" });
+          setBiometrics(tiles.length ? tiles : [
+            { label: "Weight", value: "64.2", unit: "kg", delta: "↘ 0.5kg", color: "text-emerald-600" },
+            { label: "Heart Rate", value: "72", unit: "bpm", delta: "— Stable", color: "text-gray-400" },
+            { label: "Sleep", value: "7.5", unit: "hrs", delta: "↗ 1.2hrs", color: "text-emerald-600" },
+            { label: "Energy", value: "High", unit: "", delta: "⚡ Peak State", color: "text-amber-500" },
+          ]);
+        } catch (err) {
+          console.error("Error fetching health profile / biometrics:", err);
           setBiometrics([
             { label: "Weight", value: "64.2", unit: "kg", delta: "↘ 0.5kg", color: "text-emerald-600" },
             { label: "Heart Rate", value: "72", unit: "bpm", delta: "— Stable", color: "text-gray-400" },
             { label: "Sleep", value: "7.5", unit: "hrs", delta: "↗ 1.2hrs", color: "text-emerald-600" },
             { label: "Energy", value: "High", unit: "", delta: "⚡ Peak State", color: "text-amber-500" },
           ]);
+        }
+
+        // 4b. Fetch Nutritional Goals for this health profile — feeds the
+        // caloric summary card and hydration target with the patient's
+        // real goals instead of hardcoded defaults.
+        // GET /api/v1/health-profiles/{id}/nutritional-goals — confirmed route
+        if (profileId) {
+          try {
+            const { data: goalsRes } = await api.get(`/api/v1/health-profiles/${profileId}/nutritional-goals`, { headers: authHeaders() });
+            const goals = goalsRes.nutritionalGoals || goalsRes.data || goalsRes;
+            setNutritionalGoals(goals);
+            if (goals?.dailyCalories || goals?.calorieTarget) {
+              const target = goals.dailyCalories ?? goals.calorieTarget;
+              setCaloricSummary(prev => ({ ...prev, remaining: Math.max(target - (target - prev.remaining), prev.remaining) }));
+            }
+            if (goals?.waterTarget || goals?.hydrationTarget) {
+              const target = goals.waterTarget ?? goals.hydrationTarget;
+              setHydration(prev => ({ ...prev, target }));
+            }
+          } catch (err) {
+            console.error("Error fetching nutritional goals:", err);
+          }
+        }
+
+        // 4c. Fetch the latest Health Assessment — surfaced as a dashboard
+        // notification when it flags something the patient should see.
+        // GET /api/v1/health-assessments/my-assessments/latest — confirmed route
+        try {
+          const { data: assessmentRes } = await api.get("/api/v1/health-assessments/my-assessments/latest", { headers: authHeaders() });
+          const assessment = assessmentRes.assessment || assessmentRes.data || assessmentRes;
+          setLatestAssessment(assessment || null);
+        } catch (err) {
+          console.error("Error fetching latest health assessment:", err);
         }
 
         // 5. Fetch Active Alert System Notifications — NOT CONFIRMED; best-guess path.

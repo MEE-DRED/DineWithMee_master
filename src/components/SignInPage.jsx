@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import axios from "axios";
 import dinewithmeeLogo from "./dinewithmee-logo.png";
@@ -49,15 +48,59 @@ const CheckCircle = () => (
 
 // Best-effort role → portal normalization so the landing page can route a
 // freshly authenticated user to the right workspace without guessing.
+// Tolerant of spacing/casing/underscore variants ("Clinical Nutritionist",
+// "clinical_nutritionist", "SUPER_ADMIN", etc.) and of role being an array
+// (some backends send `roles: [...]` instead of a single `role` string).
 function normalizeRole(rawRole) {
-  const r = String(rawRole || "").trim().toLowerCase();
+  const value = Array.isArray(rawRole) ? rawRole[0] : rawRole;
+  const r = String(value || "").trim().toLowerCase().replace(/[\s_-]+/g, "");
   if (!r) return "user";
   if (r.includes("admin")) return "admin";
-  if (r.includes("nutrition")) return "nutritionist";
+  if (r.includes("nutrition") || r.includes("dietit") || r.includes("dietic")) return "nutritionist";
   if (r.includes("pharmac")) return "pharmacist";
   if (r.includes("culinary") || r.includes("chef")) return "culinary";
-  if (r.includes("professional")) return "professional";
+  if (r.includes("professional") || r.includes("doctor") || r.includes("clinician")) return "professional";
   return "user";
+}
+
+// The backend's response envelope isn't consistent across every endpoint —
+// some routes return the user directly, some wrap it in `{ user }`, others
+// in `{ data: { user } }` or `{ data: <user> }`. Try every shape we've seen
+// rather than assuming one, so role-based routing doesn't silently fall
+// back to "user" just because of an envelope mismatch.
+function extractUser(payload) {
+  if (!payload || typeof payload !== "object") return null;
+  if (payload.user && typeof payload.user === "object") return payload.user;
+  if (payload.data) {
+    if (payload.data.user && typeof payload.data.user === "object") return payload.data.user;
+    if (typeof payload.data === "object" && (payload.data.role || payload.data.email || payload.data._id || payload.data.id)) {
+      return payload.data;
+    }
+  }
+  if (payload.role || payload.email || payload._id || payload.id) return payload;
+  return null;
+}
+
+// Same idea for the access token — try every field/envelope name we've
+// seen ("token", "accessToken", "access_token", nested under "data", etc).
+function extractToken(payload) {
+  if (!payload || typeof payload !== "object") return null;
+  return (
+    payload.token ||
+    payload.accessToken ||
+    payload.access_token ||
+    payload.data?.token ||
+    payload.data?.accessToken ||
+    payload.data?.access_token ||
+    null
+  );
+}
+
+// A user object can carry the role under a few different field names
+// depending on the backend model — check the common ones in order.
+function extractRole(user) {
+  if (!user) return undefined;
+  return user.role ?? user.roles ?? user.userRole ?? user.accountType ?? user.userType ?? user.type;
 }
 
 // ─── API INTEGRATION: GET /auth/profile ────────────────────────────────────
@@ -79,8 +122,17 @@ async function fetchAndStoreProfile(token, { allowRefresh = true } = {}) {
     }
 
     if (res.status >= 200 && res.status < 300) {
-      const data = res.data;
-      const user = data.user || data.data || data;
+      const user = extractUser(res.data);
+      if (!user) {
+        // eslint-disable-next-line no-console
+        console.warn("[DineWithMee] /auth/profile returned an unrecognized shape — role-based routing may fall back to the default portal.", res.data);
+        return;
+      }
+      const role = extractRole(user);
+      if (!role) {
+        // eslint-disable-next-line no-console
+        console.warn("[DineWithMee] /auth/profile user object has no recognizable role field.", user);
+      }
       localStorage.setItem(
         "dwm_user",
         JSON.stringify({
@@ -89,8 +141,8 @@ async function fetchAndStoreProfile(token, { allowRefresh = true } = {}) {
           lastName: user.lastName,
           fullName: user.fullName || user.name || [user.firstName, user.lastName].filter(Boolean).join(" "),
           email: user.email,
-          role: user.role,
-          portalRole: normalizeRole(user.role),
+          role,
+          portalRole: normalizeRole(role),
         })
       );
     }
@@ -106,7 +158,7 @@ async function fetchAndStoreProfile(token, { allowRefresh = true } = {}) {
 export async function refreshAccessToken() {
   try {
     const res = await api.post("https://new-dine-with-mee-backend-z7it.onrender.com/auth/refresh");
-    const token = res.data?.token;
+    const token = extractToken(res.data);
     if (!token) return null;
     localStorage.setItem("dwm_token", token);
     return token;
@@ -139,8 +191,13 @@ export async function validateSession() {
 
     if (res.status < 200 || res.status >= 300) return false;
 
-    const data = res.data;
-    const user = data.user || data.data || data;
+    const user = extractUser(res.data);
+    if (!user) {
+      // eslint-disable-next-line no-console
+      console.warn("[DineWithMee] /auth/profile returned an unrecognized shape during session validation.", res.data);
+      return true; // token is valid — just couldn't refresh the cached profile
+    }
+    const role = extractRole(user);
     localStorage.setItem(
       "dwm_user",
       JSON.stringify({
@@ -149,8 +206,8 @@ export async function validateSession() {
         lastName: user.lastName,
         fullName: user.fullName || user.name || [user.firstName, user.lastName].filter(Boolean).join(" "),
         email: user.email,
-        role: user.role,
-        portalRole: normalizeRole(user.role),
+        role,
+        portalRole: normalizeRole(role),
       })
     );
     return true;
@@ -196,11 +253,12 @@ export async function completeGoogleOAuthRedirect() {
       const res = await api.get(`https://new-dine-with-mee-backend-z7it.onrender.com/auth/google/callback${window.location.search}`, {
         validateStatus: () => true,
       });
-      if (res.status < 200 || res.status >= 300 || !res.data?.token) {
+      const callbackToken = extractToken(res.data);
+      if (res.status < 200 || res.status >= 300 || !callbackToken) {
         cleanUrl();
         return { status: "error", message: res.data?.message || "Google sign-in failed. Please try again." };
       }
-      finalToken = res.data.token;
+      finalToken = callbackToken;
     }
 
     if (!finalToken) {
@@ -269,9 +327,32 @@ export default function SignInPage({ navigate, initialError }) {
     try {
       const { data } = await api.post("https://new-dine-with-mee-backend-z7it.onrender.com/auth/login", { email, password });
 
-      if (data.token) {
-        localStorage.setItem("dwm_token", data.token);
-        await fetchAndStoreProfile(data.token);
+      const token = extractToken(data);
+      if (token) {
+        localStorage.setItem("dwm_token", token);
+        // Login responses sometimes already include the user object inline
+        // (avoiding a second round trip) — use it immediately if present,
+        // then confirm/refresh via /auth/profile regardless.
+        const inlineUser = extractUser(data);
+        if (inlineUser) {
+          const role = extractRole(inlineUser);
+          localStorage.setItem(
+            "dwm_user",
+            JSON.stringify({
+              id: inlineUser._id || inlineUser.id,
+              firstName: inlineUser.firstName,
+              lastName: inlineUser.lastName,
+              fullName: inlineUser.fullName || inlineUser.name || [inlineUser.firstName, inlineUser.lastName].filter(Boolean).join(" "),
+              email: inlineUser.email,
+              role,
+              portalRole: normalizeRole(role),
+            })
+          );
+        }
+        await fetchAndStoreProfile(token);
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn("[DineWithMee] /auth/login succeeded but no token was found in the response — routing will fall back to the default portal.", data);
       }
 
       navigate("dashboard");
