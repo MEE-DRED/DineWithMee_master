@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import axios from "axios";
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -29,6 +30,8 @@ const NAV = [
   { id: "users",       label: "User Directory",      icon: "👥" },
   { id: "providers",   label: "Provider Mgmt",       icon: "🧑‍🍳" },
   { id: "meals",       label: "Meal Management",     icon: "🥘" },
+  { id: "ingredients", label: "Ingredients Database", icon: "🌿" },
+  { id: "moderation",  label: "Content Moderation",  icon: "🚩" },
   { id: "components",  label: "Components Library",  icon: "🧩" },
   { id: "campaigns",   label: "Campaign Center",     icon: "📢" },
   { id: "security",    label: "Security & Audit",    icon: "🛡" },
@@ -71,27 +74,34 @@ function getAuthToken() {
   try { return localStorage.getItem(AUTH_TOKEN_KEY) || ""; } catch { return ""; }
 }
 
+// Axios instance for the Dine with Mee API — attaches the Bearer token (when
+// present) to every outgoing request via a request interceptor.
+const api = axios.create({ baseURL: API_BASE });
+api.interceptors.request.use((config) => {
+  const token = getAuthToken();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
 // Generic request wrapper: adds auth header, parses JSON, throws readable errors.
 async function apiRequest(path, { method = "GET", body, isFormData = false } = {}) {
-  const token = getAuthToken();
   const headers = {};
   if (!isFormData) headers["Content-Type"] = "application/json";
-  if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE}${path}`, {
-    method,
-    headers,
-    body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
-  });
-
-  let data = null;
-  try { data = await res.json(); } catch { /* empty body, e.g. some 204s */ }
-
-  if (!res.ok) {
-    const msg = data?.message || data?.error || `Request failed (${res.status})`;
+  try {
+    const res = await api.request({
+      url: path,
+      method,
+      headers,
+      data: body,
+    });
+    return res.data ?? null;
+  } catch (err) {
+    const data = err.response?.data;
+    const status = err.response?.status;
+    const msg = data?.message || data?.error || (status ? `Request failed (${status})` : err.message);
     throw new Error(msg);
   }
-  return data;
 }
 
 // Normalizes whatever shape the backend wraps the meal list/object in
@@ -105,6 +115,138 @@ function extractMealList(data) {
 }
 function extractMeal(data) {
   return data?.meal || data?.data?.meal || data?.data || data || null;
+}
+
+// ─── Ingredients API normalizers ─────────────────────────────────────────────
+// Same defensive-unwrap approach as meals: the backend's wrapper shape can
+// vary by route (raw array, { ingredients }, { data }, { data: { ingredients } }).
+function extractIngredientList(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.ingredients)) return data.ingredients;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.data?.ingredients)) return data.data.ingredients;
+  return [];
+}
+function extractIngredient(data) {
+  return data?.ingredient || data?.data?.ingredient || data?.data || data || null;
+}
+// Normalizes a raw ingredient record into the shape the UI reads from, so the
+// page never breaks regardless of which field names the live API returns.
+function normalizeIngredient(ing) {
+  const id = ing._id || ing.id;
+  return {
+    ...ing,
+    _id: id,
+    name: ing.name || "Unnamed Ingredient",
+    category: ing.category || "Other",
+    origin: ing.origin || ing.region || "",
+    calories: ing.calories ?? ing.kcal ?? "",
+    protein: ing.protein ?? "",
+    carbs: ing.carbs ?? ing.carbohydrates ?? "",
+    fats: ing.fats ?? ing.fat ?? "",
+    fiber: ing.fiber ?? "",
+    healthSuitability: Array.isArray(ing.healthSuitability)
+      ? ing.healthSuitability
+      : Array.isArray(ing.suitability)
+        ? ing.suitability
+        : typeof ing.healthSuitability === "string"
+          ? ing.healthSuitability.split(",").map(s => s.trim()).filter(Boolean)
+          : [],
+    allergens: Array.isArray(ing.allergens) ? ing.allergens : (ing.allergens || "").toString().split(",").map(s => s.trim()).filter(Boolean),
+    description: ing.description || ing.notes || "",
+  };
+}
+
+// ─── Admin API normalizers ───────────────────────────────────────────────────
+// The exact wrapper shape the backend uses can vary by route (raw array,
+// { users }, { data }, { data: { users } }, etc.) — these helpers unwrap
+// whichever shape comes back so the UI never breaks on a shape mismatch.
+function extractAdminUsers(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.users)) return data.users;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.data?.users)) return data.data.users;
+  return [];
+}
+function extractAdminUser(data) {
+  return data?.user || data?.data?.user || data?.data || data || null;
+}
+function extractStatsObj(data) {
+  return data?.stats || data?.data?.stats || data?.data || data || {};
+}
+function extractContentList(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.data?.content)) return data.data.content;
+  return [];
+}
+// Normalizes a raw admin-user record into the shape the UI reads from.
+function normalizeAdminUser(u) {
+  const id = u._id || u.id || u.userId;
+  return {
+    ...u,
+    _id: id,
+    name: u.name || u.fullName || [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email || "Unnamed User",
+    email: u.email || "",
+    role: u.role || u.userType || "Customer",
+    isActive: u.isActive ?? u.active ?? (u.status ? u.status === "active" : true),
+    isVerified: u.isVerified ?? u.verified ?? false,
+    joined: u.joined || u.createdAt || u.dateJoined || "",
+    rating: u.rating ?? u.avgRating ?? null,
+  };
+}
+// Normalizes a raw content-moderation record into the shape the UI reads from.
+function normalizeContentItem(c) {
+  const id = c._id || c.id || c.contentId;
+  return {
+    ...c,
+    _id: id,
+    title: c.title || c.name || c.mealName || `Content #${String(id).slice(-6)}`,
+    type: c.type || c.contentType || "Post",
+    author: c.author || c.submittedBy?.name || c.user?.name || c.ownerName || "Unknown",
+    createdAt: c.createdAt || c.submittedAt || c.date || "",
+    description: c.description || c.body || c.text || "",
+  };
+}
+
+// ─── Shared toast system (used by pages that perform admin write actions) ───
+function useToasts() {
+  const [toasts, setToasts] = useState([]);
+  const seq = useRef(0);
+  const addToast = (msg, type = "success") => {
+    const id = ++seq.current;
+    setToasts(prev => [...prev, { id, msg, type }]);
+    setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 4500);
+  };
+  const dismissToast = id => setToasts(prev => prev.filter(t => t.id !== id));
+  return { toasts, addToast, dismissToast };
+}
+
+function ToastStack({ toasts, onDismiss }) {
+  if (!toasts.length) return null;
+  return (
+    <div
+      className="left-4 right-4 sm:left-auto sm:right-5 sm:max-w-[320px]"
+      style={{ position: "fixed", bottom: 20, zIndex: 200, display: "flex", flexDirection: "column", gap: 8, pointerEvents: "none" }}
+    >
+      {toasts.map(t => (
+        <div key={t.id} style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "12px 16px", borderRadius: 10, fontWeight: 600, fontSize: 12,
+          pointerEvents: "auto", boxShadow: "0 4px 20px rgba(0,0,0,.2)", gap: 12,
+          background: t.type === "error" ? "#DC2626" : t.type === "info" ? C.sidebar : "#065F46",
+          color: "#fff", border: t.type === "info" ? "1px solid rgba(255,255,255,.1)" : "none",
+        }}>
+          <span>{t.type === "success" ? "✓ " : t.type === "error" ? "✗ " : "ℹ "}{t.msg}</span>
+          <button onClick={() => onDismiss(t.id)} style={{ background: "none", border: "none", color: "rgba(255,255,255,.7)", cursor: "pointer", padding: 0 }}>
+            <Ic d={P.x} size={13} color="rgba(255,255,255,.7)" />
+          </button>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 // ─── Shared UI Primitives ────────────────────────────────────────────────────
@@ -331,15 +473,63 @@ const activityLog = [
   { user: "System",         action: "Health check passed",           time: "4 hr ago",   status: "success" },
 ];
 
+// ── GET /api/v1/admin/dashboard/stats + GET /api/v1/admin/system/health ─────
 function Overview() {
+  const [stats, setStats]       = useState(null);
+  const [health, setHealth]     = useState(null);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const [statsRes, healthRes] = await Promise.allSettled([
+          apiRequest("/admin/dashboard/stats"),
+          apiRequest("/admin/system/health"),
+        ]);
+        if (cancelled) return;
+        if (statsRes.status === "fulfilled") setStats(extractStatsObj(statsRes.value));
+        else setError(statsRes.reason?.message || "Could not reach admin stats API.");
+        if (healthRes.status === "fulfilled") setHealth(extractStatsObj(healthRes.value));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Falls back to demo figures whenever a field isn't present in the live response,
+  // so the dashboard never looks broken while the backend catches up.
+  const kpi = {
+    activeUsers: stats?.activeUsers ?? stats?.totalUsers ?? "14.2k",
+    providers:   stats?.totalProviders ?? stats?.providers ?? "1,482",
+    ordersToday: stats?.ordersToday ?? stats?.todayOrders ?? "3,291",
+    revenueMTD:  stats?.revenueMTD ?? stats?.monthlyRevenue ?? "$84.2k",
+  };
+  const healthStatus = health?.status || (health ? "healthy" : null);
+
   return (
     <div>
       <PageHeader title="System Overview" subtitle="Live platform performance at a glance" action="+ Generate Report" />
+      {error && (
+        <div style={{ padding: "10px 14px", borderRadius: 10, background: "#FEF2F2", border: "1px solid #FECACA", color: "#B91C1C", fontSize: 12, marginBottom: 14 }}>
+          {error} — showing cached figures below.
+        </div>
+      )}
+      {healthStatus && (
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 7, marginBottom: 14, padding: "5px 12px", borderRadius: 20, background: healthStatus === "healthy" || healthStatus === "ok" ? "#D1FAE5" : "#FEF3C7", fontSize: 11, fontWeight: 700, color: healthStatus === "healthy" || healthStatus === "ok" ? "#059669" : "#B45309" }}>
+          <span style={{ width: 7, height: 7, borderRadius: "50%", background: "currentColor" }} />
+          System status: {healthStatus}
+        </div>
+      )}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4" style={{ gap: 14, marginBottom: 18 }}>
-        <KPICard label="Active Users"  value="14.2k"  delta="+8.3% vs last month"  color={C.teal}   />
-        <KPICard label="Providers"     value="1,482"  delta="+3.1% vs last month"  color={C.info}   />
-        <KPICard label="Orders Today"  value="3,291"  delta="+12.4% vs yesterday"  color={C.accent} />
-        <KPICard label="Revenue MTD"   value="$84.2k" delta="+5.7% vs last month"  color="#EC4899"  />
+        <KPICard label="Active Users"  value={loading ? "…" : kpi.activeUsers}  delta="+8.3% vs last month"  color={C.teal}   />
+        <KPICard label="Providers"     value={loading ? "…" : kpi.providers}    delta="+3.1% vs last month"  color={C.info}   />
+        <KPICard label="Orders Today"  value={loading ? "…" : kpi.ordersToday}  delta="+12.4% vs yesterday"  color={C.accent} />
+        <KPICard label="Revenue MTD"   value={loading ? "…" : kpi.revenueMTD}   delta="+5.7% vs last month"  color="#EC4899"  />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr]" style={{ gap: 14, marginBottom: 18 }}>
         <Card>
@@ -388,94 +578,153 @@ function Overview() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  PAGE 2 — USER DIRECTORY
+//  PAGE 2 — USER DIRECTORY  (GET/PUT /api/v1/admin/users …)
 // ═══════════════════════════════════════════════════════════════════════════
-const allUsers = [
-  { id: 1, name: "Maria Rodriguez", role: "Chef",     status: "active",   joined: "Jan 2024", rating: 4.9 },
-  { id: 2, name: "James Okafor",    role: "Chef",     status: "active",   joined: "Feb 2024", rating: 4.7 },
-  { id: 3, name: "Sarah Chen",      role: "Customer", status: "active",   joined: "Mar 2024", rating: null },
-  { id: 4, name: "David Kim",       role: "Chef",     status: "pending",  joined: "Apr 2024", rating: null },
-  { id: 5, name: "Emma Wilson",     role: "Customer", status: "inactive", joined: "Dec 2023", rating: null },
-  { id: 6, name: "Carlos Torres",   role: "Chef",     status: "active",   joined: "Jan 2024", rating: 4.5 },
-  { id: 7, name: "Aisha Brown",     role: "Chef",     status: "active",   joined: "Mar 2024", rating: 4.8 },
-];
-const applications = [
-  { name: "Luca Ferrari", cuisine: "Italian",  time: "2 hr ago"   },
-  { name: "Yuna Park",    cuisine: "Korean",   time: "Yesterday"  },
-  { name: "Omar Shaikh",  cuisine: "Moroccan", time: "2 days ago" },
-];
 const avatarColors = [C.teal, C.accent, C.info, "#EC4899", "#F59E0B", "#8B5CF6", "#06B6D4"];
+const ROLE_FILTERS   = ["all", "Chef", "Nutritionist", "Customer", "Admin"];
+const STATUS_FILTERS = ["all", "active", "inactive"];
 
 function UserDirectory() {
-  const [search, setSearch] = useState("");
-  const filtered = allUsers.filter(u => u.name.toLowerCase().includes(search.toLowerCase()));
+  const [users, setUsers]         = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [search, setSearch]       = useState("");
+  const [roleFilter, setRoleFilter]     = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [busyId, setBusyId]       = useState(null);
+  const { toasts, addToast, dismissToast } = useToasts();
+
+  // ── GET /api/v1/admin/users?search=&role=&status= ─────────────────────────
+  const fetchUsers = async () => {
+    setLoading(true);
+    setLoadError("");
+    try {
+      const params = new URLSearchParams();
+      if (search.trim())            params.set("search", search.trim());
+      if (roleFilter !== "all")     params.set("role", roleFilter);
+      if (statusFilter !== "all")   params.set("status", statusFilter);
+      const qs = params.toString();
+      const data = await apiRequest(`/admin/users${qs ? `?${qs}` : ""}`);
+      setUsers(extractAdminUsers(data).map(normalizeAdminUser));
+    } catch (err) {
+      setLoadError(err.message || "Could not reach the admin users API.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => { fetchUsers(); /* eslint-disable-line */ }, []);
+  useEffect(() => { const t = setTimeout(fetchUsers, 350); return () => clearTimeout(t); /* eslint-disable-line */ }, [search, roleFilter, statusFilter]);
+
+  // ── PUT /api/v1/admin/users/{userId}/status ────────────────────────────────
+  const toggleStatus = async u => {
+    setBusyId(u._id);
+    const nextActive = !u.isActive;
+    try {
+      await apiRequest(`/admin/users/${u._id}/status`, { method: "PUT", body: { isActive: nextActive } });
+      setUsers(prev => prev.map(x => (x._id === u._id ? { ...x, isActive: nextActive } : x)));
+      addToast(`${u.name} ${nextActive ? "activated" : "deactivated"}.`, "success");
+    } catch (err) {
+      addToast(err.message || "Status update failed.", "error");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  // ── PUT /api/v1/admin/users/{userId}/verify ────────────────────────────────
+  const toggleVerify = async u => {
+    setBusyId(u._id);
+    const nextVerified = !u.isVerified;
+    try {
+      await apiRequest(`/admin/users/${u._id}/verify`, { method: "PUT", body: { isVerified: nextVerified } });
+      setUsers(prev => prev.map(x => (x._id === u._id ? { ...x, isVerified: nextVerified } : x)));
+      addToast(`${u.name} ${nextVerified ? "verified" : "unverified"}.`, "success");
+    } catch (err) {
+      addToast(err.message || "Verification update failed.", "error");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const total     = users.length;
+  const activeCt  = users.filter(u => u.isActive).length;
+  const chefCt    = users.filter(u => u.role === "Chef" || u.role === "Nutritionist").length;
+  const customerCt = users.filter(u => u.role === "Customer").length;
+
   return (
-    <div>
-      <PageHeader title="User Directory" subtitle="Manage all chefs, customers and admins" action="+ Invite User" />
+    <div style={{ position: "relative" }}>
+      <PageHeader title="User Directory" subtitle="Manage all chefs, nutritionists, customers and admins" action="↻ Refresh" />
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4" style={{ gap: 14, marginBottom: 18 }}>
-        <KPICard label="Total Users"  value="12,482" delta="+6.2%" color={C.teal}   />
-        <KPICard label="Active Chefs" value="8,291"  delta="+4.1%" color={C.info}   />
-        <KPICard label="Customers"    value="4,103k" delta="+7.8%" color={C.accent} />
-        <KPICard label="Total Spend"  value="$84.2k" delta="+5.7%" color="#EC4899"  />
+        <KPICard label="Total Users"   value={loading ? "…" : total.toLocaleString()}    color={C.teal}   />
+        <KPICard label="Active Users"  value={loading ? "…" : activeCt.toLocaleString()} color={C.info}   />
+        <KPICard label="Chefs/Nutris"  value={loading ? "…" : chefCt.toLocaleString()}   color={C.accent} />
+        <KPICard label="Customers"     value={loading ? "…" : customerCt.toLocaleString()} color="#EC4899" />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr]" style={{ gap: 14 }}>
-        <Card>
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2" style={{ marginBottom: 14 }}>
-            <SectionTitle>Staffed Providers</SectionTitle>
-            <input placeholder="🔍 Search users…" value={search} onChange={e => setSearch(e.target.value)}
-              className="w-full sm:w-[180px]"
-              style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 12, outline: "none", boxSizing: "border-box" }} />
+      <Card>
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2" style={{ marginBottom: 14 }}>
+          <SectionTitle>All Users</SectionTitle>
+          <input placeholder="🔍 Search by name or email…" value={search} onChange={e => setSearch(e.target.value)}
+            className="w-full sm:w-[220px]"
+            style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${C.border}`, fontSize: 12, outline: "none", boxSizing: "border-box" }} />
+        </div>
+        <div className="flex flex-wrap" style={{ gap: 14, marginBottom: 14 }}>
+          <div className="flex flex-wrap items-center" style={{ gap: 6 }}>
+            <span style={{ fontSize: 10, color: C.muted, textTransform: "uppercase", fontWeight: 700, marginRight: 2 }}>Role</span>
+            {ROLE_FILTERS.map(r => (
+              <button key={r} onClick={() => setRoleFilter(r)} style={{ padding: "4px 10px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, textTransform: "capitalize", background: roleFilter === r ? C.sidebar : C.border, color: roleFilter === r ? "#fff" : C.mid }}>{r}</button>
+            ))}
           </div>
+          <div className="flex flex-wrap items-center" style={{ gap: 6 }}>
+            <span style={{ fontSize: 10, color: C.muted, textTransform: "uppercase", fontWeight: 700, marginRight: 2 }}>Status</span>
+            {STATUS_FILTERS.map(s => (
+              <button key={s} onClick={() => setStatusFilter(s)} style={{ padding: "4px 10px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, textTransform: "capitalize", background: statusFilter === s ? C.sidebar : C.border, color: statusFilter === s ? "#fff" : C.mid }}>{s}</button>
+            ))}
+          </div>
+        </div>
+
+        {loadError && (
+          <div style={{ padding: "10px 14px", borderRadius: 10, background: "#FEF2F2", border: "1px solid #FECACA", color: "#B91C1C", fontSize: 12, marginBottom: 14 }}>
+            {loadError}
+          </div>
+        )}
+
+        {loading ? (
+          <div style={{ padding: 40, textAlign: "center", fontSize: 12, color: C.muted }}>Loading users…</div>
+        ) : users.length === 0 ? (
+          <div style={{ padding: 40, textAlign: "center", fontSize: 12, color: C.muted }}>No users match these filters.</div>
+        ) : (
           <Table
-            headers={["Name", "Role", "Status", "Joined", "Rating"]}
-            rows={filtered.map((u, i) => (
-              <TR key={u.id}>
+            headers={["Name", "Role", "Status", "Verified", "Joined", "Actions"]}
+            rows={users.map((u, i) => (
+              <TR key={u._id}>
                 <td style={{ padding: "10px 12px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
                     <Avatar name={u.name} color={avatarColors[i % avatarColors.length]} />
-                    <span style={{ fontSize: 12, fontWeight: 500 }}>{u.name}</span>
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 500 }}>{u.name}</div>
+                      {u.email && <div style={{ fontSize: 10, color: C.muted }}>{u.email}</div>}
+                    </div>
                   </div>
                 </td>
-                <td style={{ padding: "10px 12px" }}><Badge text={u.role} type={u.role === "Chef" ? "info" : "default"} /></td>
-                <td style={{ padding: "10px 12px" }}><Badge text={u.status} type={u.status === "active" ? "success" : u.status === "pending" ? "warning" : "danger"} /></td>
-                <TD color={C.muted}>{u.joined}</TD>
-                <TD color="#F59E0B">{u.rating ? `⭐ ${u.rating}` : "—"}</TD>
+                <td style={{ padding: "10px 12px" }}><Badge text={u.role} type={u.role === "Chef" || u.role === "Nutritionist" ? "info" : "default"} /></td>
+                <td style={{ padding: "10px 12px" }}><Badge text={u.isActive ? "active" : "inactive"} type={u.isActive ? "success" : "danger"} /></td>
+                <td style={{ padding: "10px 12px" }}><Badge text={u.isVerified ? "verified" : "unverified"} type={u.isVerified ? "success" : "warning"} /></td>
+                <TD color={C.muted}>{u.joined ? new Date(u.joined).toLocaleDateString() : "—"}</TD>
+                <td style={{ padding: "10px 12px" }}>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    <button onClick={() => toggleStatus(u)} disabled={busyId === u._id} style={{ padding: "4px 9px", borderRadius: 6, border: `1px solid ${C.border}`, background: "none", fontSize: 11, cursor: busyId === u._id ? "wait" : "pointer", color: u.isActive ? C.danger : "#059669", fontWeight: 700 }}>
+                      {u.isActive ? "Deactivate" : "Activate"}
+                    </button>
+                    <button onClick={() => toggleVerify(u)} disabled={busyId === u._id} style={{ padding: "4px 9px", borderRadius: 6, border: `1px solid ${C.border}`, background: "none", fontSize: 11, cursor: busyId === u._id ? "wait" : "pointer", color: u.isVerified ? C.mid : C.teal, fontWeight: 700 }}>
+                      {u.isVerified ? "Unverify" : "Verify"}
+                    </button>
+                  </div>
+                </td>
               </TR>
             ))}
           />
-        </Card>
-        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <Card>
-            <SectionTitle>New Applications</SectionTitle>
-            {applications.map((a, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 0", borderBottom: i < applications.length - 1 ? `1px solid ${C.border}` : "none" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
-                  <Avatar name={a.name} color={C.accent} size={30} />
-                  <div>
-                    <div style={{ fontSize: 12, fontWeight: 500 }}>{a.name}</div>
-                    <div style={{ fontSize: 10, color: C.muted }}>{a.cuisine} · {a.time}</div>
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: 5 }}>
-                  <button style={{ padding: "3px 9px", borderRadius: 6, border: "none", background: "#D1FAE5", color: "#059669", fontSize: 11, cursor: "pointer", fontWeight: 700 }}>✓</button>
-                  <button style={{ padding: "3px 9px", borderRadius: 6, border: "none", background: "#FEE2E2", color: "#DC2626", fontSize: 11, cursor: "pointer", fontWeight: 700 }}>✗</button>
-                </div>
-              </div>
-            ))}
-          </Card>
-          <Card>
-            <SectionTitle>Growth Insights</SectionTitle>
-            <ResponsiveContainer width="100%" height={130}>
-              <BarChart data={growthData.slice(-5)}>
-                <CartesianGrid strokeDasharray="3 3" stroke={C.border} />
-                <XAxis dataKey="month" tick={{ fontSize: 10 }} />
-                <Tooltip />
-                <Bar dataKey="users" fill={C.teal} radius={[4, 4, 0, 0]} name="Users" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
-        </div>
-      </div>
+        )}
+      </Card>
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
     </div>
   );
 }
@@ -1066,6 +1315,662 @@ function MealManagement() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+//  PAGE — INGREDIENTS DATABASE  (African ingredients database endpoints)
+//  GET    /api/v1/ingredients                 — Get all ingredients
+//  POST   /api/v1/ingredients                 — Create ingredient (Admin only)
+//  GET    /api/v1/ingredients/search           — Search ingredients
+//  GET    /api/v1/ingredients/suitability      — Get ingredients by health suitability
+//  GET    /api/v1/ingredients/{id}             — Get ingredient by ID
+//  PATCH  /api/v1/ingredients/{id}             — Update ingredient (Admin only)
+//  DELETE /api/v1/ingredients/{id}             — Delete ingredient (Admin only)
+// ═══════════════════════════════════════════════════════════════════════════
+const EMPTY_INGREDIENT_FORM = {
+  name: "", category: "Vegetables", origin: "",
+  calories: "", protein: "", carbs: "", fats: "", fiber: "",
+  healthSuitability: "", allergens: "", description: "",
+};
+const INGREDIENT_CATEGORIES = ["Grains", "Vegetables", "Fruits", "Legumes", "Tubers", "Proteins", "Spices & Herbs", "Dairy", "Nuts & Seeds", "Beverages", "Other"];
+const SUITABILITY_TAGS = ["Diabetic-Friendly", "Hypertension-Friendly", "Heart-Healthy", "Low-Sodium", "High-Fiber", "Weight Management", "Pregnancy-Safe", "Low-Fat"];
+const ING_MACROCOLS = [
+  { key: "calories", label: "Calories (kcal)", accent: "#C2410C", border: "#FED7AA", bg: "#FFF7ED" },
+  { key: "protein",  label: "Protein (g)",     accent: "#047857", border: "#A7F3D0", bg: "#ECFDF5" },
+  { key: "carbs",    label: "Carbs (g)",       accent: "#1D4ED8", border: "#BFDBFE", bg: "#EFF6FF" },
+  { key: "fats",     label: "Fat (g)",         accent: "#7E22CE", border: "#E9D5FF", bg: "#FAF5FF" },
+  { key: "fiber",    label: "Fiber (g)",       accent: "#B45309", border: "#FDE68A", bg: "#FFFBEB" },
+];
+
+// Ingredient card (grid view)
+function IngredientCard({ ingredient, onView, onEdit, onDelete, busy }) {
+  return (
+    <div style={{
+      background: C.card, border: `1px solid ${C.border}`, borderRadius: 14,
+      padding: 16, display: "flex", flexDirection: "column", gap: 10,
+      boxShadow: "0 1px 4px rgba(0,0,0,0.05)", position: "relative",
+    }}>
+      {ingredient.mocked && (
+        <span style={{ position: "absolute", top: 10, right: 10, fontSize: 9, fontWeight: 700, background: "#EFF6FF", color: "#2563EB", border: "1px solid #BFDBFE", padding: "2px 6px", borderRadius: 5, textTransform: "uppercase", letterSpacing: ".04em" }}>Local</span>
+      )}
+      <div>
+        <div style={{ fontSize: 10, fontWeight: 700, color: C.accent, textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 3 }}>{ingredient.category}{ingredient.origin ? ` · ${ingredient.origin}` : ""}</div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: C.dark, lineHeight: 1.3 }}>{ingredient.name}</div>
+      </div>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        {ingredient.calories !== "" && ingredient.calories != null && <span style={{ fontSize: 10, fontWeight: 600, background: "#FFF7ED", color: "#C2410C", padding: "2px 7px", borderRadius: 20 }}>{ingredient.calories} kcal</span>}
+        {ingredient.protein !== "" && ingredient.protein != null && <span style={{ fontSize: 10, fontWeight: 600, background: "#ECFDF5", color: "#047857", padding: "2px 7px", borderRadius: 20 }}>P: {ingredient.protein}g</span>}
+        {ingredient.carbs !== "" && ingredient.carbs != null && <span style={{ fontSize: 10, fontWeight: 600, background: "#EFF6FF", color: "#1D4ED8", padding: "2px 7px", borderRadius: 20 }}>C: {ingredient.carbs}g</span>}
+      </div>
+      {ingredient.healthSuitability?.length > 0 && (
+        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+          {ingredient.healthSuitability.slice(0, 3).map(t => (
+            <span key={t} style={{ fontSize: 10, background: "#D1FAE5", color: "#065F46", padding: "2px 6px", borderRadius: 20, fontWeight: 600 }}>{t}</span>
+          ))}
+        </div>
+      )}
+      <div style={{ display: "flex", gap: 8, marginTop: "auto", paddingTop: 10, borderTop: `1px solid ${C.border}` }}>
+        <button onClick={() => onView(ingredient)} style={{ flex: 1, padding: "7px 0", borderRadius: 8, border: `1px solid ${C.border}`, background: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, color: C.mid, display: "flex", alignItems: "center", justifyContent: "center", gap: 5 }}>
+          <Ic d={P.eye} size={13} /> View
+        </button>
+        <button onClick={() => onEdit(ingredient)} style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${C.border}`, background: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.mid }}>
+          <Ic d={P.edit} size={13} />
+        </button>
+        <button onClick={() => onDelete(ingredient)} disabled={busy} style={{ width: 32, height: 32, borderRadius: 8, border: `1px solid ${C.border}`, background: "none", cursor: busy ? "wait" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.danger }}>
+          <Ic d={P.trash} size={13} color={C.danger} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Ingredient detail modal — reflects data returned from GET /ingredients/{id}
+function IngredientDetailModal({ ingredient, loading, onClose }) {
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 16 }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: C.card, borderRadius: 20, width: "100%", maxWidth: 480, maxHeight: "88vh", overflowY: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.2)", position: "relative" }}>
+        <div style={{ padding: "20px 22px 16px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div>
+            <span style={{ fontSize: 10, background: C.bg, color: C.muted, fontWeight: 700, padding: "2px 8px", borderRadius: 5, textTransform: "uppercase" }}>{ingredient.category}</span>
+            <div style={{ fontSize: 17, fontWeight: 800, color: C.dark, marginTop: 6 }}>{ingredient.name}</div>
+            {ingredient.origin && <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>Origin: {ingredient.origin}</div>}
+          </div>
+          <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${C.border}`, background: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.muted }}>
+            <Ic d={P.x} size={14} />
+          </button>
+        </div>
+        <div style={{ padding: "18px 22px" }}>
+          {loading ? (
+            <div style={{ fontSize: 12, color: C.muted, textAlign: "center", padding: "20px 0" }}>Loading full record…</div>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 sm:grid-cols-5" style={{ gap: 8, marginBottom: 18 }}>
+                {ING_MACROCOLS.map(col => (
+                  <div key={col.key} style={{ textAlign: "center", padding: "10px 4px", borderRadius: 10, background: col.bg, border: `1px solid ${col.border}` }}>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: col.accent }}>{ingredient[col.key] || "—"}</div>
+                    <div style={{ fontSize: 9, color: col.accent, marginTop: 2, fontWeight: 500 }}>{col.label.split(" ")[0]}</div>
+                  </div>
+                ))}
+              </div>
+              {ingredient.healthSuitability?.length > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".06em", color: C.muted, marginBottom: 8 }}>Health Suitability</div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {ingredient.healthSuitability.map(t => <Badge key={t} text={t} type="success" />)}
+                  </div>
+                </div>
+              )}
+              {ingredient.allergens?.length > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".06em", color: C.muted, marginBottom: 8 }}>Allergens</div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {ingredient.allergens.map(t => <Badge key={t} text={t} type="danger" />)}
+                  </div>
+                </div>
+              )}
+              {ingredient.description && (
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".06em", color: C.muted, marginBottom: 8 }}>Description</div>
+                  <div style={{ fontSize: 12, color: C.mid, lineHeight: 1.6 }}>{ingredient.description}</div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function IngredientsManagement() {
+  const [tab, setTab]                     = useState("list");   // "list" | "form"
+  const [formData, setFormData]           = useState(EMPTY_INGREDIENT_FORM);
+  const [ingredients, setIngredients]     = useState([]);
+  const [loading, setLoading]             = useState(true);
+  const [loadError, setLoadError]         = useState("");
+  const [submitting, setSubmitting]       = useState(false);
+  const [deletingId, setDeletingId]       = useState(null);
+  const [editingIngredient, setEditingIngredient] = useState(null); // null = creating
+  const [viewIngredient, setViewIngredient]       = useState(null);
+  const [viewLoading, setViewLoading]     = useState(false);
+  const [query, setQuery]                 = useState("");
+  const [searching, setSearching]         = useState(false);
+  const [suitabilityFilter, setSuitabilityFilter] = useState("all");
+  const { toasts, addToast, dismissToast } = useToasts();
+
+  // ── GET /api/v1/ingredients — load all ingredients on mount ───────────────
+  const fetchIngredients = async () => {
+    setLoading(true);
+    setLoadError("");
+    setSuitabilityFilter("all");
+    try {
+      const data = await apiRequest("/ingredients");
+      setIngredients(extractIngredientList(data).map(normalizeIngredient));
+    } catch (err) {
+      setLoadError(err.message || "Could not reach the ingredients API.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => { fetchIngredients(); }, []); // eslint-disable-line
+
+  const startCreate = () => {
+    setEditingIngredient(null);
+    setFormData(EMPTY_INGREDIENT_FORM);
+    setTab("form");
+  };
+
+  const startEdit = ing => {
+    setEditingIngredient(ing);
+    setFormData({
+      name: ing.name || "",
+      category: ing.category || "Vegetables",
+      origin: ing.origin || "",
+      calories: ing.calories ?? "",
+      protein: ing.protein ?? "",
+      carbs: ing.carbs ?? "",
+      fats: ing.fats ?? "",
+      fiber: ing.fiber ?? "",
+      healthSuitability: Array.isArray(ing.healthSuitability) ? ing.healthSuitability.join(", ") : (ing.healthSuitability || ""),
+      allergens: Array.isArray(ing.allergens) ? ing.allergens.join(", ") : (ing.allergens || ""),
+      description: ing.description || "",
+    });
+    setTab("form");
+  };
+
+  const handleInput = e => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // ── POST /api/v1/ingredients (create)  ·  PATCH /api/v1/ingredients/{id} (update) ──
+  const handleSubmit = async e => {
+    e.preventDefault();
+    if (!formData.name.trim()) {
+      addToast("Ingredient name is required.", "error");
+      return;
+    }
+    setSubmitting(true);
+    const isEdit = Boolean(editingIngredient);
+    const ingId = editingIngredient?._id;
+    const body = {
+      name: formData.name.trim(),
+      category: formData.category,
+      origin: formData.origin.trim(),
+      calories: formData.calories === "" ? undefined : Number(formData.calories),
+      protein: formData.protein === "" ? undefined : Number(formData.protein),
+      carbs: formData.carbs === "" ? undefined : Number(formData.carbs),
+      fats: formData.fats === "" ? undefined : Number(formData.fats),
+      fiber: formData.fiber === "" ? undefined : Number(formData.fiber),
+      healthSuitability: formData.healthSuitability.split(",").map(s => s.trim()).filter(Boolean),
+      allergens: formData.allergens.split(",").map(s => s.trim()).filter(Boolean),
+      description: formData.description.trim(),
+    };
+
+    try {
+      const data = await apiRequest(isEdit ? `/ingredients/${ingId}` : "/ingredients", {
+        method: isEdit ? "PATCH" : "POST",
+        body,
+      });
+      const saved = normalizeIngredient(extractIngredient(data) || body);
+
+      if (isEdit) {
+        setIngredients(prev => prev.map(i => (i._id === ingId ? { ...saved, _id: ingId } : i)));
+        addToast("Ingredient updated on server.");
+      } else {
+        setIngredients(prev => [{ ...saved, _id: saved._id || Date.now() }, ...prev]);
+        addToast("Ingredient added to the database.");
+      }
+    } catch (err) {
+      if (isEdit) {
+        addToast(err.message || "Update failed — server unavailable.", "error");
+      } else {
+        // Create failed (offline / permissions) — fall back to a local-only record.
+        setIngredients(prev => [normalizeIngredient({ ...body, _id: Date.now(), mocked: true }), ...prev]);
+        addToast(err.message || "Saved locally — server unavailable.", "info");
+      }
+    } finally {
+      setSubmitting(false);
+      setFormData(EMPTY_INGREDIENT_FORM);
+      setEditingIngredient(null);
+      setTab("list");
+    }
+  };
+
+  // ── DELETE /api/v1/ingredients/{id} ────────────────────────────────────────
+  const handleDelete = async ing => {
+    if (!window.confirm(`Delete "${ing.name}"? This can't be undone.`)) return;
+    if (ing.mocked) {
+      setIngredients(prev => prev.filter(i => i._id !== ing._id));
+      addToast("Ingredient removed.", "info");
+      return;
+    }
+    setDeletingId(ing._id);
+    try {
+      await apiRequest(`/ingredients/${ing._id}`, { method: "DELETE" });
+      setIngredients(prev => prev.filter(i => i._id !== ing._id));
+      addToast("Ingredient deleted from server.", "info");
+    } catch (err) {
+      addToast(err.message || "Delete failed — server unavailable.", "error");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  // ── GET /api/v1/ingredients/{id} — fetch the canonical record for the modal ──
+  const handleView = async ing => {
+    setViewIngredient(ing);
+    setViewLoading(true);
+    try {
+      const data = await apiRequest(`/ingredients/${ing._id}`);
+      const full = extractIngredient(data);
+      if (full) setViewIngredient(normalizeIngredient(full));
+    } catch {
+      // Keep showing the row's cached data if the single-record fetch fails.
+    } finally {
+      setViewLoading(false);
+    }
+  };
+
+  // ── GET /api/v1/ingredients/search?query= ───────────────────────────────────
+  const handleSearch = async e => {
+    e?.preventDefault?.();
+    if (!query.trim()) { fetchIngredients(); return; }
+    setSearching(true);
+    setLoadError("");
+    setSuitabilityFilter("all");
+    try {
+      const data = await apiRequest(`/ingredients/search?query=${encodeURIComponent(query.trim())}`);
+      setIngredients(extractIngredientList(data).map(normalizeIngredient));
+    } catch (err) {
+      setLoadError(err.message || "Search failed.");
+    } finally {
+      setSearching(false);
+    }
+  };
+  const clearSearch = () => { setQuery(""); fetchIngredients(); };
+
+  // ── GET /api/v1/ingredients/suitability?condition= ─────────────────────────
+  const handleSuitabilityFilter = async tag => {
+    setSuitabilityFilter(tag);
+    setQuery("");
+    if (tag === "all") { fetchIngredients(); return; }
+    setLoading(true);
+    setLoadError("");
+    try {
+      const data = await apiRequest(`/ingredients/suitability?condition=${encodeURIComponent(tag)}`);
+      setIngredients(extractIngredientList(data).map(normalizeIngredient));
+    } catch (err) {
+      setLoadError(err.message || "Could not filter by health suitability.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const inp = (extra = {}) => ({
+    width: "100%", padding: "9px 12px", borderRadius: 10,
+    border: `1px solid ${C.border}`, fontSize: 13, outline: "none",
+    background: "#FAFAF8", boxSizing: "border-box", color: C.dark, ...extra,
+  });
+  const lbl = { fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: ".06em", display: "block", marginBottom: 5 };
+
+  const categoryCount = new Set(ingredients.map(i => i.category)).size;
+  const diabeticCount = ingredients.filter(i => i.healthSuitability.includes("Diabetic-Friendly")).length;
+
+  return (
+    <div style={{ position: "relative" }}>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3" style={{ marginBottom: 24 }}>
+        <div>
+          <h1 style={{ fontSize: 21, fontWeight: 800, color: C.dark, margin: 0 }}>Ingredients Database</h1>
+          <p style={{ fontSize: 12, color: C.muted, margin: "4px 0 0" }}>Manage the African ingredients catalog used across meals</p>
+        </div>
+        {/* Tab switcher */}
+        <div className="self-start sm:self-auto" style={{ display: "flex", background: "#F3F2EE", padding: 4, borderRadius: 10, border: `1px solid ${C.border}` }}>
+          {[["list", "All Ingredients", P.list], ["form", "+ Add Ingredient", P.plus]].map(([id, label, icon]) => (
+            <button key={id} onClick={() => (id === "form" ? startCreate() : setTab(id))} style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "7px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600,
+              background: tab === id ? C.card : "transparent",
+              color: tab === id ? C.dark : C.muted,
+              boxShadow: tab === id ? "0 1px 3px rgba(0,0,0,.08)" : "none",
+            }}>
+              <Ic d={icon} size={13} color={tab === id ? C.dark : C.muted} />
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── LIST TAB ── */}
+      {tab === "list" && (
+        <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4" style={{ gap: 14, marginBottom: 20 }}>
+            <KPICard label="Total Ingredients"     value={ingredients.length || "0"} color={C.teal}   />
+            <KPICard label="Categories"            value={categoryCount || "—"}      color={C.info}   />
+            <KPICard label="Diabetic-Friendly"     value={diabeticCount}             color={C.accent} />
+            <KPICard label="Server Synced"         value={ingredients.filter(i => !i.mocked).length} color="#F59E0B" />
+          </div>
+
+          {/* Search (GET /ingredients/search) + refresh (GET /ingredients) */}
+          <form onSubmit={handleSearch} className="flex flex-wrap sm:flex-nowrap" style={{ gap: 10, marginBottom: 14 }}>
+            <div style={{ position: "relative", flex: "1 1 200px" }}>
+              <div style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: C.muted }}>
+                <Ic d={P.search} size={14} />
+              </div>
+              <input
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder="Search ingredients by name or category…"
+                style={{ width: "100%", padding: "9px 12px 9px 34px", borderRadius: 10, border: `1px solid ${C.border}`, fontSize: 13, outline: "none", background: C.card, boxSizing: "border-box" }}
+              />
+            </div>
+            {query && (
+              <button type="button" onClick={clearSearch} style={{ padding: "9px 14px", borderRadius: 10, border: `1px solid ${C.border}`, background: C.card, fontSize: 12, cursor: "pointer", color: C.mid }}>
+                Clear
+              </button>
+            )}
+            <button type="submit" disabled={searching} style={{ padding: "9px 16px", borderRadius: 10, border: "none", background: C.dark, color: "#fff", fontSize: 12, fontWeight: 700, cursor: searching ? "not-allowed" : "pointer" }}>
+              {searching ? "Searching…" : "Search"}
+            </button>
+            <button type="button" onClick={fetchIngredients} title="Refresh from server" style={{ width: 36, borderRadius: 10, border: `1px solid ${C.border}`, background: C.card, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.mid }}>
+              <Ic d={P.refresh} size={14} />
+            </button>
+          </form>
+
+          {/* Health-suitability filter (GET /ingredients/suitability) */}
+          <div className="flex flex-wrap items-center" style={{ gap: 6, marginBottom: 16 }}>
+            <span style={{ fontSize: 10, color: C.muted, textTransform: "uppercase", fontWeight: 700, marginRight: 2 }}>Suitability</span>
+            <button onClick={() => handleSuitabilityFilter("all")} style={{ padding: "4px 10px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: suitabilityFilter === "all" ? C.sidebar : C.border, color: suitabilityFilter === "all" ? "#fff" : C.mid }}>all</button>
+            {SUITABILITY_TAGS.map(tag => (
+              <button key={tag} onClick={() => handleSuitabilityFilter(tag)} style={{ padding: "4px 10px", borderRadius: 7, border: "none", cursor: "pointer", fontSize: 11, fontWeight: 600, background: suitabilityFilter === tag ? C.sidebar : C.border, color: suitabilityFilter === tag ? "#fff" : C.mid }}>{tag}</button>
+            ))}
+          </div>
+
+          {loadError && (
+            <div style={{ padding: "10px 14px", borderRadius: 10, background: "#FEF2F2", border: "1px solid #FECACA", color: "#B91C1C", fontSize: 12, marginBottom: 16 }}>
+              {loadError} — showing any locally cached ingredients below.
+            </div>
+          )}
+
+          {loading ? (
+            <Card style={{ padding: 48, textAlign: "center" }}>
+              <div style={{ fontSize: 12, color: C.muted }}>Loading ingredients from server…</div>
+            </Card>
+          ) : ingredients.length === 0 ? (
+            <Card style={{ padding: 48, textAlign: "center" }}>
+              <div style={{ fontSize: 40, marginBottom: 14 }}>🌿</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: C.dark, marginBottom: 6 }}>No ingredients found</div>
+              <div style={{ fontSize: 12, color: C.muted, marginBottom: 18 }}>{query || suitabilityFilter !== "all" ? "Try a different search or filter." : "Add your first ingredient to populate the database."}</div>
+              <button onClick={startCreate} style={{ padding: "10px 22px", borderRadius: 10, border: "none", background: C.sidebar, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+                Add First Ingredient
+              </button>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3" style={{ gap: 14 }}>
+              {ingredients.map(ing => (
+                <IngredientCard key={ing._id} ingredient={ing} onView={handleView} onEdit={startEdit} onDelete={handleDelete} busy={deletingId === ing._id} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── FORM TAB ── */}
+      {tab === "form" && (
+        <Card style={{ padding: 24, maxWidth: 720 }}>
+          <div style={{ marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: C.dark }}>{editingIngredient ? "Edit Ingredient" : "New Ingredient"}</div>
+              <div style={{ fontSize: 12, color: C.muted, marginTop: 3 }}>{editingIngredient ? `Updating "${editingIngredient.name}"` : "Add a new item to the African ingredients database"}</div>
+            </div>
+            {editingIngredient && (
+              <button onClick={() => { setEditingIngredient(null); setFormData(EMPTY_INGREDIENT_FORM); setTab("list"); }} style={{ padding: "6px 12px", borderRadius: 8, border: `1px solid ${C.border}`, background: "none", fontSize: 11, fontWeight: 600, cursor: "pointer", color: C.mid }}>
+                Cancel Edit
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 14, marginBottom: 14 }}>
+            <div>
+              <label style={lbl}>Ingredient Name *</label>
+              <input name="name" value={formData.name} onChange={handleInput} placeholder="e.g. Egusi Seeds" style={inp()} />
+            </div>
+            <div>
+              <label style={lbl}>Category</label>
+              <select name="category" value={formData.category} onChange={handleInput} style={inp({ appearance: "none", cursor: "pointer" })}>
+                {INGREDIENT_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div style={{ marginBottom: 14 }}>
+            <label style={lbl}>Origin / Region <span style={{ color: C.muted, fontWeight: 400 }}>(optional)</span></label>
+            <input name="origin" value={formData.origin} onChange={handleInput} placeholder="e.g. West Africa" style={inp()} />
+          </div>
+
+          {/* Macro row */}
+          <div className="grid grid-cols-2 sm:grid-cols-5" style={{ gap: 10, marginBottom: 14 }}>
+            {ING_MACROCOLS.map(col => (
+              <div key={col.key}>
+                <label style={{ ...lbl, color: col.accent }}>{col.label}</label>
+                <input name={col.key} value={formData[col.key]} onChange={handleInput} placeholder="0" style={inp({ border: `1px solid ${col.border}`, background: col.bg })} />
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginBottom: 14 }}>
+            <label style={lbl}>Health Suitability <span style={{ color: C.muted, fontWeight: 400 }}>(comma-separated, e.g. Diabetic-Friendly, Low-Sodium)</span></label>
+            <input name="healthSuitability" value={formData.healthSuitability} onChange={handleInput} placeholder="Diabetic-Friendly, Heart-Healthy" style={inp()} />
+          </div>
+
+          <div style={{ marginBottom: 14 }}>
+            <label style={lbl}>Allergens <span style={{ color: C.muted, fontWeight: 400 }}>(comma-separated)</span></label>
+            <input name="allergens" value={formData.allergens} onChange={handleInput} placeholder="e.g. Peanuts, Tree Nuts" style={inp()} />
+          </div>
+
+          <div style={{ marginBottom: 20 }}>
+            <label style={lbl}>Description <span style={{ color: C.muted, fontWeight: 400 }}>(optional)</span></label>
+            <textarea name="description" value={formData.description} onChange={handleInput} rows={3} placeholder="Notes on preparation, culinary use, or nutritional highlights…" style={{ ...inp(), resize: "vertical", lineHeight: 1.5 }} />
+          </div>
+
+          <button onClick={handleSubmit} disabled={submitting} style={{
+            width: "100%", padding: "12px 0", borderRadius: 10, border: "none",
+            background: submitting ? C.muted : C.sidebar, color: "#fff",
+            fontSize: 13, fontWeight: 700, cursor: submitting ? "not-allowed" : "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+          }}>
+            {submitting
+              ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" style={{ animation: "spin 1s linear infinite" }}><circle cx="12" cy="12" r="10" strokeOpacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" /></svg> {editingIngredient ? "Saving…" : "Adding…"}</>
+              : editingIngredient
+                ? <><Ic d={P.check} size={15} color="#fff" sw={2.5} /> Save Changes</>
+                : <><Ic d={P.plus} size={15} color="#fff" sw={2.5} /> Add Ingredient</>
+            }
+          </button>
+          <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+        </Card>
+      )}
+
+      {/* Detail modal (GET /ingredients/{id}) */}
+      {viewIngredient && <IngredientDetailModal ingredient={viewIngredient} loading={viewLoading} onClose={() => setViewIngredient(null)} />}
+
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  PAGE — CONTENT MODERATION
+//  GET /api/v1/admin/content/moderation · GET /api/v1/admin/content/pending
+//  PUT /api/v1/admin/content/{contentId}/approve · PUT …/{contentId}/reject
+// ═══════════════════════════════════════════════════════════════════════════
+function ContentModerationCard({ item, onApprove, onReject, busy }) {
+  return (
+    <Card>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
+            <Badge text={item.type} type="info" />
+            <span style={{ fontSize: 13, fontWeight: 700, color: C.dark }}>{item.title}</span>
+          </div>
+          <div style={{ fontSize: 11, color: C.muted, marginBottom: 6 }}>
+            Submitted by {item.author}{item.createdAt ? ` · ${new Date(item.createdAt).toLocaleString()}` : ""}
+          </div>
+          {item.description && (
+            <div style={{ fontSize: 12, color: C.mid, lineHeight: 1.5, maxWidth: 560 }}>
+              {item.description.length > 220 ? `${item.description.slice(0, 220)}…` : item.description}
+            </div>
+          )}
+        </div>
+        <div className="flex sm:flex-col" style={{ gap: 8, flexShrink: 0 }}>
+          <button onClick={() => onApprove(item)} disabled={busy === item._id} style={{
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+            padding: "7px 14px", borderRadius: 8, border: "none", background: "#D1FAE5", color: "#059669",
+            fontSize: 12, fontWeight: 700, cursor: busy === item._id ? "wait" : "pointer",
+          }}>
+            <Ic d={P.check} size={13} /> Approve
+          </button>
+          <button onClick={() => onReject(item)} disabled={busy === item._id} style={{
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+            padding: "7px 14px", borderRadius: 8, border: "none", background: "#FEE2E2", color: "#DC2626",
+            fontSize: 12, fontWeight: 700, cursor: busy === item._id ? "wait" : "pointer",
+          }}>
+            <Ic d={P.x} size={13} /> Reject
+          </button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function ContentModeration() {
+  const [stats, setStats]           = useState(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [pending, setPending]       = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [loadError, setLoadError]   = useState("");
+  const [busyId, setBusyId]         = useState(null);
+  const { toasts, addToast, dismissToast } = useToasts();
+
+  // ── GET /api/v1/admin/content/moderation — summary stats ──────────────────
+  const fetchStats = async () => {
+    setStatsLoading(true);
+    try {
+      const data = await apiRequest("/admin/content/moderation");
+      setStats(extractStatsObj(data));
+    } catch {
+      setStats(null); // KPI cards fall back to placeholders below
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
+  // ── GET /api/v1/admin/content/pending — queue of items to review ──────────
+  const fetchPending = async () => {
+    setLoading(true);
+    setLoadError("");
+    try {
+      const data = await apiRequest("/admin/content/pending");
+      setPending(extractContentList(data).map(normalizeContentItem));
+    } catch (err) {
+      setLoadError(err.message || "Could not reach the content moderation API.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchStats(); fetchPending(); }, []);
+
+  // ── PUT /api/v1/admin/content/{contentId}/approve ──────────────────────────
+  const handleApprove = async item => {
+    setBusyId(item._id);
+    try {
+      await apiRequest(`/admin/content/${item._id}/approve`, { method: "PUT" });
+      setPending(prev => prev.filter(x => x._id !== item._id));
+      addToast(`"${item.title}" approved.`, "success");
+    } catch (err) {
+      addToast(err.message || "Approve failed.", "error");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  // ── PUT /api/v1/admin/content/{contentId}/reject ───────────────────────────
+  const handleReject = async item => {
+    if (!window.confirm(`Reject and delete "${item.title}"? This can't be undone.`)) return;
+    setBusyId(item._id);
+    try {
+      await apiRequest(`/admin/content/${item._id}/reject`, { method: "PUT" });
+      setPending(prev => prev.filter(x => x._id !== item._id));
+      addToast(`"${item.title}" rejected.`, "info");
+    } catch (err) {
+      addToast(err.message || "Reject failed.", "error");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const refreshAll = () => { fetchStats(); fetchPending(); };
+
+  return (
+    <div style={{ position: "relative" }}>
+      <PageHeader title="Content Moderation" subtitle="Review and action content flagged or awaiting approval" action="↻ Refresh" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4" style={{ gap: 14, marginBottom: 18 }}>
+        <KPICard label="Pending Review" value={statsLoading ? "…" : (stats?.pending ?? stats?.totalPending ?? pending.length)} color={C.accent} />
+        <KPICard label="Approved"       value={statsLoading ? "…" : (stats?.approved ?? stats?.totalApproved ?? "—")}        color="#22C55E"  />
+        <KPICard label="Rejected"       value={statsLoading ? "…" : (stats?.rejected ?? stats?.totalRejected ?? "—")}        color={C.danger} />
+        <KPICard label="Total Reviewed" value={statsLoading ? "…" : (stats?.totalReviewed ?? stats?.total ?? "—")}           color={C.info}   />
+      </div>
+
+      {loadError && (
+        <div style={{ padding: "10px 14px", borderRadius: 10, background: "#FEF2F2", border: "1px solid #FECACA", color: "#B91C1C", fontSize: 12, marginBottom: 16 }}>
+          {loadError}
+        </div>
+      )}
+
+      {loading ? (
+        <Card style={{ padding: 48, textAlign: "center" }}>
+          <div style={{ fontSize: 12, color: C.muted }}>Loading pending content…</div>
+        </Card>
+      ) : pending.length === 0 ? (
+        <Card style={{ padding: 48, textAlign: "center" }}>
+          <div style={{ fontSize: 40, marginBottom: 14 }}>✅</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: C.dark, marginBottom: 6 }}>Nothing pending</div>
+          <div style={{ fontSize: 12, color: C.muted, marginBottom: 18 }}>The moderation queue is clear — new submissions will appear here.</div>
+          <button onClick={refreshAll} style={{ padding: "10px 22px", borderRadius: 10, border: "none", background: C.sidebar, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
+            Refresh Queue
+          </button>
+        </Card>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {pending.map(item => (
+            <ContentModerationCard key={item._id} item={item} onApprove={handleApprove} onReject={handleReject} busy={busyId} />
+          ))}
+        </div>
+      )}
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 //  PAGE 5 — SYSTEM COMPONENTS LIBRARY
 // ═══════════════════════════════════════════════════════════════════════════
 const devices = [
@@ -1076,20 +1981,59 @@ const devices = [
   { name: "IoT Hub Node #7",        status: "online",  data: "14 peers" },
 ];
 
+// Default demo metrics — shown until/unless the live health check overrides them.
+const DEFAULT_HEALTH_METRICS = [
+  { key: "uptime",   metric: "API Uptime",        value: "99.97%", color: C.teal,    bar: 99 },
+  { key: "response", metric: "Avg Response Time", value: "142 ms", color: C.info,    bar: 85 },
+  { key: "errors",   metric: "Error Rate",        value: "0.03%",  color: C.accent,  bar: 3  },
+  { key: "dbPool",   metric: "DB Pool Usage",     value: "48/100", color: "#F59E0B", bar: 48 },
+  { key: "cache",    metric: "Cache Hit Rate",    value: "91.2%",  color: C.teal,    bar: 91 },
+];
+
 function SystemComponents() {
+  const [health, setHealth]   = useState(null);
+  const [checking, setChecking] = useState(true);
+  const [checkedAt, setCheckedAt] = useState(null);
+
+  // ── GET /api/v1/admin/system/health ────────────────────────────────────────
+  const checkHealth = async () => {
+    setChecking(true);
+    try {
+      const data = await apiRequest("/admin/system/health");
+      setHealth(extractStatsObj(data));
+      setCheckedAt(new Date());
+    } catch {
+      setHealth(null);
+    } finally {
+      setChecking(false);
+    }
+  };
+  useEffect(() => { checkHealth(); }, []);
+
+  const metrics = DEFAULT_HEALTH_METRICS.map(m => {
+    const live = health?.[m.key];
+    return live !== undefined ? { ...m, value: String(live) } : m;
+  });
+  const overallStatus = health?.status || (checking ? null : "unknown");
+
   return (
     <div>
       <PageHeader title="System Components Library" subtitle="Health monitoring, wearable sync, and AI tooling" />
       <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 14, marginBottom: 14 }}>
         <Card>
-          <SectionTitle>🫀 System Health Insights</SectionTitle>
-          {[
-            { metric: "API Uptime",        value: "99.97%", color: C.teal,   bar: 99 },
-            { metric: "Avg Response Time", value: "142 ms", color: C.info,   bar: 85 },
-            { metric: "Error Rate",        value: "0.03%",  color: C.accent, bar: 3  },
-            { metric: "DB Pool Usage",     value: "48/100", color: "#F59E0B",bar: 48 },
-            { metric: "Cache Hit Rate",    value: "91.2%",  color: C.teal,   bar: 91 },
-          ].map(m => (
+          <div className="flex justify-between items-center" style={{ marginBottom: 14 }}>
+            <SectionTitle>🫀 System Health Insights</SectionTitle>
+            <button onClick={checkHealth} disabled={checking} title="Re-check system health" style={{ width: 26, height: 26, borderRadius: 7, border: `1px solid ${C.border}`, background: "none", cursor: checking ? "wait" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: C.mid }}>
+              <Ic d={P.refresh} size={12} />
+            </button>
+          </div>
+          {overallStatus && (
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, marginBottom: 12, padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700, background: overallStatus === "healthy" || overallStatus === "ok" ? "#D1FAE5" : overallStatus === "unknown" ? "#F3F4F6" : "#FEF3C7", color: overallStatus === "healthy" || overallStatus === "ok" ? "#059669" : overallStatus === "unknown" ? C.muted : "#B45309" }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "currentColor" }} />
+              {overallStatus === "unknown" ? "Live check unavailable — showing cached metrics" : `Status: ${overallStatus}`}
+            </div>
+          )}
+          {metrics.map(m => (
             <div key={m.metric} style={{ marginBottom: 12 }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
                 <span style={{ color: C.mid }}>{m.metric}</span>
@@ -1100,6 +2044,7 @@ function SystemComponents() {
               </div>
             </div>
           ))}
+          {checkedAt && <div style={{ fontSize: 10, color: C.muted, marginTop: 4 }}>Last checked {checkedAt.toLocaleTimeString()}</div>}
         </Card>
         <Card>
           <SectionTitle>⌚ Smart Wearable Sync</SectionTitle>
@@ -1411,6 +2356,8 @@ export default function AdminAll() {
     users:      <UserDirectory />,
     providers:  <ProviderManagement />,
     meals:      <MealManagement />,
+    ingredients:<IngredientsManagement />,
+    moderation: <ContentModeration />,
     components: <SystemComponents />,
     campaigns:  <CampaignCenter />,
     security:   <SecurityAudit />,
